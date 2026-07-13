@@ -26,15 +26,15 @@ export default function AiSummaryPanel({ lat, lon, locationName }: AiSummaryPane
       const res = await weatherService.getInsights({ lat, lon });
       if (res.insights) {
         setInsights(res.insights);
-        showToast("WeatherAI insights compiled successfully", "success");
+        showToast("Weather story compiled successfully", "success");
       }
     } catch (e: any) {
       if (e.status === 403 || e.code === "FORBIDDEN") {
         setError("PRO_LIMIT");
       } else {
-        setError(e.message || "Failed to query AI engine.");
+        setError(e.message || "We couldn't load the weather story.");
       }
-      showToast("Failed to compile AI insights", "danger");
+      showToast("We couldn't load the weather story right now.", "danger");
     } finally {
       setLoading(false);
     }
@@ -82,7 +82,7 @@ export default function AiSummaryPanel({ lat, lon, locationName }: AiSummaryPane
           </div>
           <div>
             <h3 className="font-display text-sm md:text-base font-bold text-text-primary group-hover:text-accent transition-colors flex items-center gap-2">
-              WeatherAI Premium Insights for {locationName}
+              Today&apos;s Weather Story for {locationName}
               {apiPlan === "free" && (
                 <span className="bg-accent/15 text-accent border border-accent/20 text-[8px] font-bold px-1.5 py-0.5 rounded uppercase flex items-center gap-0.5">
                   <Lock size={8} /> Pro
@@ -91,7 +91,7 @@ export default function AiSummaryPanel({ lat, lon, locationName }: AiSummaryPane
             </h3>
             {!isExpanded && (
               <p className="text-[11px] text-text-muted mt-0.5 font-medium">
-                Click to expand and generate real-time AI weather reports & activity scores.
+                See what this means for your day and get simple tips.
               </p>
             )}
           </div>
@@ -118,9 +118,9 @@ export default function AiSummaryPanel({ lat, lon, locationName }: AiSummaryPane
                   <Lock size={18} />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="font-display text-xs font-bold text-text-primary">WeatherAI Insights Gated</h4>
+                  <h4 className="font-display text-xs font-bold text-text-primary">Weather tips are locked</h4>
                   <p className="text-[10px] text-text-muted max-w-sm">
-                    Today&apos;s clothing recommenders, driving visibility alerts, running index, and cycle comfort scoring require a Pro Plan subscription. (Error: HTTP 403 Forbidden)
+                    Get simple tips and clothing recommendations based on today&apos;s weather by upgrading your active plan.
                   </p>
                 </div>
                 <div className="mt-1">
@@ -130,22 +130,22 @@ export default function AiSummaryPanel({ lat, lon, locationName }: AiSummaryPane
 
               {/* Locked Preview Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 opacity-40 select-none pointer-events-none">
-                {renderMetricRowPreview("Running comfort index", "--", "High humidity risk")}
-                {renderMetricRowPreview("Driving visibility comfort", "--", "Normal road conditions")}
-                {renderMetricRowPreview("Photography lighting score", "--", "Golden hour preview")}
+                {renderMetricRowPreview("Running comfort", "--", "High humidity risk")}
+                {renderMetricRowPreview("Driving conditions", "--", "Normal road conditions")}
+                {renderMetricRowPreview("Photography lighting", "--", "Golden hour preview")}
               </div>
             </div>
           ) : error ? (
             <div className="flex items-start gap-2.5 p-3 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 text-xs">
               <AlertTriangle size={15} className="shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="font-semibold">AI Synthesis Error</p>
+                <p className="font-semibold">We couldn&apos;t compile today&apos;s weather story</p>
                 <p className="opacity-80 mt-0.5">{error}</p>
                 <button
                   onClick={fetchAiInsights}
                   className="mt-2 text-[10px] font-bold underline uppercase tracking-wider block hover:text-red-400 transition-colors"
                 >
-                  Retry Synthesis
+                  Try Again
                 </button>
               </div>
             </div>
@@ -155,30 +155,30 @@ export default function AiSummaryPanel({ lat, lon, locationName }: AiSummaryPane
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-surface-raised border border-border p-4 rounded-xl flex flex-col gap-2">
                   <span className="text-[10px] font-bold text-accent uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles size={11} /> Today&apos;s Weather Summary
+                    <Sparkles size={11} /> Today&apos;s Weather Story
                   </span>
                   <p className="text-xs text-text-primary leading-relaxed font-sans font-medium">
-                    {insights?.summary || "Sunny clear conditions with moderate UV indices. Ideal for outdoor recreation."}
+                    {insights?.summary || "Sunny clear conditions with moderate UV indices. Perfect weather for a walk."}
                   </p>
                 </div>
 
                 <div className="bg-surface-raised border border-border p-4 rounded-xl flex flex-col gap-2">
                   <span className="text-[10px] font-bold text-accent uppercase tracking-wider flex items-center gap-1.5">
-                    <Activity size={11} /> Apparel Advice
+                    <Activity size={11} /> What to wear
                   </span>
                   <p className="text-xs text-text-primary leading-relaxed font-sans font-medium">
-                    {insights?.recommendations?.[0] || "Wear breathable light clothing. Sunglasses and UV sunscreen recommended."}
+                    {insights?.recommendations?.[0] || "Wear breathable light clothing. Light jacket recommended for the evening."}
                   </p>
                 </div>
               </div>
 
               {/* Recommendation Grid */}
               <div className="space-y-3">
-                <h4 className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Lifestyle Comfort Index</h4>
+                <h4 className="text-[10px] font-bold text-text-muted uppercase tracking-wider">A few tips for today</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {renderRecommendationCard("Running comfort index", 85, "Excellent conditions. Low wind resistance.")}
-                  {renderRecommendationCard("Driving conditions index", 92, "Optimal visibility. Dry road grip values.")}
-                  {renderRecommendationCard("Photography lighting", 78, "Clear golden hour window starting at sunset.")}
+                  {renderRecommendationCard("Running", 85, "Excellent conditions. Low wind resistance.")}
+                  {renderRecommendationCard("Driving", 92, "Optimal visibility. Dry road conditions.")}
+                  {renderRecommendationCard("Photography", 78, "Clear golden hour window starting at sunset.")}
                 </div>
               </div>
 
@@ -187,7 +187,7 @@ export default function AiSummaryPanel({ lat, lon, locationName }: AiSummaryPane
                 <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex items-start gap-2 text-[10px] text-amber-500">
                   <ShieldAlert size={14} className="shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold uppercase block mb-0.5">Atmospheric Alert / Risk</span>
+                    <span className="font-bold uppercase block mb-0.5">Stay informed</span>
                     {insights.risk}
                   </div>
                 </div>
@@ -199,7 +199,7 @@ export default function AiSummaryPanel({ lat, lon, locationName }: AiSummaryPane
                   className="text-[10px] font-bold text-text-muted hover:text-text-primary flex items-center gap-1 uppercase transition-colors"
                 >
                   <RefreshCw size={10} />
-                  Refresh Diagnostics
+                  Refresh story
                 </button>
               </div>
             </div>

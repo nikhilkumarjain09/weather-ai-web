@@ -166,7 +166,7 @@ export default function SearchBar() {
         <input
           ref={inputRef}
           type="text"
-          placeholder="Search locations or coords... (Press '/' to focus)"
+          placeholder="Search for a city..."
           value={query}
           onFocus={() => {
             setFocused(true);
@@ -201,7 +201,7 @@ export default function SearchBar() {
           {results.length > 0 ? (
             <div className="py-1">
               <span className="block px-3 py-1 text-[9px] font-bold text-text-muted uppercase tracking-wider">
-                Matching Suggestions
+                Suggestions
               </span>
               {results.map((city, idx) => {
                 const isSelected = idx === selectedIndex;
@@ -246,7 +246,7 @@ export default function SearchBar() {
               <div className="flex items-center justify-between px-3 py-1">
                 <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
                   <History size={10} />
-                  Recent Searches
+                  Recently viewed
                 </span>
               </div>
               {recentSearches.map((city, idx) => {
@@ -274,7 +274,7 @@ export default function SearchBar() {
             <div className="py-1">
               <span className="block px-3 py-1 text-[9px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
                 <Compass size={10} />
-                Popular suggestions
+                Popular cities
               </span>
               <div className="grid grid-cols-2 gap-1 p-2">
                 {popularCities.map((city) => (

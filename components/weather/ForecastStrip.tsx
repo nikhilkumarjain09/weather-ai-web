@@ -127,10 +127,10 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
       <div className="flex items-center justify-between mb-6">
         <div className="space-y-0.5">
           <span className="text-[10px] font-bold text-accent uppercase tracking-widest block font-display">
-            Chronology Forecast
+            Coming up
           </span>
           <h3 className="font-display text-base font-bold text-text-primary tracking-tight">
-            Extended Forecast
+            This week
           </h3>
         </div>
         <div className="flex bg-white/5 border border-white/10 rounded-xl p-0.5">
@@ -213,9 +213,9 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
                     <Lock size={16} />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-display text-xs font-bold text-text-primary">14-Day Forecast Locked</h4>
+                    <h4 className="font-display text-xs font-bold text-text-primary">Extended forecast is locked</h4>
                     <p className="text-[10px] text-text-muted max-w-sm">
-                      Premium extended 14-day forecasts require a Pro Plan credentials configuration. Update your active plan settings in Quota panel to unlock.
+                      Unlock 14-day forecasts and daily tips by upgrading your active plan.
                     </p>
                   </div>
                 </div>
@@ -238,7 +238,7 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
             <div className="flex justify-between items-center pb-2.5 border-b border-white/5 mb-3">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-text-primary">
-                  Weather Details: {getFormattedDate(activeDays[expandedIndex].date)}
+                  Today&apos;s weather details: {getFormattedDate(activeDays[expandedIndex].date)}
                 </span>
                 <span className="text-[10px] px-2 py-0.5 bg-accent-tint/50 border border-accent/20 rounded text-accent font-semibold">
                   {activeDays[expandedIndex].conditionsText}
@@ -256,7 +256,7 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
               <div className="flex items-center gap-3">
                 <Wind size={15} className="text-accent" />
                 <div>
-                  <span className="block text-[8px] uppercase font-bold text-text-muted tracking-wider">Wind projection</span>
+                  <span className="block text-[8px] uppercase font-bold text-text-muted tracking-wider">Wind</span>
                   <span className="font-display text-xs text-text-primary font-bold">14 km/h</span>
                 </div>
               </div>
@@ -272,7 +272,7 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
               <div className="flex items-center gap-3">
                 <Zap size={15} className="text-accent" />
                 <div>
-                  <span className="block text-[8px] uppercase font-bold text-text-muted tracking-wider">UV Exposure</span>
+                  <span className="block text-[8px] uppercase font-bold text-text-muted tracking-wider">UV Index</span>
                   <span className="font-display text-xs text-text-primary font-bold">Low (2/10)</span>
                 </div>
               </div>
@@ -280,7 +280,7 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
               <div className="flex items-center gap-3">
                 <Droplet size={15} className="text-accent" />
                 <div>
-                  <span className="block text-[8px] uppercase font-bold text-text-muted tracking-wider">Precip. Risk</span>
+                  <span className="block text-[8px] uppercase font-bold text-text-muted tracking-wider">Rain risk</span>
                   <span className="font-display text-xs text-text-primary font-bold">
                     {activeDays[expandedIndex].precipChance}%
                   </span>

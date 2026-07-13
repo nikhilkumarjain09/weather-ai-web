@@ -61,10 +61,10 @@ export default function HourlyTimeline({
     <div className="glass-panel p-6 md:p-8 relative overflow-hidden bg-slate-950/40 border-white/5 shadow-2xl">
       <div className="space-y-0.5">
         <span className="text-[10px] font-bold text-accent uppercase tracking-widest block font-display">
-          Chronology Timeline
+          Coming up
         </span>
         <h3 className="font-display text-base font-bold text-text-primary tracking-tight">
-          Hourly Weather Timeline
+          Today&apos;s weather timeline
         </h3>
       </div>
 

@@ -45,7 +45,7 @@ export default function CompareConsole() {
       });
       setDataA(res);
     } catch (e: any) {
-      setErrorA(e.message || "Failed to load weather for City A");
+      setErrorA(e.message || "We couldn't load the weather details.");
     } finally {
       setLoadingA(false);
     }
@@ -66,7 +66,7 @@ export default function CompareConsole() {
       });
       setDataB(res);
     } catch (e: any) {
-      setErrorB(e.message || "Failed to load weather for City B");
+      setErrorB(e.message || "We couldn't load the weather details.");
     } finally {
       setLoadingB(false);
     }
@@ -108,9 +108,9 @@ export default function CompareConsole() {
   return (
     <div className="bg-surface border border-border rounded-xl p-5 md:p-6 font-sans space-y-6">
       <div>
-        <h3 className="font-display text-base font-bold text-text-primary">Side-by-Side Comparison</h3>
+        <h3 className="font-display text-base font-bold text-text-primary">Compare cities</h3>
         <p className="text-xs text-text-muted mt-0.5">
-          Select two saved locations to evaluate real-time meteorology metrics and AI forecasts.
+          Choose two of your saved cities to compare today&apos;s weather.
         </p>
       </div>
 
@@ -118,14 +118,14 @@ export default function CompareConsole() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface-raised/40 p-4 rounded-xl border border-border/80">
         <div className="flex flex-col gap-1.5">
           <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
-            Primary Location (City A)
+            First city
           </label>
           <select
             value={cityAId}
             onChange={(e) => setCityAId(e.target.value)}
-            className="bg-surface border border-border rounded px-3 py-1.5 text-xs text-text-primary focus:outline-none"
+            className="bg-surface border border-border rounded-xl px-3 py-2 text-xs text-text-primary focus:outline-none"
           >
-            <option value="">Select a location</option>
+            <option value="">Choose a city</option>
             {savedLocations.map((loc) => (
               <option key={loc.id} value={loc.id}>
                 {loc.name}
@@ -136,14 +136,14 @@ export default function CompareConsole() {
 
         <div className="flex flex-col gap-1.5">
           <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
-            Secondary Location (City B)
+            Second city
           </label>
           <select
             value={cityBId}
             onChange={(e) => setCityBId(e.target.value)}
-            className="bg-surface border border-border rounded px-3 py-1.5 text-xs text-text-primary focus:outline-none"
+            className="bg-surface border border-border rounded-xl px-3 py-2 text-xs text-text-primary focus:outline-none"
           >
-            <option value="">Select a location</option>
+            <option value="">Choose a city</option>
             {savedLocations.map((loc) => (
               <option key={loc.id} value={loc.id}>
                 {loc.name}
@@ -157,12 +157,12 @@ export default function CompareConsole() {
       <div className="border border-border rounded-xl overflow-hidden bg-bg">
         {/* Table Header */}
         <div className="grid grid-cols-3 py-3.5 bg-surface-raised border-b border-border text-[10px] font-bold text-text-muted uppercase tracking-wider text-center">
-          <span className="text-left pl-4">Metrics Focus</span>
+          <span className="text-left pl-4">Details</span>
           <span>
-            {dataA?.current.locationName || "City A"} {loadingA && "(...)"}
+            {dataA?.current.locationName || "First City"} {loadingA && "(...)"}
           </span>
           <span>
-            {dataB?.current.locationName || "City B"} {loadingB && "(...)"}
+            {dataB?.current.locationName || "Second City"} {loadingB && "(...)"}
           </span>
         </div>
 
@@ -217,10 +217,10 @@ export default function CompareConsole() {
         <div className="bg-surface-raised border border-border rounded-xl p-4 space-y-2">
           <span className="text-[10px] font-bold text-accent uppercase tracking-wider flex items-center gap-1">
             <Sparkles size={12} />
-            AI Report: {dataA?.current.locationName || "City A"}
+            Today&apos;s Weather Story: {dataA?.current.locationName || "First City"}
           </span>
           <p className="text-xs text-text-muted leading-relaxed">
-            {dataA?.aiSummary || "No AI report available for this location."}
+            {dataA?.aiSummary || "No weather story available for this location yet."}
           </p>
         </div>
 
@@ -228,10 +228,10 @@ export default function CompareConsole() {
         <div className="bg-surface-raised border border-border rounded-xl p-4 space-y-2">
           <span className="text-[10px] font-bold text-accent uppercase tracking-wider flex items-center gap-1">
             <Sparkles size={12} />
-            AI Report: {dataB?.current.locationName || "City B"}
+            Today&apos;s Weather Story: {dataB?.current.locationName || "Second City"}
           </span>
           <p className="text-xs text-text-muted leading-relaxed">
-            {dataB?.aiSummary || "No AI report available for this location."}
+            {dataB?.aiSummary || "No weather story available for this location yet."}
           </p>
         </div>
       </div>

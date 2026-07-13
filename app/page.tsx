@@ -335,7 +335,7 @@ export default function DashboardConsole() {
             {error && <ErrorBanner message={error} onRetry={fetchWeather} isLoading={loading} />}
             {loading && !weather && (
               <div className="h-60 rounded-xl bg-surface border border-border animate-pulse flex items-center justify-center">
-                <span className="text-xs text-text-muted">Querying station conditions...</span>
+                <span className="text-xs text-text-muted">Getting today&apos;s weather...</span>
               </div>
             )}
             {weather && !loading && (
@@ -545,28 +545,28 @@ export default function DashboardConsole() {
         {/* Dashboard Stat Cards row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            label="Current Temp"
+            label="Temperature"
             icon={Thermometer}
             value={weather?.current ? `${Math.round(unit === "F" ? (weather.current.temp * 9/5 + 32) : weather.current.temp)}°${unit}` : "--"}
-            caption="Current Temperature"
+            caption="Right now"
           />
           <StatCard
             label="Feels Like"
             icon={Thermometer}
             value={weather?.current ? `${Math.round(unit === "F" ? (weather.current.feelsLike * 9/5 + 32) : weather.current.feelsLike)}°${unit}` : "--"}
-            caption="Apparent Temperature"
+            caption="How it actually feels"
           />
           <StatCard
             label="Humidity"
             icon={Droplets}
             value={weather?.current ? `${weather.current.humidity}%` : "--"}
-            caption="Atmospheric Moisture"
+            caption="Moisture level in the air"
           />
           <StatCard
-            label="Monthly Quota"
+            label="Usage limits"
             icon={Package}
             value={usage ? `${usage.used} / ${usage.limit}` : "--"}
-            caption={usage ? `${usage.plan.toUpperCase()} Plan Quota` : "Usage Limits"}
+            caption={usage ? `${usage.plan.toUpperCase()} Plan` : "Remaining lookups this month"}
           />
         </div>
 

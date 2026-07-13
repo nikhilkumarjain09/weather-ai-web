@@ -3,13 +3,13 @@
 import React from "react";
 
 interface AnimatedWeatherIconProps {
-  code: string;
+  code?: string;
   size?: number;
   className?: string;
 }
 
-export default function AnimatedWeatherIcon({ code, size = 48, className = "" }: AnimatedWeatherIconProps) {
-  const normCode = code.toLowerCase();
+export default function AnimatedWeatherIcon({ code = "", size = 48, className = "" }: AnimatedWeatherIconProps) {
+  const normCode = (code || "").toLowerCase();
 
   const getSvgContent = () => {
     switch (normCode) {
