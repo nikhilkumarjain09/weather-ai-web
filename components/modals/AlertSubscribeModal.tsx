@@ -10,10 +10,11 @@ interface AlertSubscribeModalProps {
 }
 
 export default function AlertSubscribeModal({ onSubscriptionCreated }: AlertSubscribeModalProps) {
-  const { activeModal, setActiveModal, apiPlan, showToast } = useAppStore();
+  const { activeModal, setActiveModal, showToast } = useAppStore();
   const [webhookUrl, setWebhookUrl] = useState("");
   const [events, setEvents] = useState<string[]>(["alert.storm"]);
   const [submitting, setSubmitting] = useState(false);
+  const [lockedError, setLockedError] = useState<string | null>(null);
 
   const isOpen = activeModal === "alert_subscribe";
 
@@ -27,25 +28,33 @@ export default function AlertSubscribeModal({ onSubscriptionCreated }: AlertSubs
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (apiPlan === "free") {
-      showToast("Access Denied: Upgrade to Pro plan to configure webhooks", "danger");
-      return;
-    }
-
     setSubmitting(true);
+    setLockedError(null);
     try {
       const res = await fetch("/api/alerts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: webhookUrl, events }),
       });
-      if (res.ok) {
+
+      const json = await res.json();
+
+      if (res.status === 403 || (json.error && json.error.code === 403)) {
+        const errorMsg =
+          json.error?.message ||
+          json.message ||
+          "Webhook alerts require a Pro tier API key";
+        setLockedError(errorMsg);
+        showToast("Webhook subscription failed: tier locked", "danger");
+      } else if (!res.ok) {
+        const errorMsg =
+          json.error?.message || json.message || "Failed to create subscription";
+        throw new Error(errorMsg);
+      } else {
         showToast("Webhook subscription registered successfully", "success");
         if (onSubscriptionCreated) onSubscriptionCreated();
+        setWebhookUrl("");
         setActiveModal(null);
-      } else {
-        const err = await res.json();
-        throw new Error(err.message || "Failed to create subscription");
       }
     } catch (err: any) {
       showToast(err.message || "Subscription failure", "danger");
@@ -58,7 +67,10 @@ export default function AlertSubscribeModal({ onSubscriptionCreated }: AlertSubs
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-sans">
       <div className="bg-surface border border-border rounded-xl shadow-2xl max-w-sm w-full p-6 relative animate-slide-in">
         <button
-          onClick={() => setActiveModal(null)}
+          onClick={() => {
+            setLockedError(null);
+            setActiveModal(null);
+          }}
           className="absolute top-4 right-4 text-text-muted hover:text-text-primary transition-colors"
         >
           <X size={16} />
@@ -69,25 +81,36 @@ export default function AlertSubscribeModal({ onSubscriptionCreated }: AlertSubs
           <h2 className="font-display text-base font-bold text-text-primary">Configure Webhook Alert</h2>
         </div>
 
-        {apiPlan === "free" ? (
+        {lockedError ? (
           <div className="space-y-4">
             <div className="flex items-start gap-2.5 p-3 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs">
               <AlertTriangle size={15} className="shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold flex items-center gap-1.5">
+                <p className="font-bold flex items-center gap-1.5 mb-1 text-text-primary">
                   Pro Feature Flagged <LockedFeatureBadge />
                 </p>
-                <p className="opacity-90 mt-1 leading-relaxed">
-                  Webhooks and automated alerting streams are exclusive to Pro subscribers. Toggle your plan to Pro in the Usage & Quota section.
+                <p className="opacity-90 leading-relaxed font-medium">
+                  {lockedError}
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setActiveModal(null)}
-              className="w-full py-2 rounded-lg text-xs font-semibold bg-surface-raised border border-border text-text-primary hover:bg-surface-raised/80 transition-colors"
-            >
-              Acknowledge
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setLockedError(null)}
+                className="flex-1 py-2 rounded-lg text-xs font-semibold bg-accent hover:bg-accent/90 text-bg transition-colors"
+              >
+                Try Again
+              </button>
+              <button
+                onClick={() => {
+                  setLockedError(null);
+                  setActiveModal(null);
+                }}
+                className="flex-1 py-2 rounded-lg text-xs font-semibold bg-surface-raised border border-border text-text-primary hover:bg-surface-raised/80 transition-colors"
+              >
+                Close
+              </button>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubscribe} className="space-y-4">
@@ -115,7 +138,10 @@ export default function AlertSubscribeModal({ onSubscriptionCreated }: AlertSubs
                   { id: "alert.temp_extreme", label: "Extreme Temperatures" },
                   { id: "alert.wind", label: "Gale & High Winds" },
                 ].map((ev) => (
-                  <label key={ev.id} className="flex items-center gap-2 text-xs text-text-muted cursor-pointer select-none">
+                  <label
+                    key={ev.id}
+                    className="flex items-center gap-2 text-xs text-text-muted cursor-pointer select-none"
+                  >
                     <input
                       type="checkbox"
                       checked={events.includes(ev.id)}
@@ -134,7 +160,7 @@ export default function AlertSubscribeModal({ onSubscriptionCreated }: AlertSubs
               className="w-full py-2 rounded-lg text-xs font-semibold bg-accent hover:bg-accent/90 text-bg transition-all mt-6 flex items-center justify-center gap-1.5"
             >
               <Plus size={12} />
-              Register Webhook
+              {submitting ? "Registering..." : "Register Webhook"}
             </button>
           </form>
         )}

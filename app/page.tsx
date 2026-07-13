@@ -174,6 +174,12 @@ export default function DashboardConsole() {
           showToast(`Active location: ${savedLocations[idx].name}`, "success");
         }
       }
+
+      // 'Escape' key to close modals
+      if (e.key === "Escape") {
+        e.preventDefault();
+        useAppStore.setState({ activeModal: null });
+      }
     }
 
     window.addEventListener("keydown", handleKeyDown);
