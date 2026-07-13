@@ -2,8 +2,15 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { WeatherResponse, UsageResponse } from "@/lib/types";
+import { WeatherResponse, UsageResponse } from "@/services/weather/weather.types";
 import { addHistoricalEntry } from "@/lib/historicalStore";
+import { weatherService } from "@/services/weather/weather.service";
+import {
+  saveLastSuccessfulResponse,
+  getLastSuccessfulResponse,
+  saveLastCoordinates,
+  getLastCoordinates,
+} from "@/services/weather/weather.cache";
 
 // Chrome & Shared
 import TopBar from "@/components/chrome/TopBar";
@@ -67,6 +74,10 @@ export default function DashboardConsole() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [usage, setUsage] = useState<UsageResponse | null>(null);
+  
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [lastUpdatedTime, setLastUpdatedTime] = useState("");
+  const [rateLimit, setRateLimit] = useState<{ limit: number; remaining: number; reset: number } | null>(null);
 
   const fetchUsage = useCallback(async () => {
     try {
@@ -109,22 +120,57 @@ export default function DashboardConsole() {
   const fetchWeather = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setIsOfflineMode(false);
     
-    let url = "/api/weather?days=7";
+    let lat = activeLocation?.lat;
+    let lon = activeLocation?.lon;
 
-    if (activeLocation) {
-      url = `/api/weather?lat=${activeLocation.lat}&lon=${activeLocation.lon}&days=7`;
+    // Detect location if no active location (follows: GPS -> IP Lookup -> Default)
+    if (lat === undefined || lon === undefined) {
+      const cachedCoords = getLastCoordinates();
+      if (cachedCoords) {
+        lat = cachedCoords.lat;
+        lon = cachedCoords.lon;
+      } else if (typeof navigator !== "undefined" && navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 6000 });
+          });
+          lat = position.coords.latitude;
+          lon = position.coords.longitude;
+          saveLastCoordinates(lat, lon);
+          showToast("Retrieved GPS location coordinates", "success");
+        } catch {
+          // Denied or timeout -> fallback to IP Lookup
+          try {
+            const ipRes = await weatherService.getIpLookup();
+            lat = ipRes.location.lat;
+            lon = ipRes.location.lon;
+            saveLastCoordinates(lat, lon);
+            showToast(`Location resolved from IP: ${ipRes.location.city}`, "info");
+          } catch {
+            // Default coords fallback
+            lat = 37.7749;
+            lon = -122.4194;
+          }
+        }
+      }
     }
 
     try {
-      const res = await fetch(url);
-      const data = await res.json();
-      
-      if (data.error) {
-        throw new Error(data.error.message || `API Error: ${data.error.code}`);
-      }
+      const data = await weatherService.getWeather({
+        lat,
+        lon,
+        days: 7,
+        ai: true,
+        units: unit.toLowerCase() as any,
+      });
       
       setWeather(data);
+      saveLastSuccessfulResponse(data);
+      if (lat !== undefined && lon !== undefined) {
+        saveLastCoordinates(lat, lon);
+      }
 
       // Record in historical trend logs
       if (data.current) {
@@ -132,12 +178,36 @@ export default function DashboardConsole() {
         window.dispatchEvent(new Event("aeris-data-fetched"));
       }
     } catch (err: any) {
-      setError(err.message || "Failed to retrieve meteorology data.");
-      showToast("Weather fetch failed", "danger");
+      // Offline support: Fallback to last successful response
+      const cachedResponse = getLastSuccessfulResponse();
+      if (cachedResponse) {
+        setWeather(cachedResponse.data);
+        setIsOfflineMode(true);
+        setLastUpdatedTime(new Date(cachedResponse.timestamp).toLocaleTimeString());
+        showToast("Offline mode: loaded cached response", "warning");
+      } else {
+        setError(err.message || "Failed to retrieve meteorology data.");
+        showToast("Weather fetch failed", "danger");
+      }
     } finally {
       setLoading(false);
     }
-  }, [activeLocation, showToast]);
+  }, [activeLocation, unit, showToast]);
+
+  // Rate Limit & Telemetry listener
+  useEffect(() => {
+    function handleRateLimit(e: any) {
+      if (e.detail) {
+        setRateLimit({
+          limit: parseInt(e.detail.limit, 10),
+          remaining: parseInt(e.detail.remaining, 10),
+          reset: parseInt(e.detail.reset, 10),
+        });
+      }
+    }
+    window.addEventListener("aeris-rate-limit-updated", handleRateLimit);
+    return () => window.removeEventListener("aeris-rate-limit-updated", handleRateLimit);
+  }, []);
 
   // Trigger weather query on location shift
   useEffect(() => {
@@ -149,8 +219,10 @@ export default function DashboardConsole() {
     const defaultLoc = savedLocations.find((loc) => loc.isDefault);
     if (defaultLoc) {
       setActiveLocation(defaultLoc);
+    } else {
+      fetchWeather();
     }
-  }, [savedLocations, setActiveLocation]);
+  }, [savedLocations, setActiveLocation, fetchWeather]);
 
   // Global Hotkey Manager
   useEffect(() => {
@@ -405,6 +477,20 @@ export default function DashboardConsole() {
           </div>
         </div>
 
+        {isOfflineMode && (
+          <div className="bg-amber-500/10 border border-amber-500/20 text-amber-500 p-3 rounded-lg flex items-center justify-between text-xs animate-slide-in">
+            <span className="font-medium">
+              Offline Mode: Displaying last cached weather conditions (Last updated: {lastUpdatedTime}).
+            </span>
+            <button
+              onClick={fetchWeather}
+              className="px-2.5 py-1 bg-amber-500 text-bg hover:bg-amber-600 rounded font-bold uppercase text-[10px] transition-colors"
+            >
+              Retry Connection
+            </button>
+          </div>
+        )}
+
         {/* Dashboard Stat Cards row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
@@ -435,6 +521,39 @@ export default function DashboardConsole() {
 
         {/* Active Route Section Panel */}
         <div className="mt-6">{renderPanel()}</div>
+
+        {/* Developer Telemetry Card */}
+        <div className="bg-surface-raised border border-border/80 rounded-xl p-4 font-mono text-[10px] text-text-muted mt-8">
+          <div className="flex items-center justify-between pb-2 border-b border-border/40 mb-2">
+            <span className="font-bold text-text-primary uppercase tracking-wider">Developer API Telemetry</span>
+            <span className="bg-accent/10 text-accent px-1.5 py-0.5 rounded text-[8px] font-bold uppercase">Active Plan: {apiPlan}</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <span className="block text-text-muted uppercase">Rate-Limit Remaining:</span>
+              <span className={`font-bold ${rateLimit && rateLimit.remaining < 100 ? "text-red-400 animate-pulse" : "text-text-primary"}`}>
+                {rateLimit ? `${rateLimit.remaining} / ${rateLimit.limit}` : "N/A"}
+              </span>
+              {rateLimit && rateLimit.remaining < 100 && (
+                <span className="block text-[8px] text-red-400 font-bold uppercase mt-0.5">Quota critically low!</span>
+              )}
+            </div>
+            <div>
+              <span className="block text-text-muted uppercase">Reset Window (Epoch):</span>
+              <span className="text-text-primary font-bold">
+                {rateLimit ? rateLimit.reset : "N/A"}
+              </span>
+            </div>
+            <div>
+              <span className="block text-text-muted uppercase">Cache Mode:</span>
+              <span className="text-text-primary font-bold">Zustand persisted + TanStack Cache</span>
+            </div>
+            <div>
+              <span className="block text-text-muted uppercase">Base URL Target:</span>
+              <span className="text-text-primary font-bold truncate">https://api.weather-ai.co</span>
+            </div>
+          </div>
+        </div>
       </main>
 
       {/* Modals & Portal Overlays */}
