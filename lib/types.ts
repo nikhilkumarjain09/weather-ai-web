@@ -1,5 +1,5 @@
 export interface CurrentWeather {
-  temp: number; // in Celsius by default
+  temp: number;
   feelsLike: number;
   humidity: number;
   windSpeed: number;
@@ -29,11 +29,29 @@ export interface WeatherResponse {
   current: CurrentWeather;
   forecast: ForecastDay[];
   aiSummary?: string;
-  _meta: {
+  _meta?: {
     cache: "hit" | "miss";
     latency: number;
     timestamp: number;
   };
+}
+
+export interface UsageResponse {
+  plan: string;
+  used: number;
+  limit: number;
+  resetDays: number;
+}
+
+export interface WebhookSubscription {
+  id: string;
+  url: string;
+  events: string[];
+  status: string;
+}
+
+export interface WebhooksResponse {
+  subscriptions: WebhookSubscription[];
 }
 
 export interface SavedLocation {
@@ -42,24 +60,6 @@ export interface SavedLocation {
   lat: number;
   lon: number;
   isDefault: boolean;
-}
-
-export interface RequestLog {
-  id: string;
-  endpoint: string;
-  params: string;
-  status: number;
-  latency: number;
-  cache: "hit" | "miss";
-  timestamp: string;
-}
-
-export interface WeatherAlert {
-  id: string;
-  title: string;
-  description: string;
-  severity: "info" | "warning" | "danger";
-  time: string;
 }
 
 export interface AppNotification {
@@ -74,8 +74,3 @@ export interface AppNotification {
 export type ThemePreference = "dark" | "light" | "system";
 export type TemperatureUnit = "C" | "F";
 export type ApiPlan = "free" | "pro";
-
-export interface QuotaState {
-  used: number;
-  limit: number;
-}

@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { CurrentWeather } from "@/lib/types";
-import { generateMockCurrentWeather } from "@/lib/weatherClient";
 import { Layers, MapPin, RefreshCw, X, Thermometer, Wind, Droplets, Sun } from "lucide-react";
 import ErrorBanner from "@/components/shared/ErrorBanner";
 
@@ -33,8 +32,6 @@ function ComparisonCard({ name, lat, lon, unit, onRemove }: ComparisonCardProps)
       setData(json.current);
     } catch (e: any) {
       setError(e.message || "Failed to load data");
-      // Fallback to offline mock generation
-      setData(generateMockCurrentWeather(lat, lon, name));
     } finally {
       setLoading(false);
     }

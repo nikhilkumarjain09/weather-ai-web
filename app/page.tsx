@@ -90,20 +90,20 @@ export default function DashboardConsole() {
     setError(null);
     const startTime = Date.now();
     
-    let url = "/api/weather";
+    let url = "/api/weather?days=7";
 
     if (activeLocation) {
-      url = `/api/weather?lat=${activeLocation.lat}&lon=${activeLocation.lon}&name=${encodeURIComponent(
-        activeLocation.name
-      )}`;
+      url = `/api/weather?lat=${activeLocation.lat}&lon=${activeLocation.lon}&days=7`;
     }
 
     try {
       const res = await fetch(url);
-      if (!res.ok) {
-        throw new Error(`API returned status ${res.status}`);
+      const data = await res.json();
+      
+      if (data.error) {
+        throw new Error(data.error.message || `API Error: ${data.error.code}`);
       }
-      const data: WeatherResponse = await res.json();
+      
       setWeather(data);
 
       const latencyTime = Date.now() - startTime;

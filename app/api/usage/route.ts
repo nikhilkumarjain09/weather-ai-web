@@ -1,16 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requestWeatherApi } from "@/lib/weatherClient";
 
 export async function GET(req: NextRequest) {
-  const plan = process.env.WEATHERAI_PLAN || "free";
-  
-  // Mock usage data
-  const limit = plan === "pro" ? 50000 : 1000;
-  const used = plan === "pro" ? 12450 : 384;
+  try {
+    const data = await requestWeatherApi("/v1/usage");
+    
+    if (data.error) {
+      return NextResponse.json(data, { status: data.status || 400 });
+    }
 
-  return NextResponse.json({
-    plan,
-    used,
-    limit,
-    resetDays: 18,
-  });
+    return NextResponse.json(data);
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        error: {
+          code: "PROXY_ERROR",
+          message: error.message || "Failed to retrieve usage info.",
+        },
+      },
+      { status: 500 }
+    );
+  }
 }
