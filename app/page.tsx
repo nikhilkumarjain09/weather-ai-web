@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { WeatherResponse } from "@/lib/types";
+import { WeatherResponse, UsageResponse } from "@/lib/types";
 import { addHistoricalEntry } from "@/lib/historicalStore";
 
 // Chrome & Shared
@@ -34,20 +34,15 @@ import UsagePanel from "@/components/controls/UsagePanel";
 
 // Icons
 import {
-  Send,
-  Zap,
-  Wifi,
   Package,
   Sunrise,
   Sun,
   Sunset,
-  Moon,
-  Compass,
-  AlertTriangle,
-  RefreshCw,
   Plus,
   Lock,
   User,
+  Thermometer,
+  Droplets,
 } from "lucide-react";
 
 export default function DashboardConsole() {
@@ -68,7 +63,26 @@ export default function DashboardConsole() {
   const [weather, setWeather] = useState<WeatherResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [metrics, setMetrics] = useState({ requestsToday: 0, avgLatency: 0, cacheHitRate: 0 });
+  const [usage, setUsage] = useState<UsageResponse | null>(null);
+
+  const fetchUsage = useCallback(async () => {
+    try {
+      const res = await fetch("/api/usage");
+      if (res.ok) {
+        const data = await res.json();
+        setUsage(data);
+        if (data.plan) {
+          useAppStore.setState({ apiPlan: data.plan.toLowerCase() as "free" | "pro" });
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch usage:", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUsage();
+  }, [fetchUsage, weather]);
 
   // Sync client-side theme class to document element
   useEffect(() => {
@@ -90,7 +104,6 @@ export default function DashboardConsole() {
   const fetchWeather = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const startTime = Date.now();
     
     let url = "/api/weather?days=7";
 
@@ -108,20 +121,7 @@ export default function DashboardConsole() {
       
       setWeather(data);
 
-      const latencyTime = Date.now() - startTime;
 
-      // Update session metrics locally
-      setMetrics((prev) => {
-        const nextCount = prev.requestsToday + 1;
-        const nextAvg = Math.round((prev.avgLatency * prev.requestsToday + latencyTime) / nextCount);
-        const hitCount = (prev.cacheHitRate * prev.requestsToday) / 100 + (data._meta?.cache === "hit" ? 1 : 0);
-        const nextHitRate = Math.round((hitCount / nextCount) * 100);
-        return {
-          requestsToday: nextCount,
-          avgLatency: nextAvg,
-          cacheHitRate: nextHitRate,
-        };
-      });
 
       // Record in historical trend logs
       if (data.current) {
@@ -375,28 +375,28 @@ export default function DashboardConsole() {
         {/* Dashboard Stat Cards row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            label="Requests Today"
-            icon={Send}
-            value={metrics.requestsToday}
-            caption="WeatherAI Proxies"
+            label="Current Temp"
+            icon={Thermometer}
+            value={weather?.current ? `${Math.round(unit === "F" ? (weather.current.temp * 9/5 + 32) : weather.current.temp)}°${unit}` : "--"}
+            caption="Current Temperature"
           />
           <StatCard
-            label="Avg Response Time"
-            icon={Zap}
-            value={`${metrics.avgLatency}ms`}
-            caption="Proxy Latency"
+            label="Feels Like"
+            icon={Thermometer}
+            value={weather?.current ? `${Math.round(unit === "F" ? (weather.current.feelsLike * 9/5 + 32) : weather.current.feelsLike)}°${unit}` : "--"}
+            caption="Apparent Temperature"
           />
           <StatCard
-            label="Cache Hit Rate"
-            icon={Wifi}
-            value={`${metrics.cacheHitRate}%`}
-            caption="Redis Caching"
+            label="Humidity"
+            icon={Droplets}
+            value={weather?.current ? `${weather.current.humidity}%` : "--"}
+            caption="Atmospheric Moisture"
           />
           <StatCard
             label="Monthly Quota"
             icon={Package}
-            value={apiPlan === "pro" ? "12k / 50k" : "384 / 1k"}
-            caption={`${apiPlan.toUpperCase()} Plan Quota`}
+            value={usage ? `${usage.used} / ${usage.limit}` : "--"}
+            caption={usage ? `${usage.plan.toUpperCase()} Plan Quota` : "Usage Limits"}
           />
         </div>
 
