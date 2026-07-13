@@ -7,11 +7,11 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { Map, MapPin, RefreshCw } from "lucide-react";
 
 interface WeatherMapProps {
-  lat: number;
-  lon: number;
+  lat?: number;
+  lon?: number;
 }
 
-export default function WeatherMap({ lat, lon }: WeatherMapProps) {
+export default function WeatherMap({ lat = 0, lon = 0 }: WeatherMapProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { mapPreference, setMapPreference } = usePreferencesStore();
   const { addSavedLocation } = useFavoritesStore();
