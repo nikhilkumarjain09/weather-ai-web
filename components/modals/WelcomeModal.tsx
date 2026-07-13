@@ -53,8 +53,8 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
   };
 
   return (
-    <div className="fixed inset-0 bg-black/85 backdrop-blur-xl z-50 flex items-center justify-center p-4 font-sans">
-      <div className="glass-panel w-full max-w-md overflow-hidden p-6 md:p-8 flex flex-col gap-6 relative border-white/10 bg-slate-950/80">
+    <div className="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4 font-sans">
+      <div className="w-full max-w-md overflow-hidden p-6 md:p-8 flex flex-col gap-6 relative rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950 shadow-2xl">
         
         {/* Glow corner blobs */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-accent/20 rounded-full filter blur-[60px]" />
@@ -71,17 +71,17 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
             >
               <div className="space-y-2">
                 <span className="text-3xl block">👋</span>
-                <h2 className="font-display text-2xl font-extrabold text-text-primary tracking-tight">
+                <h2 className="font-display text-2xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
                   Welcome
                 </h2>
-                <p className="text-xs text-text-muted leading-relaxed font-medium">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
                   We&apos;re happy you&apos;re here. Let&apos;s set things up in less than a minute.
                 </p>
               </div>
 
               <button
                 onClick={handleNextStep}
-                className="w-full py-3 bg-accent hover:bg-accent/90 text-bg font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-lg shadow-accent/15"
+                className="w-full py-3 bg-accent hover:bg-accent/90 text-white dark:text-bg font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-lg shadow-accent/15"
               >
                 Get Started
               </button>
@@ -98,23 +98,23 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
             >
               <div className="space-y-2 text-center">
                 <span className="text-3xl block">😊</span>
-                <h2 className="font-display text-xl font-extrabold text-text-primary tracking-tight">
+                <h2 className="font-display text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
                   What should we call you?
                 </h2>
-                <p className="text-[11px] text-text-muted font-medium">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                   This helps us personalize your weather experience.
                 </p>
               </div>
 
               <div className="space-y-3">
-                <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus-within:border-accent/40 transition-all">
-                  <Smile size={15} className="text-text-muted" />
+                <div className="flex items-center gap-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 focus-within:border-accent/40 transition-all">
+                  <Smile size={15} className="text-slate-400 dark:text-slate-500" />
                   <input
                     type="text"
                     value={nameInput}
                     onChange={(e) => setNameInput(e.target.value)}
                     placeholder="Type your name"
-                    className="flex-1 bg-transparent text-xs text-text-primary focus:outline-none placeholder-text-muted font-sans font-medium"
+                    className="flex-1 bg-transparent text-xs text-slate-900 dark:text-slate-50 focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 font-sans font-medium"
                     autoFocus
                   />
                 </div>
@@ -122,7 +122,7 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
 
               <button
                 onClick={handleNextStep}
-                className="w-full py-3 bg-accent hover:bg-accent/90 text-bg font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300"
+                className="w-full py-3 bg-accent hover:bg-accent/90 text-white dark:text-bg font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300"
               >
                 Continue
               </button>
@@ -139,10 +139,10 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
             >
               <div className="space-y-2">
                 <span className="text-3xl block">📍</span>
-                <h2 className="font-display text-xl font-extrabold text-text-primary tracking-tight">
+                <h2 className="font-display text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
                   Can we use your location?
                 </h2>
-                <p className="text-xs text-text-muted leading-relaxed font-medium">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
                   This helps us show the weather where you are. You can always change this later.
                 </p>
               </div>
@@ -150,13 +150,13 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
               <div className="space-y-3">
                 <button
                   onClick={handleAllowLocation}
-                  className="w-full py-3 bg-accent hover:bg-accent/90 text-bg font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-lg shadow-accent/15"
+                  className="w-full py-3 bg-accent hover:bg-accent/90 text-white dark:text-bg font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-lg shadow-accent/15"
                 >
                   Allow Location
                 </button>
                 <button
                   onClick={handleSkipLocation}
-                  className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-text-muted hover:text-text-primary font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300"
+                  className="w-full py-3 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300"
                 >
                   Not Now
                 </button>
@@ -174,7 +174,7 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
             >
               <div className="space-y-2 text-center">
                 <span className="text-3xl block">🌡️</span>
-                <h2 className="font-display text-xl font-extrabold text-text-primary tracking-tight">
+                <h2 className="font-display text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
                   How would you like to see the temperature?
                 </h2>
               </div>
@@ -187,8 +187,8 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
                   }}
                   className={`py-3 rounded-xl border text-xs font-bold transition-all ${
                     tempUnit === "C"
-                      ? "bg-accent/15 border-accent text-accent"
-                      : "bg-white/5 border-white/10 text-text-muted hover:text-text-primary"
+                      ? "bg-accent/10 border-accent text-accent"
+                      : "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-50"
                   }`}
                 >
                   Celsius (°C)
@@ -200,8 +200,8 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
                   }}
                   className={`py-3 rounded-xl border text-xs font-bold transition-all ${
                     tempUnit === "F"
-                      ? "bg-accent/15 border-accent text-accent"
-                      : "bg-white/5 border-white/10 text-text-muted hover:text-text-primary"
+                      ? "bg-accent/10 border-accent text-accent"
+                      : "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-50"
                   }`}
                 >
                   Fahrenheit (°F)
@@ -220,10 +220,10 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
             >
               <div className="space-y-2 text-center">
                 <span className="text-3xl block">✨</span>
-                <h2 className="font-display text-xl font-extrabold text-text-primary tracking-tight">
+                <h2 className="font-display text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
                   Want daily weather tips?
                 </h2>
-                <p className="text-xs text-text-muted leading-relaxed font-medium">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
                   We&apos;ll show simple recommendations based on today&apos;s weather.
                 </p>
               </div>
@@ -234,7 +234,7 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
                     setEnableAi(true);
                     setStep(6);
                   }}
-                  className="w-full py-3 bg-accent hover:bg-accent/90 text-bg font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-lg shadow-accent/15"
+                  className="w-full py-3 bg-accent hover:bg-accent/90 text-white dark:text-bg font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-lg shadow-accent/15"
                 >
                   Yes, show tips
                 </button>
@@ -243,7 +243,7 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
                     setEnableAi(false);
                     setStep(6);
                   }}
-                  className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-text-muted hover:text-text-primary font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300"
+                  className="w-full py-3 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300"
                 >
                   Skip for now
                 </button>
@@ -261,17 +261,17 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
             >
               <div className="space-y-2">
                 <span className="text-3xl block">🎉</span>
-                <h2 className="font-display text-xl font-extrabold text-text-primary tracking-tight">
+                <h2 className="font-display text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
                   You&apos;re all set!
                 </h2>
-                <p className="text-xs text-text-muted leading-relaxed font-medium">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
                   Let&apos;s check today&apos;s weather.
                 </p>
               </div>
 
               <button
                 onClick={handleFinish}
-                className="w-full py-3 bg-accent hover:bg-accent/90 text-bg font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-lg shadow-accent/15"
+                className="w-full py-3 bg-accent hover:bg-accent/90 text-white dark:text-bg font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-lg shadow-accent/15"
               >
                 Go to Dashboard
               </button>

@@ -143,7 +143,15 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
             7-Day
           </button>
           <button
-            onClick={() => setForecastMode("14")}
+            onClick={() => {
+              if (apiPlan === "free") {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("aeris-show-pro-modal"));
+                }
+              } else {
+                setForecastMode("14");
+              }
+            }}
             className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${
               forecastMode === "14" ? "bg-accent text-bg shadow-sm" : "text-text-muted hover:text-text-primary"
             }`}

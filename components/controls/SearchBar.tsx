@@ -57,9 +57,9 @@ export default function SearchBar() {
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
-  // Debounced search simulator matching popular suggestions or coordinate math
+  // Real-time geocoding search querying Nominatim API & falling back to weather-geo proxy
   useEffect(() => {
-    const handler = setTimeout(() => {
+    const handler = setTimeout(async () => {
       const trimmed = query.trim();
       if (trimmed.length > 1) {
         // Check if coordinates entered: e.g. "37.77, -122.41"
@@ -73,26 +73,53 @@ export default function SearchBar() {
           return;
         }
 
-        const matches = popularCities.filter((c) =>
-          c.name.toLowerCase().includes(trimmed.toLowerCase())
-        );
-
-        if (matches.length === 0) {
-          // Fallback custom node generation based on text hashing
-          let hash = 0;
-          for (let i = 0; i < trimmed.length; i++) {
-            hash = trimmed.charCodeAt(i) + ((hash << 5) - hash);
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(trimmed)}&format=json&limit=5&addressdetails=1`, {
+            headers: {
+              "User-Agent": "AerisWeatherAI/1.0"
+            }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) {
+              const mapped = data.map((item: any) => {
+                const name = item.display_name.split(",").slice(0, 3).join(",");
+                return {
+                  name,
+                  lat: parseFloat(item.lat),
+                  lon: parseFloat(item.lon)
+                };
+              });
+              setResults(mapped);
+            } else {
+              setResults([]);
+            }
+          } else {
+            throw new Error("Nominatim call unsuccessful");
           }
-          const lat = parseFloat(((hash % 60) + 10).toFixed(4));
-          const lon = parseFloat(((hash % 120) - 60).toFixed(4));
-          setResults([{ name: `${trimmed} (Custom Location)`, lat, lon }]);
-        } else {
-          setResults(matches);
+        } catch {
+          // Fallback to internal weather-geo endpoint proxy
+          try {
+            const geoRes = await fetch(`/api/v1/weather-geo?city=${encodeURIComponent(trimmed)}`);
+            if (geoRes.ok) {
+              const geoData = await geoRes.json();
+              if (geoData && geoData.current) {
+                const name = geoData.geo ? `${geoData.geo.city}, ${geoData.geo.country}` : geoData.locationName || trimmed;
+                setResults([{ name, lat: geoData.lat, lon: geoData.lon }]);
+              }
+            }
+          } catch {
+            // Ultimate fallback to popular suggestions bank
+            const matches = popularCities.filter((c) =>
+              c.name.toLowerCase().includes(trimmed.toLowerCase())
+            );
+            setResults(matches);
+          }
         }
       } else {
         setResults([]);
       }
-    }, 250); // 250ms debounce window
+    }, 450); // 450ms debounce window to limit server hammering
 
     return () => clearTimeout(handler);
   }, [query]);
@@ -161,8 +188,8 @@ export default function SearchBar() {
   return (
     <div ref={containerRef} className="relative w-full max-w-md font-sans z-30">
       {/* Search Input Bar */}
-      <div className="flex items-center gap-2 bg-surface-raised border border-border rounded-lg px-3 py-1.5 focus-within:border-accent/40 focus-within:ring-1 focus-within:ring-accent/15 transition-all">
-        <Search size={15} className="text-text-muted shrink-0" />
+      <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 focus-within:border-accent/40 focus-within:ring-1 focus-within:ring-accent/15 transition-all">
+        <Search size={13} className="text-text-muted shrink-0" />
         <input
           ref={inputRef}
           type="text"
@@ -174,7 +201,7 @@ export default function SearchBar() {
           }}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="flex-1 bg-transparent text-xs text-text-primary focus:outline-none placeholder-text-muted font-sans"
+          className="flex-1 bg-transparent text-xs text-white focus:outline-none placeholder-text-muted font-sans font-medium"
         />
         {hasQuery ? (
           <button
@@ -183,12 +210,12 @@ export default function SearchBar() {
               setResults([]);
               setSelectedIndex(-1);
             }}
-            className="text-text-muted hover:text-text-primary p-0.5"
+            className="text-text-muted hover:text-white p-0.5"
           >
             <X size={13} />
           </button>
         ) : (
-          <span className="text-[10px] text-text-muted font-mono bg-surface border border-border px-1.5 py-0.5 rounded select-none shrink-0 pointer-events-none">
+          <span className="text-[10px] text-text-muted font-mono bg-white/5 border border-white/5 px-1.5 py-0.5 rounded select-none shrink-0 pointer-events-none">
             /
           </span>
         )}
@@ -196,11 +223,11 @@ export default function SearchBar() {
 
       {/* Autocomplete & suggestions dropdown menu */}
       {focused && (
-        <div className="absolute left-0 right-0 mt-1.5 bg-surface border border-border rounded-lg shadow-xl overflow-hidden divide-y divide-border/20 z-50">
+        <div className="absolute left-0 right-0 mt-1.5 bg-slate-900/95 dark:bg-slate-950/95 border border-white/5 rounded-2xl shadow-2xl overflow-hidden divide-y divide-white/5 z-50 backdrop-blur-xl">
           {/* Autocomplete Query Results */}
           {results.length > 0 ? (
-            <div className="py-1">
-              <span className="block px-3 py-1 text-[9px] font-bold text-text-muted uppercase tracking-wider">
+            <div className="py-1.5">
+              <span className="block px-4 py-1 text-[9px] font-bold text-text-muted uppercase tracking-wider">
                 Suggestions
               </span>
               {results.map((city, idx) => {
@@ -211,8 +238,8 @@ export default function SearchBar() {
                 return (
                   <div
                     key={`${city.lat}-${city.lon}`}
-                    className={`flex items-center justify-between px-3 py-2 cursor-pointer ${
-                      isSelected ? "bg-accent-tint/50" : "hover:bg-surface-raised/40"
+                    className={`flex items-center justify-between px-4 py-2 cursor-pointer ${
+                      isSelected ? "bg-accent/10 text-accent" : "hover:bg-white/5 text-text-muted hover:text-white"
                     }`}
                   >
                     <button
@@ -221,7 +248,7 @@ export default function SearchBar() {
                     >
                       <MapPin size={13} className="text-accent shrink-0" />
                       <div className="truncate">
-                        <span className="text-xs font-semibold text-text-primary block truncate">
+                        <span className="text-xs font-semibold block truncate text-white">
                           {city.name}
                         </span>
                         <span className="text-[9px] text-text-muted font-mono">
@@ -232,7 +259,7 @@ export default function SearchBar() {
                     <button
                       onClick={() => handleSelect(city, true)}
                       title="Add to saved favorites"
-                      className={`p-1 rounded text-text-muted hover:text-accent transition-colors`}
+                      className="p-1 rounded text-text-muted hover:text-accent transition-colors"
                     >
                       <Star size={13} className={isSaved ? "fill-accent text-accent" : ""} />
                     </button>
@@ -242,8 +269,8 @@ export default function SearchBar() {
             </div>
           ) : recentSearches.length > 0 && !hasQuery ? (
             /* Recent Queries and History lists */
-            <div className="py-1">
-              <div className="flex items-center justify-between px-3 py-1">
+            <div className="py-1.5">
+              <div className="flex items-center justify-between px-4 py-1">
                 <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
                   <History size={10} />
                   Recently viewed
@@ -255,13 +282,13 @@ export default function SearchBar() {
                   <div
                     key={`${city.lat}-${city.lon}`}
                     onClick={() => handleSelect(city, false)}
-                    className={`flex items-center gap-2.5 px-3 py-2 cursor-pointer ${
-                      isSelected ? "bg-accent-tint/50" : "hover:bg-surface-raised/40"
+                    className={`flex items-center gap-2.5 px-4 py-2 cursor-pointer ${
+                      isSelected ? "bg-accent/10 text-accent" : "hover:bg-white/5 text-text-muted hover:text-white"
                     }`}
                   >
                     <History size={12} className="text-text-muted shrink-0" />
                     <div className="flex-1 truncate">
-                      <span className="text-xs font-medium text-text-primary block truncate">
+                      <span className="text-xs font-semibold block truncate text-white">
                         {city.name}
                       </span>
                     </div>
@@ -271,20 +298,20 @@ export default function SearchBar() {
             </div>
           ) : (
             /* Popular suggestion indicators */
-            <div className="py-1">
-              <span className="block px-3 py-1 text-[9px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
+            <div className="py-1.5">
+              <span className="block px-4 py-1 text-[9px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
                 <Compass size={10} />
                 Popular cities
               </span>
-              <div className="grid grid-cols-2 gap-1 p-2">
+              <div className="grid grid-cols-2 gap-1.5 p-3">
                 {popularCities.map((city) => (
                   <button
                     key={city.name}
                     onClick={() => handleSelect(city, false)}
-                    className="flex items-center gap-1.5 p-1.5 rounded bg-surface-raised hover:bg-accent-tint hover:text-accent text-left text-[11px] text-text-muted transition-colors truncate"
+                    className="flex items-center gap-1.5 p-2 rounded-xl bg-white/5 hover:bg-accent/10 hover:text-accent text-left text-[11px] text-text-muted transition-all truncate border border-transparent hover:border-accent/15"
                   >
-                    <MapPin size={10} className="shrink-0" />
-                    <span className="truncate">{city.name}</span>
+                    <MapPin size={10} className="shrink-0 text-accent" />
+                    <span className="truncate text-white font-medium">{city.name}</span>
                   </button>
                 ))}
               </div>

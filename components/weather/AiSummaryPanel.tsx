@@ -29,8 +29,11 @@ export default function AiSummaryPanel({ lat, lon, locationName }: AiSummaryPane
         showToast("Weather story compiled successfully", "success");
       }
     } catch (e: any) {
-      if (e.status === 403 || e.code === "FORBIDDEN") {
+      if (e.status === 403 || e.code === "FORBIDDEN" || e.message?.includes("requires a Pro")) {
         setError("PRO_LIMIT");
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("aeris-show-pro-modal"));
+        }
       } else {
         setError(e.message || "We couldn't load the weather story.");
       }
@@ -41,6 +44,12 @@ export default function AiSummaryPanel({ lat, lon, locationName }: AiSummaryPane
   };
 
   const handleToggle = () => {
+    if (apiPlan === "free") {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("aeris-show-pro-modal"));
+      }
+      return;
+    }
     const nextState = !isExpanded;
     setIsExpanded(nextState);
     if (nextState && !insights && !loading) {

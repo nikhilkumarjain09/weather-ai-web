@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { mapApiResponse } from "@/services/weather/mapper";
 
 // 1. Validation Layer for environment credentials
 function validateConfig() {
@@ -75,7 +76,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ path
       });
     }
 
-    return NextResponse.json(data, {
+    // Map response structure to UI-compatible models
+    const mappedData = mapApiResponse(data);
+
+    return NextResponse.json(mappedData, {
       status: 200,
       headers: responseHeaders,
     });

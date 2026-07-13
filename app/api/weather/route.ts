@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requestWeatherApi } from "@/lib/weatherClient";
 import { getCache } from "@/lib/cache";
+import { mapApiResponse } from "@/services/weather/mapper";
 
 export async function GET(req: NextRequest) {
   const startTime = Date.now();
@@ -49,12 +50,15 @@ export async function GET(req: NextRequest) {
     }
 
     // Call WeatherAI API
-    const data = await requestWeatherApi(apiPath, params);
+    const rawData = await requestWeatherApi(apiPath, params);
 
     // If API returned an error, pass it straight through without caching
-    if (data.error) {
-      return NextResponse.json(data, { status: data.status || 400 });
+    if (rawData.error) {
+      return NextResponse.json(rawData, { status: rawData.status || 400 });
     }
+
+    // Map response structure to UI-compatible models
+    const data = mapApiResponse(rawData);
 
     // Cache the successful response
     await cache.set(cacheKey, data, ttl);

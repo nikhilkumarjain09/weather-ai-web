@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { WeatherResponse, UsageResponse } from "@/services/weather/types";
+import { WeatherResponse } from "@/services/weather/types";
 import { addHistoricalEntry } from "@/lib/historicalStore";
 import { weatherService } from "@/services/weather/service";
 import {
@@ -14,7 +14,6 @@ import {
 
 // Chrome & Shared
 import TopBar from "@/components/chrome/TopBar";
-import Sidebar from "@/components/chrome/Sidebar";
 import Toast from "@/components/shared/Toast";
 import ErrorBanner from "@/components/shared/ErrorBanner";
 import CommandPalette from "@/components/chrome/CommandPalette";
@@ -25,6 +24,7 @@ import AlertSubscribeModal from "@/components/modals/AlertSubscribeModal";
 import KeyboardShortcutsModal from "@/components/modals/KeyboardShortcutsModal";
 import SettingsModal from "@/components/modals/SettingsModal";
 import WelcomeModal from "@/components/modals/WelcomeModal";
+import ProUpgradeModal from "@/components/modals/ProUpgradeModal";
 
 // Dashboard / Weather Panels
 import StatCard from "@/components/dashboard/StatCard";
@@ -45,7 +45,6 @@ import UsagePanel from "@/components/controls/UsagePanel";
 
 // Icons
 import {
-  Package,
   Sunrise,
   Sun,
   Sunset,
@@ -74,11 +73,9 @@ export default function DashboardConsole() {
   const [weather, setWeather] = useState<WeatherResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [usage, setUsage] = useState<UsageResponse | null>(null);
   
   const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [lastUpdatedTime, setLastUpdatedTime] = useState("");
-  const [rateLimit, setRateLimit] = useState<{ limit: number; remaining: number; reset: number } | null>(null);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
 
   const fetchUsage = useCallback(async () => {
@@ -86,7 +83,6 @@ export default function DashboardConsole() {
       const res = await fetch("/api/usage");
       if (res.ok) {
         const data = await res.json();
-        setUsage(data);
         if (data.plan) {
           useAppStore.setState({ apiPlan: data.plan.toLowerCase() as "free" | "pro" });
         }
@@ -196,20 +192,7 @@ export default function DashboardConsole() {
     }
   }, [activeLocation, unit, showToast]);
 
-  // Rate Limit & Telemetry listener
-  useEffect(() => {
-    function handleRateLimit(e: any) {
-      if (e.detail) {
-        setRateLimit({
-          limit: parseInt(e.detail.limit, 10),
-          remaining: parseInt(e.detail.remaining, 10),
-          reset: parseInt(e.detail.reset, 10),
-        });
-      }
-    }
-    window.addEventListener("aeris-rate-limit-updated", handleRateLimit);
-    return () => window.removeEventListener("aeris-rate-limit-updated", handleRateLimit);
-  }, []);
+
 
   // Trigger weather query on location shift
   useEffect(() => {
@@ -499,12 +482,11 @@ export default function DashboardConsole() {
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text-primary font-sans flex flex-col pt-14 pb-16 md:pb-0 md:pl-60 relative">
+    <div className="min-h-screen bg-bg text-text-primary font-sans flex flex-col pt-24 pb-16 md:pb-0 relative">
       <AnimatedBackground conditionCode={weather?.current?.conditionsCode || "sunny"} />
 
       {/* Chrome Shell */}
       <TopBar />
-      <Sidebar />
 
       {/* Main Console Content */}
       <main className="flex-1 p-4 md:p-6 max-w-6xl w-full mx-auto space-y-6">
@@ -543,7 +525,7 @@ export default function DashboardConsole() {
         )}
 
         {/* Dashboard Stat Cards row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <StatCard
             label="Temperature"
             icon={Thermometer}
@@ -562,69 +544,12 @@ export default function DashboardConsole() {
             value={weather?.current ? `${weather.current.humidity}%` : "--"}
             caption="Moisture level in the air"
           />
-          <StatCard
-            label="Usage limits"
-            icon={Package}
-            value={usage ? `${usage.used} / ${usage.limit}` : "--"}
-            caption={usage ? `${usage.plan.toUpperCase()} Plan` : "Remaining lookups this month"}
-          />
         </div>
 
         {/* Active Route Section Panel */}
         <div className="mt-6">{renderPanel()}</div>
 
-        {/* Developer Telemetry Card */}
-        <div className="bg-surface-raised border border-border/85 rounded-xl p-5 font-mono text-[10px] text-text-muted mt-8">
-          <div className="flex items-center justify-between pb-2 border-b border-border/40 mb-3">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-text-primary uppercase tracking-wider">Developer Diagnostic Telemetry</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            </div>
-            <span className="bg-accent/10 text-accent px-1.5 py-0.5 rounded text-[8px] font-bold uppercase">
-              Plan Status: {apiPlan}
-            </span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div>
-              <span className="block text-text-muted uppercase">Requests Limit:</span>
-              <span className="text-text-primary font-bold">{rateLimit ? rateLimit.limit : "1000"}</span>
-            </div>
-            <div>
-              <span className="block text-text-muted uppercase">Requests Remaining:</span>
-              <span className={`font-bold ${rateLimit && rateLimit.remaining < 100 ? "text-red-400 animate-pulse" : "text-text-primary"}`}>
-                {rateLimit ? rateLimit.remaining : "984"}
-              </span>
-            </div>
-            <div>
-              <span className="block text-text-muted uppercase">AI Requests Remaining:</span>
-              <span className="text-text-primary font-bold">
-                {rateLimit ? Math.max(0, Math.floor(rateLimit.remaining / 3)) : "328"}
-              </span>
-            </div>
-            <div>
-              <span className="block text-text-muted uppercase">Reset Date:</span>
-              <span className="text-text-primary font-bold truncate block">
-                {rateLimit ? new Date(rateLimit.reset * 1000).toLocaleString() : "Next billing cycle"}
-              </span>
-            </div>
-            <div>
-              <span className="block text-text-muted uppercase">Active Endpoint:</span>
-              <span className="text-accent font-bold">/v1/weather</span>
-            </div>
-            <div>
-              <span className="block text-text-muted uppercase">Response Latency:</span>
-              <span className="text-text-primary font-bold">{weather?._meta?.latency ? `${weather._meta.latency}ms` : "48ms"}</span>
-            </div>
-            <div>
-              <span className="block text-text-muted uppercase">Cache Node Status:</span>
-              <span className="text-text-primary font-bold uppercase">{weather?._meta?.cache || "HIT"}</span>
-            </div>
-            <div>
-              <span className="block text-text-muted uppercase">Target Host:</span>
-              <span className="text-text-primary font-bold truncate block">api.weather-ai.co</span>
-            </div>
-          </div>
-        </div>
+
       </main>
 
       {/* Modals & Portal Overlays */}
@@ -638,6 +563,7 @@ export default function DashboardConsole() {
         onClose={() => setWelcomeOpen(false)}
         onRequestLocation={requestLocationAndFetch}
       />
+      <ProUpgradeModal />
       <Toast />
     </div>
   );

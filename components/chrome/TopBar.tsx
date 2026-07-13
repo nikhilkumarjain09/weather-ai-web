@@ -1,73 +1,207 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { Bell, ChevronDown, Sparkles } from "lucide-react";
+import { Bell, ChevronDown, Menu, X, LayoutDashboard, TrendingUp, Layers, MapPin, BellRing } from "lucide-react";
 import NotificationDropdown from "./NotificationDropdown";
 import ProfileMenu from "./ProfileMenu";
+import SearchBar from "../controls/SearchBar";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function TopBar() {
-  const { userName, notifications } = useAppStore();
+  const { userName, notifications, activeView, setActiveView, apiPlan } = useAppStore();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const drawerRef = useRef<HTMLDivElement>(null);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
   const initial = userName ? userName.trim().charAt(0).toUpperCase() : "D";
 
+  // Navigation link configurations
+  const navigation = [
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "trends", label: "Trends", icon: TrendingUp },
+    { id: "comparison", label: "Comparison", icon: Layers },
+    { id: "locations", label: "Saved Locations", icon: MapPin },
+    { id: "alerts", label: "Alerts & Webhooks", icon: BellRing, proGated: true },
+  ];
+
+  // Close drawer on Escape key or outside click
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setIsMenuOpen(false);
+    }
+    function handleClickOutside(e: MouseEvent) {
+      if (drawerRef.current && !drawerRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    }
+    if (isMenuOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
+  const handleNavClick = (id: string) => {
+    setActiveView(id);
+    setIsMenuOpen(false);
+  };
+
   return (
-    <header className="fixed top-0 left-0 right-0 h-14 bg-slate-950/60 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 md:px-6 z-40 font-sans">
-      {/* Brand logo / tagline */}
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-accent via-indigo-600 to-purple-600 flex items-center justify-center font-display font-black text-white text-sm shadow-lg shadow-accent/25 hover:scale-105 transition-transform duration-300">
-          A
-        </div>
-        <div className="flex flex-col">
-          <span className="font-display font-bold text-sm tracking-tight text-text-primary leading-none">Aeris</span>
-          <span className="text-[8px] text-text-muted font-display font-bold uppercase tracking-widest leading-none mt-1 flex items-center gap-0.5">
-            <Sparkles size={8} className="text-accent" /> WeatherAI Native
-          </span>
-        </div>
-      </div>
-
-      {/* Action controls */}
-      <div className="flex items-center gap-4">
-        {/* Notification Bell */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              setIsNotifOpen(!isNotifOpen);
-              setIsProfileOpen(false);
-            }}
-            className="p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-text-muted hover:text-text-primary transition-all relative hover:scale-105"
-          >
-            <Bell size={16} />
-            {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-accent border border-slate-950 animate-pulse" />
-            )}
-          </button>
-          <NotificationDropdown isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
-        </div>
-
-        {/* User Profile */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              setIsProfileOpen(!isProfileOpen);
-              setIsNotifOpen(false);
-            }}
-            className="flex items-center gap-2 p-1 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group text-left hover:scale-[1.02]"
-          >
-            <div className="w-6 h-6 rounded-lg bg-accent/15 border border-accent/20 flex items-center justify-center text-[10px] font-bold text-accent">
-              {initial}
-            </div>
-            <span className="text-xs font-semibold text-text-muted group-hover:text-text-primary hidden sm:inline max-w-[120px] truncate">
-              {userName || "Developer"}
+    <>
+      <header className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-5xl h-16 bg-slate-900/80 dark:bg-slate-950/80 backdrop-blur-xl border border-slate-200/20 dark:border-white/10 rounded-2xl flex items-center justify-between px-4 md:px-6 z-40 shadow-2xl transition-all duration-300">
+        
+        {/* Brand logo */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-accent via-indigo-600 to-purple-600 flex items-center justify-center font-display font-black text-white text-xs shadow-lg shadow-accent/25 hover:scale-105 transition-transform duration-300">
+            A
+          </div>
+          <div className="flex flex-col hidden sm:flex">
+            <span className="font-display font-bold text-xs tracking-tight text-white leading-none">Aeris</span>
+            <span className="text-[7px] text-text-muted font-display font-bold uppercase tracking-widest leading-none mt-1">
+              WeatherAI
             </span>
-            <ChevronDown size={12} className="text-text-muted group-hover:text-text-primary transition-transform duration-200" />
-          </button>
-          <ProfileMenu isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+          </div>
         </div>
-      </div>
-    </header>
+
+        {/* Embedded Center Search Bar */}
+        <div className="flex-1 max-w-sm mx-4 shrink-0">
+          <SearchBar />
+        </div>
+
+        {/* Action Controls */}
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
+          {/* Notification Bell */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setIsNotifOpen(!isNotifOpen);
+                setIsProfileOpen(false);
+              }}
+              className="p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-text-muted hover:text-text-primary transition-all relative hover:scale-105"
+            >
+              <Bell size={15} />
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-accent border border-slate-950 animate-pulse" />
+              )}
+            </button>
+            <NotificationDropdown isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
+          </div>
+
+          {/* User Profile */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setIsProfileOpen(!isProfileOpen);
+                setIsNotifOpen(false);
+              }}
+              className="flex items-center gap-2 p-1 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group text-left hover:scale-[1.02]"
+            >
+              <div className="w-6 h-6 rounded-lg bg-accent/15 border border-accent/20 flex items-center justify-center text-[9px] font-bold text-accent">
+                {initial}
+              </div>
+              <ChevronDown size={11} className="text-text-muted group-hover:text-text-primary transition-transform duration-200" />
+            </button>
+            <ProfileMenu isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+          </div>
+
+          {/* Top Menu Trigger (Sidebar Replacement) */}
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="p-2 rounded-xl bg-accent text-bg hover:bg-accent/90 transition-all hover:scale-105 flex items-center justify-center shadow-lg shadow-accent/15"
+          >
+            <Menu size={15} />
+          </button>
+        </div>
+      </header>
+
+      {/* Slide-in Navigation Drawer Menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            {/* Backdrop Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black z-40 backdrop-blur-sm"
+            />
+
+            {/* Slideout Panel */}
+            <motion.div
+              ref={drawerRef}
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 bottom-0 w-72 bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-2xl border-l border-white/5 p-6 z-50 flex flex-col justify-between shadow-2xl font-sans"
+            >
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="flex items-center justify-between pb-4 border-b border-white/5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-accent flex items-center justify-center font-display font-bold text-bg text-[10px]">
+                      A
+                    </div>
+                    <span className="font-display font-bold text-sm text-white">Menu Navigation</span>
+                  </div>
+                  <button
+                    onClick={() => setIsMenuOpen(false)}
+                    className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-text-muted hover:text-white transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+
+                {/* Nav Items Link List */}
+                <div className="flex flex-col gap-2">
+                  {navigation.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeView === item.id;
+                    const isLocked = item.proGated && apiPlan === "free";
+
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => handleNavClick(item.id)}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs transition-all border ${
+                          isActive
+                            ? "bg-accent/15 border-accent/20 text-accent font-bold"
+                            : "bg-transparent border-transparent text-text-muted hover:text-text-primary hover:bg-white/5"
+                        }`}
+                      >
+                        <Icon size={16} />
+                        <span className="flex-1 text-left font-medium">{item.label}</span>
+                        {isLocked && (
+                          <span className="bg-amber-500/10 text-amber-500 border border-amber-500/25 px-1 rounded text-[8px] font-bold uppercase">
+                            Pro
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Bottom Brand footer */}
+              <div className="text-center space-y-1">
+                <span className="text-[9px] text-text-muted font-display font-bold uppercase tracking-wider block">
+                  Aeris Weather Platform
+                </span>
+                <span className="text-[8px] text-text-muted/60 block leading-snug">
+                  Designed by AVITA. All systems functional.
+                </span>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
