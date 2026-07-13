@@ -1,4 +1,4 @@
-import { parseWeatherError } from "./weather.errors";
+import { parseWeatherError } from "./errors";
 
 interface FetchOptions extends RequestInit {
   timeout?: number;
@@ -13,7 +13,6 @@ export async function requestWeatherClient<T>(
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
 
-  // Construct search query params
   const url = new URL(`/api${path}`, window.location.origin);
   if (params) {
     Object.entries(params).forEach(([key, val]) => {
@@ -40,13 +39,11 @@ export async function requestWeatherClient<T>(
     const res = await fetch(url.toString(), fetchOptions);
     clearTimeout(id);
 
-    // Read headers for dev telemetry
-    if (res.headers.has("X-RateLimit-Limit")) {
-      const limit = res.headers.get("X-RateLimit-Limit");
-      const remaining = res.headers.get("X-RateLimit-Remaining");
-      const reset = res.headers.get("X-RateLimit-Reset");
+    if (res.headers.has("X-RateLimit-Limit") || res.headers.has("x-ratelimit-limit")) {
+      const limit = res.headers.get("X-RateLimit-Limit") || res.headers.get("x-ratelimit-limit");
+      const remaining = res.headers.get("X-RateLimit-Remaining") || res.headers.get("x-ratelimit-remaining");
+      const reset = res.headers.get("X-RateLimit-Reset") || res.headers.get("x-ratelimit-reset");
       
-      // Dispatch an event to update rate limit indicators in the UI
       if (typeof window !== "undefined") {
         window.dispatchEvent(
           new CustomEvent("aeris-rate-limit-updated", {

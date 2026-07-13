@@ -1,4 +1,4 @@
-import { WeatherApiError } from "./weather.types";
+import { WeatherApiError } from "./types";
 
 export class WeatherError extends Error {
   public code: string;

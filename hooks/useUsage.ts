@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { weatherQueries } from "@/services/weather/weather.query";
+import { weatherQueries } from "@/services/weather/queries";
 
 export function useUsage() {
   return useQuery(weatherQueries.usage());

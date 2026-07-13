@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { weatherQueries } from "@/services/weather/weather.query";
+import { weatherQueries } from "@/services/weather/queries";
 import { usePreferencesStore } from "@/store/preferencesStore";
-import { WeatherBaseRequest } from "@/services/weather/weather.types";
+import { WeatherBaseRequest } from "@/services/weather/types";
 
 export function useForecast14(params: Partial<WeatherBaseRequest>) {
   const { unit, language } = usePreferencesStore();

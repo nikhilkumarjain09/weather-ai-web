@@ -1,4 +1,4 @@
-import { WeatherResponse } from "./weather.types";
+import { WeatherResponse } from "./types";
 
 const CACHE_KEYS = {
   LAST_SUCCESSFUL_RESPONSE: "aeris-last-successful-weather",

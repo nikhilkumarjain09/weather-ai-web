@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
-import { weatherService } from "./weather.service";
-import { QUERY_KEYS, CACHE_DURATIONS } from "./weather.constants";
-import { WeatherRequest, WeatherBaseRequest } from "./weather.types";
+import { weatherService } from "./service";
+import { QUERY_KEYS, CACHE_DURATIONS } from "./constants";
+import { WeatherRequest, WeatherBaseRequest } from "./types";
 
 export const weatherQueries = {
   weather: (params: WeatherRequest) =>

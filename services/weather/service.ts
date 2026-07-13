@@ -1,5 +1,5 @@
-import { requestWeatherClient } from "./weather.api";
-import { API_ENDPOINTS } from "./weather.constants";
+import { requestWeatherClient } from "./client";
+import { API_ENDPOINTS } from "./constants";
 import {
   WeatherResponse,
   CurrentResponse,
@@ -13,7 +13,7 @@ import {
   UsageResponse,
   WeatherRequest,
   WeatherBaseRequest,
-} from "./weather.types";
+} from "./types";
 
 export const weatherService = {
   getWeather: (params: WeatherRequest) =>
