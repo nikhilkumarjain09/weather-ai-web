@@ -2,14 +2,9 @@
 
 import React from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { CurrentWeather } from "@/lib/types";
+import { CurrentWeatherEntity } from "@/services/weather/types";
+import AnimatedWeatherIcon from "@/components/shared/AnimatedWeatherIcon";
 import {
-  Sun,
-  CloudSun,
-  Cloud,
-  CloudRain,
-  CloudSnow,
-  CloudLightning,
   Wind,
   Droplets,
   Thermometer,
@@ -18,14 +13,16 @@ import {
   ArrowDown,
   RefreshCw,
   Moon,
+  Sun,
   Sunrise,
   Sunset,
   ShieldCheck,
   Zap,
+  CloudSun,
 } from "lucide-react";
 
 interface CurrentConditionsProps {
-  data: CurrentWeather;
+  data: CurrentWeatherEntity;
   unit: "C" | "F";
   onRefresh: () => void;
   isRefreshing: boolean;
@@ -39,17 +36,6 @@ export default function CurrentConditions({
 }: CurrentConditionsProps) {
   const { userName } = useAppStore();
 
-  const iconMap: Record<string, React.ComponentType<any>> = {
-    sunny: Sun,
-    cloudy: CloudSun,
-    rainy: CloudRain,
-    windy: Wind,
-    snowy: CloudSnow,
-    stormy: CloudLightning,
-  };
-
-  const IconComponent = iconMap[data.conditionsCode] || Cloud;
-
   const convertTemp = (c: number) => {
     if (unit === "F") {
       return Math.round((c * 9) / 5 + 32);
@@ -60,17 +46,16 @@ export default function CurrentConditions({
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) {
-      return { text: "Good morning", Icon: Sun };
+      return { text: "Good Morning", Icon: Sun };
     } else if (hour >= 12 && hour < 18) {
-      return { text: "Good afternoon", Icon: Sun };
+      return { text: "Good Afternoon", Icon: Sun };
     } else {
-      return { text: "Good evening", Icon: Moon };
+      return { text: "Good Evening", Icon: Moon };
     }
   };
 
-  const { text: greetingText, Icon: GreetingIcon } = getGreeting();
+  const { text: greetingText } = getGreeting();
 
-  // Dynamic calculations for premium metadata (Sunrise/Sunset, Moon Phase, Cloud Cover, AQI)
   const getSunTimes = (latitude: number) => {
     const dayOfYear = Math.floor(
       (Date.now() - new Date(new Date().getFullYear(), 0, 1).getTime()) / 86400000
@@ -121,8 +106,8 @@ export default function CurrentConditions({
     return 45;
   };
 
-  const getAqiDetails = (aqi?: number) => {
-    const val = aqi || 38;
+  const getAqiDetails = (aqiValue?: number) => {
+    const val = aqiValue || 38;
     if (val <= 50) return { val, label: "Good", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" };
     if (val <= 100) return { val, label: "Moderate", color: "text-amber-400 bg-amber-500/10 border-amber-500/20" };
     return { val, label: "Unhealthy", color: "text-red-400 bg-red-500/10 border-red-500/20" };
@@ -137,9 +122,9 @@ export default function CurrentConditions({
     { label: "Feels Like", val: `${convertTemp(data.feelsLike)}°${unit}`, icon: Thermometer },
     { label: "Humidity", val: `${data.humidity}%`, icon: Droplets },
     { label: "Wind Speed", val: `${data.windSpeed} km/h`, icon: Wind },
-    { label: "Wind Dir", val: data.windDirection, icon: Compass },
+    { label: "Wind Direction", val: data.windDirection, icon: Compass },
     { label: "Visibility", val: `${data.visibility} km`, icon: Eye },
-    { label: "Pressure", val: `${data.pressure} hPa`, icon: ArrowDown },
+    { label: "Atmospheric Pressure", val: `${data.pressure} hPa`, icon: ArrowDown },
     { label: "UV Index", val: `${data.uvIndex} Low`, icon: Zap },
     { label: "Cloud Cover", val: `${cloudCover}%`, icon: CloudSun },
     { label: "Sunrise", val: sunTimes.sunrise, icon: Sunrise },
@@ -148,69 +133,72 @@ export default function CurrentConditions({
   ];
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-5 md:p-6 font-sans">
-      {/* Header controls section */}
-      <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded bg-surface-raised border border-border text-accent shrink-0">
-            <GreetingIcon size={18} />
-          </div>
-          <div>
-            <h2 className="font-display text-sm md:text-base font-bold text-text-primary">
-              {greetingText}
-              {userName ? `, ${userName}` : ""}
-            </h2>
-            <span className="text-xs text-text-muted font-medium block">{data.locationName}</span>
-          </div>
+    <div className="glass-panel p-6 md:p-8 space-y-8 relative overflow-hidden bg-slate-950/40 border-white/5 shadow-2xl">
+      {/* Dynamic top ambient glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-gradient-to-b from-accent/10 to-transparent blur-2xl pointer-events-none" />
+
+      {/* Header greeting & refresh */}
+      <div className="flex items-center justify-between pb-6 border-b border-white/5 relative z-10">
+        <div className="space-y-1">
+          <span className="text-[10px] font-bold text-accent uppercase tracking-widest block font-display">
+            Active Station Analytics
+          </span>
+          <h2 className="font-display text-xl font-extrabold text-text-primary tracking-tight">
+            {greetingText}, <span className="text-accent">{userName || "Explorer"}</span> 👋
+          </h2>
+          <span className="text-xs text-text-muted font-medium block mt-0.5">
+            Focus: {data.locationName}
+          </span>
         </div>
         <button
           onClick={onRefresh}
           disabled={isRefreshing}
-          className="p-2 rounded bg-surface border border-border hover:bg-surface-raised transition-colors text-text-muted hover:text-text-primary disabled:opacity-50 shrink-0"
+          className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-text-muted hover:text-text-primary disabled:opacity-50 hover:scale-105"
         >
-          <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
+          <RefreshCw size={15} className={isRefreshing ? "animate-spin" : ""} />
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Large Condition summary widget */}
-        <div className="flex flex-col gap-4 bg-surface-raised/40 border border-border/80 rounded-xl p-5 items-center text-center">
-          <div className="w-16 h-16 rounded-xl bg-accent-tint/40 border border-accent/20 flex items-center justify-center text-accent">
-            <IconComponent size={36} />
-          </div>
-          <div>
-            <span className="font-mono text-4xl md:text-5xl font-extrabold text-text-primary tracking-tighter block">
-              {convertTemp(data.temp)}°{unit}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+        {/* Massive Apple Weather hero temp widget */}
+        <div className="lg:col-span-5 flex flex-col items-center text-center p-6 bg-white/5 border border-white/10 rounded-2xl relative overflow-hidden group">
+          {/* Subtle background animated sun rays */}
+          <div className="absolute inset-0 bg-gradient-to-b from-accent/5 to-transparent pointer-events-none" />
+          
+          <AnimatedWeatherIcon code={data.conditionsCode} size={64} className="mb-4 text-accent drop-shadow-[0_0_15px_rgba(99,102,241,0.2)]" />
+          
+          <div className="space-y-1">
+            <span className="font-display text-6xl md:text-7xl font-extrabold text-text-primary tracking-tighter block leading-none select-none">
+              {convertTemp(data.temp)}°
             </span>
-            <span className="block text-sm font-bold text-text-primary mt-1">
+            <span className="block text-sm font-extrabold text-text-primary tracking-tight mt-1 font-display">
               {data.conditionsText}
             </span>
           </div>
 
-          {/* AQI Pill */}
-          <div className={`mt-2 flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider ${aqi.color}`}>
+          <div className={`mt-5 flex items-center gap-1.5 px-3 py-1 rounded-full border text-[9px] font-bold uppercase tracking-widest ${aqi.color}`}>
             <ShieldCheck size={12} />
-            <span>Air Quality: {aqi.val} {aqi.label}</span>
+            <span>AQI: {aqi.val} • {aqi.label}</span>
           </div>
         </div>
 
         {/* Detailed Stats Grid Layout */}
-        <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-4">
           {stats.map((item, idx) => {
             const StatIcon = item.icon;
             return (
               <div
                 key={idx}
-                className="flex items-center gap-2.5 p-3 rounded-lg bg-surface-raised/35 border border-border/60 hover:border-accent/25 transition-all"
+                className="flex items-center gap-3 p-3.5 rounded-xl bg-white/5 border border-white/5 hover:border-accent/30 transition-all duration-300 hover:scale-[1.02] shadow-sm"
               >
-                <div className="p-1.5 rounded bg-surface border border-border text-text-muted shrink-0">
-                  <StatIcon size={14} />
+                <div className="p-2 rounded-lg bg-white/5 border border-white/10 text-text-muted shrink-0">
+                  <StatIcon size={14} className="text-accent" />
                 </div>
-                <div>
-                  <span className="block text-[9px] uppercase font-bold text-text-muted">
+                <div className="space-y-0.5">
+                  <span className="block text-[9px] uppercase font-bold text-text-muted tracking-wider">
                     {item.label}
                   </span>
-                  <span className="font-mono text-xs font-bold text-text-primary block mt-0.5">
+                  <span className="font-display text-xs font-bold text-text-primary block leading-none">
                     {item.val}
                   </span>
                 </div>

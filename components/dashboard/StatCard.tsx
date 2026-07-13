@@ -10,22 +10,24 @@ interface StatCardProps {
 
 export default function StatCard({ label, icon: Icon, value, caption }: StatCardProps) {
   return (
-    <div className="bg-surface border border-border rounded-[10px] p-4 flex flex-col font-sans relative overflow-hidden transition-all hover:bg-surface-raised/40">
-      <div className="flex items-start justify-between">
-        <span className="text-[10px] font-bold text-text-muted tracking-wider uppercase">
+    <div className="glass-panel p-5 flex flex-col justify-between font-sans relative overflow-hidden group">
+      {/* Absolute faint accent background glow */}
+      <div className="absolute -top-12 -right-12 w-24 h-24 bg-accent/5 rounded-full filter blur-xl group-hover:bg-accent/10 transition-all duration-300" />
+      
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-bold text-text-muted tracking-widest uppercase font-display">
           {label}
         </span>
-        <div className="w-7 h-7 rounded-full bg-surface-raised border border-border flex items-center justify-center text-text-muted">
-          <Icon size={14} />
+        <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-accent group-hover:scale-110 transition-transform duration-300">
+          <Icon size={15} />
         </div>
       </div>
-      <div className="mt-3">
-        <span className="font-mono text-xl md:text-2xl font-bold tracking-tight text-text-primary">
+      
+      <div className="mt-5 space-y-1">
+        <span className="font-display text-2xl md:text-3xl font-extrabold tracking-tight text-text-primary block">
           {value}
         </span>
-      </div>
-      <div className="mt-1">
-        <span className="text-[11px] text-text-muted font-medium">
+        <span className="text-[10px] text-text-muted font-medium block leading-snug">
           {caption}
         </span>
       </div>

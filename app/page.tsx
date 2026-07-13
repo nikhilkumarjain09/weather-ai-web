@@ -509,16 +509,16 @@ export default function DashboardConsole() {
       {/* Main Console Content */}
       <main className="flex-1 p-4 md:p-6 max-w-6xl w-full mx-auto space-y-6">
         {/* Console Greeting Banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded bg-surface border border-border shrink-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 pb-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-white/5 border border-white/10 text-accent shrink-0 shadow-lg shadow-accent/5">
               {greeting.icon}
             </div>
             <div>
-              <h1 className="font-display text-lg md:text-xl font-bold text-text-primary">
-                {greeting.text}, <span className="text-accent">{userName || "Developer"}</span>
+              <h1 className="font-display text-2xl md:text-3xl font-extrabold text-text-primary tracking-tight">
+                {greeting.text}, <span className="text-accent">{userName || "Explorer"}</span> 👋
               </h1>
-              <p className="text-xs text-text-muted font-medium mt-0.5">{dateString}</p>
+              <p className="text-xs text-text-muted font-medium mt-0.5 tracking-wide uppercase">{dateString}</p>
             </div>
           </div>
 

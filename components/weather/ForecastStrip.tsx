@@ -4,13 +4,8 @@ import React, { useState, useEffect } from "react";
 import { ForecastDayEntity } from "@/services/weather/types";
 import { weatherService } from "@/services/weather/service";
 import { useAppStore } from "@/store/useAppStore";
+import AnimatedWeatherIcon from "@/components/shared/AnimatedWeatherIcon";
 import {
-  Sun,
-  CloudSun,
-  Cloud,
-  CloudRain,
-  CloudSnow,
-  CloudLightning,
   Droplet,
   ChevronDown,
   ChevronUp,
@@ -37,15 +32,6 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
   const [forecastMode, setForecastMode] = useState<"7" | "14">("7");
   const [proForecast, setProForecast] = useState<ForecastDayEntity[]>([]);
   const [loadingPro, setLoadingPro] = useState(false);
-
-  const iconMap: Record<string, React.ComponentType<any>> = {
-    sunny: Sun,
-    cloudy: CloudSun,
-    rainy: CloudRain,
-    windy: Sun,
-    snowy: CloudSnow,
-    stormy: CloudLightning,
-  };
 
   const convertTemp = (c: number) => {
     if (unit === "F") {
@@ -83,7 +69,7 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
     }
   }, [forecastMode, apiPlan, lat, lon, showToast]);
 
-  const activeDays = forecastMode === "7" || apiPlan === "free" ? days : proForecast;
+  const activeDays = (forecastMode === "7" || apiPlan === "free" ? days : proForecast) || [];
 
   // Sparkline coordinates calculations
   const renderSparkline = () => {
@@ -96,8 +82,7 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
 
     const points = activeDays.map((day, i) => {
       const x = 50 + i * (600 / (activeDays.length - 1 || 1));
-      const avg = (day.minTemp + day.maxTemp) / 2;
-      const ratio = (avg - minTemp) / range;
+      const ratio = (day.minTemp + day.maxTemp - 2 * minTemp) / (2 * range);
       const y = 50 - ratio * 40;
       return { x, y };
     });
@@ -110,22 +95,22 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
           <path
             d={linePath}
             fill="none"
-            stroke="var(--accent)"
-            strokeWidth="2"
+            stroke="var(--color-accent)"
+            strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="opacity-70"
+            className="opacity-60"
           />
           {points.map((p, i) => (
             <circle
               key={i}
               cx={p.x}
               cy={p.y}
-              r="3"
+              r="3.5"
               fill="var(--bg)"
-              stroke="var(--accent)"
+              stroke="var(--color-accent)"
               strokeWidth="2"
-              className="opacity-90"
+              className="opacity-95"
             />
           ))}
         </svg>
@@ -138,22 +123,29 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
   };
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-5 md:p-6 font-sans relative">
+    <div className="glass-panel p-6 md:p-8 relative overflow-hidden bg-slate-950/40 border-white/5 shadow-2xl">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="font-display text-sm md:text-base font-bold text-text-primary">Forecast Focus</h3>
-        <div className="flex bg-surface-raised border border-border/80 rounded-lg p-0.5">
+        <div className="space-y-0.5">
+          <span className="text-[10px] font-bold text-accent uppercase tracking-widest block font-display">
+            Chronology Forecast
+          </span>
+          <h3 className="font-display text-base font-bold text-text-primary tracking-tight">
+            Extended Forecast
+          </h3>
+        </div>
+        <div className="flex bg-white/5 border border-white/10 rounded-xl p-0.5">
           <button
             onClick={() => setForecastMode("7")}
-            className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${
-              forecastMode === "7" ? "bg-accent text-bg" : "text-text-muted hover:text-text-primary"
+            className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${
+              forecastMode === "7" ? "bg-accent text-bg shadow-sm" : "text-text-muted hover:text-text-primary"
             }`}
           >
             7-Day
           </button>
           <button
             onClick={() => setForecastMode("14")}
-            className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${
-              forecastMode === "14" ? "bg-accent text-bg" : "text-text-muted hover:text-text-primary"
+            className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${
+              forecastMode === "14" ? "bg-accent text-bg shadow-sm" : "text-text-muted hover:text-text-primary"
             }`}
           >
             14-Day
@@ -170,37 +162,36 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
           <>
             {forecastMode === "7" && renderSparkline()}
 
-            <div className={`grid gap-3 ${forecastMode === "7" ? "grid-cols-2 sm:grid-cols-4 lg:grid-cols-7" : "grid-cols-2 sm:grid-cols-4 lg:grid-cols-7"}`}>
+            <div className="grid gap-3 grid-cols-2 sm:grid-cols-4 lg:grid-cols-7">
               {activeDays.map((day, idx) => {
-                const IconComponent = iconMap[day.conditionsCode] || Cloud;
                 const isExpanded = expandedIndex === idx;
 
                 return (
                   <div
                     key={day.date}
                     onClick={() => handleToggleExpand(idx)}
-                    className={`bg-surface-raised border rounded-lg p-3 flex flex-col items-center text-center hover:border-accent/50 transition-all z-20 cursor-pointer ${
-                      isExpanded ? "border-accent ring-1 ring-accent/20 bg-accent-tint/10" : "border-border"
+                    className={`bg-white/5 border rounded-2xl p-4 flex flex-col items-center text-center hover:border-accent/40 transition-all duration-300 z-20 cursor-pointer hover:scale-[1.03] ${
+                      isExpanded ? "border-accent ring-1 ring-accent/25 bg-accent-tint/10" : "border-white/5"
                     }`}
                   >
-                    <span className="text-xs font-bold text-text-primary">{getDayName(day.date)}</span>
-                    <span className="text-[10px] text-text-muted mt-0.5">{getFormattedDate(day.date)}</span>
+                    <span className="text-xs font-bold text-text-primary tracking-tight font-display">{getDayName(day.date)}</span>
+                    <span className="text-[9px] text-text-muted mt-0.5 font-medium">{getFormattedDate(day.date)}</span>
 
-                    <div className="my-3 text-accent bg-surface border border-border p-2 rounded-full">
-                      <IconComponent size={16} />
+                    <div className="my-4 drop-shadow-[0_0_10px_rgba(99,102,241,0.2)]">
+                      <AnimatedWeatherIcon code={day.conditionsCode} size={28} />
                     </div>
 
-                    <div className="flex items-center gap-1.5 justify-center mt-1">
-                      <span className="font-mono text-xs font-bold text-text-primary">
+                    <div className="flex items-center gap-2 justify-center mt-1">
+                      <span className="font-display text-xs font-bold text-text-primary">
                         {convertTemp(day.maxTemp)}°
                       </span>
-                      <span className="font-mono text-[10px] text-text-muted">
+                      <span className="font-display text-[10px] text-text-muted">
                         {convertTemp(day.minTemp)}°
                       </span>
                     </div>
 
                     {day.precipChance > 0 ? (
-                      <div className="flex items-center gap-0.5 mt-2 text-[10px] font-bold text-accent">
+                      <div className="flex items-center gap-0.5 mt-2 text-[9px] font-bold text-accent tracking-wide uppercase">
                         <Droplet size={10} />
                         <span>{day.precipChance}%</span>
                       </div>
@@ -209,7 +200,7 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
                     )}
 
                     <div className="text-text-muted hover:text-text-primary mt-2">
-                      {isExpanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+                      {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                     </div>
                   </div>
                 );
@@ -217,14 +208,14 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
 
               {/* Free Plan Lock Slots overlay if on Free Plan and Mode is 14 */}
               {forecastMode === "14" && apiPlan === "free" && (
-                <div className="col-span-full border border-dashed border-border rounded-xl p-5 text-center bg-surface-raised/40 flex flex-col items-center justify-center gap-3 relative mt-4">
-                  <div className="w-9 h-9 rounded-full bg-accent/15 flex items-center justify-center text-accent">
+                <div className="col-span-full border border-dashed border-white/10 rounded-2xl p-6 text-center bg-white/5 flex flex-col items-center justify-center gap-3 relative mt-4">
+                  <div className="w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center text-accent">
                     <Lock size={16} />
                   </div>
-                  <div>
+                  <div className="space-y-1">
                     <h4 className="font-display text-xs font-bold text-text-primary">14-Day Forecast Locked</h4>
-                    <p className="text-[10px] text-text-muted max-w-sm mt-0.5">
-                      Premium extended 14-day forecasts require a Pro Plan credentials config. Update your API plan parameters in the Quota settings to unlock.
+                    <p className="text-[10px] text-text-muted max-w-sm">
+                      Premium extended 14-day forecasts require a Pro Plan credentials configuration. Update your active plan settings in Quota panel to unlock.
                     </p>
                   </div>
                 </div>
@@ -242,9 +233,9 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
             animate={animationsEnabled ? { opacity: 1, height: "auto", marginTop: 16 } : {}}
             exit={animationsEnabled ? { opacity: 0, height: 0, marginTop: 0 } : {}}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden bg-surface-raised border border-border rounded-lg p-4 font-sans text-xs"
+            className="overflow-hidden bg-white/5 border border-white/10 rounded-2xl p-4 font-sans text-xs"
           >
-            <div className="flex justify-between items-center pb-2.5 border-b border-border/40 mb-3">
+            <div className="flex justify-between items-center pb-2.5 border-b border-white/5 mb-3">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-text-primary">
                   Weather Details: {getFormattedDate(activeDays[expandedIndex].date)}
@@ -262,35 +253,35 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="flex items-center gap-2">
-                <Wind size={14} className="text-text-muted" />
+              <div className="flex items-center gap-3">
+                <Wind size={15} className="text-accent" />
                 <div>
-                  <span className="block text-[9px] uppercase font-bold text-text-muted">Wind projection</span>
-                  <span className="font-mono text-xs text-text-primary font-bold">14 km/h</span>
+                  <span className="block text-[8px] uppercase font-bold text-text-muted tracking-wider">Wind projection</span>
+                  <span className="font-display text-xs text-text-primary font-bold">14 km/h</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Droplets size={14} className="text-text-muted" />
+              <div className="flex items-center gap-3">
+                <Droplets size={15} className="text-accent" />
                 <div>
-                  <span className="block text-[9px] uppercase font-bold text-text-muted">Estimated Humidity</span>
-                  <span className="font-mono text-xs text-text-primary font-bold">54%</span>
+                  <span className="block text-[8px] uppercase font-bold text-text-muted tracking-wider">Humidity</span>
+                  <span className="font-display text-xs text-text-primary font-bold">54%</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Zap size={14} className="text-text-muted" />
+              <div className="flex items-center gap-3">
+                <Zap size={15} className="text-accent" />
                 <div>
-                  <span className="block text-[9px] uppercase font-bold text-text-muted">UV Exposure</span>
-                  <span className="font-mono text-xs text-text-primary font-bold">Low (2/10)</span>
+                  <span className="block text-[8px] uppercase font-bold text-text-muted tracking-wider">UV Exposure</span>
+                  <span className="font-display text-xs text-text-primary font-bold">Low (2/10)</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Droplet size={14} className="text-text-muted" />
+              <div className="flex items-center gap-3">
+                <Droplet size={15} className="text-accent" />
                 <div>
-                  <span className="block text-[9px] uppercase font-bold text-text-muted">Precip. Risk</span>
-                  <span className="font-mono text-xs text-text-primary font-bold">
+                  <span className="block text-[8px] uppercase font-bold text-text-muted tracking-wider">Precip. Risk</span>
+                  <span className="font-display text-xs text-text-primary font-bold">
                     {activeDays[expandedIndex].precipChance}%
                   </span>
                 </div>
