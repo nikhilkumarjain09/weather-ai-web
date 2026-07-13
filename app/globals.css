@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+:root {
+  /* Default: Dark Theme */
+  --bg: #0A0E16;
+  --sidebar-bg: #0D1220;
+  --surface: #121826;
+  --surface-raised: #1A2233;
+  --border: #212B3D;
+  --text-primary: #F1F5F9;
+  --text-muted: #8B95A7;
+  --accent: #2DD4BF;
+  --accent-tint: rgba(45, 212, 191, 0.12);
+  --warning: #F59E0B;
+  --success: #34D399;
+  --danger: #F87171;
+}
+
+:root.light {
+  /* Light Theme */
+  --bg: #F7F9FC;
+  --sidebar-bg: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-raised: #F1F5F9;
+  --border: #E2E8F0;
+  --text-primary: #0F172A;
+  --text-muted: #64748B;
+  --accent: #0D9488;
+  --accent-tint: rgba(13, 148, 136, 0.08);
+  --warning: #D97706;
+  --success: #059669;
+  --danger: #DC2626;
+}
+
+@theme {
+  --color-bg: var(--bg);
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-border: var(--border);
+  --color-text-primary: var(--text-primary);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-tint: var(--accent-tint);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  margin: 0;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+/* Base custom styles if needed */
+*, ::before, ::after {
+  border-color: var(--border);
+}
