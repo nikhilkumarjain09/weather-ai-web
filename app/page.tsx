@@ -3,24 +3,19 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { WeatherResponse } from "@/lib/types";
-import { addRequestLog, getRequestMetrics } from "@/lib/requestLogStore";
 import { addHistoricalEntry } from "@/lib/historicalStore";
 
 // Chrome & Shared
 import TopBar from "@/components/chrome/TopBar";
 import Sidebar from "@/components/chrome/Sidebar";
-import CommandPalette from "@/components/chrome/CommandPalette";
 import Toast from "@/components/shared/Toast";
 import ErrorBanner from "@/components/shared/ErrorBanner";
 import EmptyState from "@/components/shared/EmptyState";
-import LockedFeatureBadge from "@/components/shared/LockedFeatureBadge";
 
 // Modals
 import SavedLocationsModal from "@/components/modals/SavedLocationsModal";
-import AlertSubscribeModal from "@/components/modals/AlertSubscribeModal";
 import KeyboardShortcutsModal from "@/components/modals/KeyboardShortcutsModal";
 import SettingsModal from "@/components/modals/SettingsModal";
-import NamePromptModal from "@/components/modals/NamePromptModal";
 
 // Dashboard / Weather Panels
 import StatCard from "@/components/dashboard/StatCard";
@@ -34,8 +29,6 @@ import AiSummaryPanel from "@/components/weather/AiSummaryPanel";
 import LocationSearch from "@/components/controls/LocationSearch";
 import UnitToggle from "@/components/controls/UnitToggle";
 import UsagePanel from "@/components/controls/UsagePanel";
-import RequestLogTable from "@/components/power/RequestLogTable";
-import ApiPlayground from "@/components/power/ApiPlayground";
 
 // Icons
 import {
@@ -91,17 +84,6 @@ export default function DashboardConsole() {
     }
   }, [theme]);
 
-  // Load metrics from transaction log
-  const syncMetrics = useCallback(() => {
-    setMetrics(getRequestMetrics());
-  }, []);
-
-  useEffect(() => {
-    syncMetrics();
-    window.addEventListener("aeris-logs-updated", syncMetrics);
-    return () => window.removeEventListener("aeris-logs-updated", syncMetrics);
-  }, [syncMetrics]);
-
   // Main Weather Fetch Logic
   const fetchWeather = useCallback(async () => {
     setLoading(true);
@@ -109,13 +91,11 @@ export default function DashboardConsole() {
     const startTime = Date.now();
     
     let url = "/api/weather";
-    let paramsLabel = "?ip=auto";
 
     if (activeLocation) {
       url = `/api/weather?lat=${activeLocation.lat}&lon=${activeLocation.lon}&name=${encodeURIComponent(
         activeLocation.name
       )}`;
-      paramsLabel = `?lat=${activeLocation.lat.toFixed(3)}&lon=${activeLocation.lon.toFixed(3)}`;
     }
 
     try {
@@ -128,33 +108,26 @@ export default function DashboardConsole() {
 
       const latencyTime = Date.now() - startTime;
 
-      // Log transaction
-      addRequestLog({
-        endpoint: "/api/weather",
-        params: paramsLabel,
-        status: 200,
-        latency: latencyTime,
-        cache: data._meta?.cache || "miss",
+      // Update session metrics locally
+      setMetrics((prev) => {
+        const nextCount = prev.requestsToday + 1;
+        const nextAvg = Math.round((prev.avgLatency * prev.requestsToday + latencyTime) / nextCount);
+        const hitCount = (prev.cacheHitRate * prev.requestsToday) / 100 + (data._meta?.cache === "hit" ? 1 : 0);
+        const nextHitRate = Math.round((hitCount / nextCount) * 100);
+        return {
+          requestsToday: nextCount,
+          avgLatency: nextAvg,
+          cacheHitRate: nextHitRate,
+        };
       });
 
       // Record in historical trend logs
       if (data.current) {
         addHistoricalEntry(data.current.locationName, data.current.temp, data.current.humidity);
-        // Notify charts to update
         window.dispatchEvent(new Event("aeris-data-fetched"));
       }
     } catch (err: any) {
-      const latencyTime = Date.now() - startTime;
       setError(err.message || "Failed to retrieve meteorology data.");
-
-      addRequestLog({
-        endpoint: "/api/weather",
-        params: paramsLabel,
-        status: 500,
-        latency: latencyTime,
-        cache: "miss",
-      });
-
       showToast("Weather fetch failed", "danger");
     } finally {
       setLoading(false);
@@ -298,58 +271,6 @@ export default function DashboardConsole() {
             </div>
           </div>
         );
-      case "alerts":
-        return (
-          <div className="bg-surface border border-border rounded-xl p-5 md:p-6 font-sans">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="font-display text-base font-bold text-text-primary flex items-center gap-2">
-                  Alerting & Webhook Channels
-                  {apiPlan === "free" && <LockedFeatureBadge />}
-                </h3>
-                <p className="text-xs text-text-muted mt-0.5">
-                  Pipe severe meteorological events to custom HTTP endpoints.
-                </p>
-              </div>
-              <button
-                onClick={() => setActiveModal("alert_subscribe")}
-                className="px-3 py-1.5 rounded text-xs font-semibold bg-accent hover:bg-accent/90 text-bg transition-colors flex items-center gap-1"
-              >
-                <Plus size={12} />
-                Configure webhook
-              </button>
-            </div>
-            
-            {apiPlan === "free" ? (
-              <div className="p-8 border border-dashed rounded-xl bg-surface-raised/50 border-border text-center mt-6">
-                <Lock className="text-text-muted opacity-40 mb-3 mx-auto" size={32} />
-                <h3 className="font-display text-sm font-bold text-text-primary mb-1">Gated configuration</h3>
-                <p className="text-xs text-text-muted max-w-sm mx-auto">
-                  Alert webhooks, telemetry callbacks, and SMS notifications require a Pro plan subscription. Toggle your active plan in the Usage & Quota section.
-                </p>
-              </div>
-            ) : (
-              <div className="border border-border rounded-lg bg-surface-raised p-4 text-xs mt-6">
-                <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-2">Registered webhooks</span>
-                <div className="divide-y divide-border">
-                  <div className="py-2.5 flex items-center justify-between">
-                    <div>
-                      <span className="font-mono text-text-primary font-bold">https://api.domain.com/weather-alerts</span>
-                      <span className="block text-[10px] text-text-muted mt-0.5">Events: alert.storm, alert.temp_extreme</span>
-                    </div>
-                    <span className="text-[9px] font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded uppercase">
-                      Active
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      case "logs":
-        return <RequestLogTable />;
-      case "playground":
-        return <ApiPlayground />;
       case "profile":
         return (
           <div className="bg-surface border border-border rounded-xl p-5 md:p-6 font-sans">
@@ -435,11 +356,8 @@ export default function DashboardConsole() {
 
       {/* Modals & Portal Overlays */}
       <SavedLocationsModal />
-      <AlertSubscribeModal />
       <KeyboardShortcutsModal />
       <SettingsModal />
-      <NamePromptModal />
-      <CommandPalette />
       <Toast />
     </div>
   );

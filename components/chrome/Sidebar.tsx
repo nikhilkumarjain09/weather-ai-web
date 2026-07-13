@@ -7,12 +7,8 @@ import {
   TrendingUp,
   Layers,
   MapPin,
-  BellRing,
-  ScrollText,
-  Terminal,
   User,
   Gauge,
-  Lock,
 } from "lucide-react";
 
 interface NavItem {
@@ -46,14 +42,6 @@ export default function Sidebar() {
       ],
     },
     {
-      title: "CONFIGURATION",
-      items: [
-        { id: "alerts", label: "Alerts & Webhooks", icon: BellRing, proGated: true },
-        { id: "logs", label: "Request Log", icon: ScrollText },
-        { id: "playground", label: "API Playground", icon: Terminal },
-      ],
-    },
-    {
       title: "ACCOUNT",
       items: [
         { id: "profile", label: "Profile", icon: User },
@@ -81,7 +69,6 @@ export default function Sidebar() {
               {group.items.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeView === item.id;
-                const isLocked = item.proGated && apiPlan === "free";
 
                 return (
                   <button
@@ -97,9 +84,6 @@ export default function Sidebar() {
                     <Icon size={18} className="shrink-0" />
                     {!sidebarCollapsed && (
                       <span className="truncate flex-1 text-left">{item.label}</span>
-                    )}
-                    {!sidebarCollapsed && isLocked && (
-                      <Lock size={12} className="text-amber-500 shrink-0" />
                     )}
                   </button>
                 );

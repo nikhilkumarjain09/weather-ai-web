@@ -15,7 +15,7 @@ export default function AlertSubscribeModal({ onSubscriptionCreated }: AlertSubs
   const [events, setEvents] = useState<string[]>(["alert.storm"]);
   const [submitting, setSubmitting] = useState(false);
 
-  const isOpen = activeModal === "alert_subscribe";
+  const isOpen = (activeModal as unknown) === "alert_subscribe";
 
   if (!isOpen) return null;
 

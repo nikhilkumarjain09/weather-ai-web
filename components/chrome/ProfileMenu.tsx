@@ -41,7 +41,7 @@ export default function ProfileMenu({ isOpen, onClose }: ProfileMenuProps) {
   const handleSignOut = () => {
     setUserName(null);
     showToast("Signed out successfully", "info");
-    setActiveModal("name_prompt");
+    setActiveModal("settings");
     onClose();
   };
 
