@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePreferencesStore } from "@/store/preferencesStore";
-import { ForecastDay } from "@/lib/types";
+import { ForecastDayEntity } from "@/services/weather/types";
 import {
   AreaChart,
   Area,
@@ -19,7 +19,7 @@ import {
 import { TrendingUp, Percent, Wind, Droplets, Gauge } from "lucide-react";
 
 interface WeatherChartsProps {
-  forecast: ForecastDay[];
+  forecast?: ForecastDayEntity[];
   currentHumidity: number;
   currentWindSpeed: number;
   currentPressure: number;
@@ -46,8 +46,7 @@ export default function WeatherCharts({
   };
 
   // Prepare chart data combining real forecast days and derived parameters
-  const chartData = forecast.map((day, idx) => {
-    // Generate derived daily metrics based on current day details to ensure consistent lines
+  const chartData = (forecast || []).map((day, idx) => {
     const seed = idx * 1.5;
     const derivedHumidity = Math.max(
       15,
@@ -71,28 +70,30 @@ export default function WeatherCharts({
   });
 
   const chartTabs = [
-    { id: "temp", label: "Temperature", icon: TrendingUp, color: "var(--accent)" },
-    { id: "rain", label: "Rain Chance", icon: Percent, color: "#38bdf8" },
-    { id: "humidity", label: "Humidity", icon: Droplets, color: "#34d399" },
-    { id: "wind", label: "Wind Speed", icon: Wind, color: "#fb7185" },
-    { id: "pressure", label: "Pressure", icon: Gauge, color: "#f59e0b" },
+    { id: "temp", label: "Temperature", icon: TrendingUp },
+    { id: "rain", label: "Rain Chance", icon: Percent },
+    { id: "humidity", label: "Humidity", icon: Droplets },
+    { id: "wind", label: "Wind Speed", icon: Wind },
+    { id: "pressure", label: "Pressure", icon: Gauge },
   ] as const;
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-5 md:p-6 font-sans">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h3 className="font-display text-base font-bold text-text-primary flex items-center gap-2">
-            <TrendingUp size={18} className="text-accent" />
-            Weather Analytics
+    <div className="glass-panel p-6 md:p-8 relative overflow-hidden bg-slate-950/40 border-white/5 shadow-2xl space-y-6">
+      {/* Background glow blob */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full filter blur-2xl pointer-events-none" />
+
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="space-y-0.5">
+          <span className="text-[10px] font-bold text-accent uppercase tracking-widest block font-display">
+            Weather analytics
+          </span>
+          <h3 className="font-display text-base font-bold text-text-primary tracking-tight">
+            How weather elements change this week
           </h3>
-          <p className="text-xs text-text-muted mt-0.5">
-            Plotting forecasted cycles and parameters for the upcoming week.
-          </p>
         </div>
 
         {/* Tab Controls Selector */}
-        <div className="flex flex-wrap bg-surface-raised p-0.5 rounded border border-border gap-0.5">
+        <div className="flex flex-wrap bg-white/5 p-0.5 rounded-xl border border-white/10 gap-0.5 self-start lg:self-auto">
           {chartTabs.map((tab) => {
             const TabIcon = tab.icon;
             const isActive = tab.id === chartPreference;
@@ -100,14 +101,14 @@ export default function WeatherCharts({
               <button
                 key={tab.id}
                 onClick={() => setChartPreference(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all duration-300 ${
                   isActive
-                    ? "bg-surface border border-border text-accent shadow-sm"
+                    ? "bg-accent text-bg shadow-sm"
                     : "text-text-muted hover:text-text-primary"
                 }`}
               >
-                <TabIcon size={12} className={isActive ? "text-accent" : "text-text-muted"} />
-                <span className="hidden md:inline">{tab.label}</span>
+                <TabIcon size={12} />
+                <span>{tab.label}</span>
               </button>
             );
           })}
@@ -115,24 +116,25 @@ export default function WeatherCharts({
       </div>
 
       {/* Recharts Container */}
-      <div className="w-full h-64 font-mono text-[9px]">
+      <div className="w-full h-64 font-mono text-[9px] relative z-10">
         <ResponsiveContainer width="100%" height="100%">
           {chartPreference === "temp" ? (
             <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
               <defs>
                 <linearGradient id="tempMaxGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="var(--accent)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" className="opacity-50" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
               <XAxis dataKey="name" stroke="var(--text-muted)" tickLine={false} />
               <YAxis stroke="var(--text-muted)" tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "var(--surface)",
-                  borderColor: "var(--border)",
-                  borderRadius: "8px",
+                  backgroundColor: "rgba(10,15,30,0.85)",
+                  borderColor: "rgba(255,255,255,0.08)",
+                  borderRadius: "12px",
+                  backdropFilter: "blur(12px)",
                   color: "var(--text-primary)",
                 }}
               />
@@ -140,7 +142,7 @@ export default function WeatherCharts({
                 name={`Max Temp (°${unit})`}
                 type="monotone"
                 dataKey="maxTemp"
-                stroke="var(--accent)"
+                stroke="var(--color-accent)"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#tempMaxGradient)"
@@ -156,29 +158,31 @@ export default function WeatherCharts({
             </AreaChart>
           ) : chartPreference === "rain" ? (
             <BarChart data={chartData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" className="opacity-50" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
               <XAxis dataKey="name" stroke="var(--text-muted)" tickLine={false} />
               <YAxis stroke="var(--text-muted)" tickLine={false} domain={[0, 100]} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "var(--surface)",
-                  borderColor: "var(--border)",
-                  borderRadius: "8px",
+                  backgroundColor: "rgba(10,15,30,0.85)",
+                  borderColor: "rgba(255,255,255,0.08)",
+                  borderRadius: "12px",
+                  backdropFilter: "blur(12px)",
                   color: "var(--text-primary)",
                 }}
               />
-              <Bar name="Rain Chance (%)" dataKey="rainChance" fill="#38bdf8" radius={[4, 4, 0, 0]} />
+              <Bar name="Rain Chance (%)" dataKey="rainChance" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
             </BarChart>
           ) : chartPreference === "humidity" ? (
             <LineChart data={chartData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" className="opacity-50" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
               <XAxis dataKey="name" stroke="var(--text-muted)" tickLine={false} />
               <YAxis stroke="var(--text-muted)" tickLine={false} domain={[0, 100]} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "var(--surface)",
-                  borderColor: "var(--border)",
-                  borderRadius: "8px",
+                  backgroundColor: "rgba(10,15,30,0.85)",
+                  borderColor: "rgba(255,255,255,0.08)",
+                  borderRadius: "12px",
+                  backdropFilter: "blur(12px)",
                   color: "var(--text-primary)",
                 }}
               />
@@ -186,21 +190,22 @@ export default function WeatherCharts({
                 name="Humidity (%)"
                 type="monotone"
                 dataKey="humidity"
-                stroke="#34d399"
+                stroke="#10b981"
                 strokeWidth={2.5}
-                dot={{ stroke: "#34d399", strokeWidth: 2, r: 3 }}
+                dot={{ stroke: "#10b981", strokeWidth: 2, r: 3 }}
               />
             </LineChart>
           ) : chartPreference === "wind" ? (
             <LineChart data={chartData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" className="opacity-50" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
               <XAxis dataKey="name" stroke="var(--text-muted)" tickLine={false} />
               <YAxis stroke="var(--text-muted)" tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "var(--surface)",
-                  borderColor: "var(--border)",
-                  borderRadius: "8px",
+                  backgroundColor: "rgba(10,15,30,0.85)",
+                  borderColor: "rgba(255,255,255,0.08)",
+                  borderRadius: "12px",
+                  backdropFilter: "blur(12px)",
                   color: "var(--text-primary)",
                 }}
               />
@@ -208,21 +213,22 @@ export default function WeatherCharts({
                 name="Wind (km/h)"
                 type="monotone"
                 dataKey="wind"
-                stroke="#fb7185"
+                stroke="#f43f5e"
                 strokeWidth={2.5}
-                dot={{ stroke: "#fb7185", strokeWidth: 2, r: 3 }}
+                dot={{ stroke: "#f43f5e", strokeWidth: 2, r: 3 }}
               />
             </LineChart>
           ) : (
             <LineChart data={chartData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" className="opacity-50" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
               <XAxis dataKey="name" stroke="var(--text-muted)" tickLine={false} />
               <YAxis stroke="var(--text-muted)" tickLine={false} domain={["auto", "auto"]} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "var(--surface)",
-                  borderColor: "var(--border)",
-                  borderRadius: "8px",
+                  backgroundColor: "rgba(10,15,30,0.85)",
+                  borderColor: "rgba(255,255,255,0.08)",
+                  borderRadius: "12px",
+                  backdropFilter: "blur(12px)",
                   color: "var(--text-primary)",
                 }}
               />
@@ -230,9 +236,9 @@ export default function WeatherCharts({
                 name="Pressure (hPa)"
                 type="monotone"
                 dataKey="pressure"
-                stroke="#f59e0b"
+                stroke="#eab308"
                 strokeWidth={2.5}
-                dot={{ stroke: "#f59e0b", strokeWidth: 2, r: 3 }}
+                dot={{ stroke: "#eab308", strokeWidth: 2, r: 3 }}
               />
             </LineChart>
           )}
