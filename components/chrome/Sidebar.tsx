@@ -7,8 +7,10 @@ import {
   TrendingUp,
   Layers,
   MapPin,
+  BellRing,
   User,
   Gauge,
+  Lock,
 } from "lucide-react";
 
 interface NavItem {
@@ -42,6 +44,12 @@ export default function Sidebar() {
       ],
     },
     {
+      title: "CONFIGURATION",
+      items: [
+        { id: "alerts", label: "Alerts & Webhooks", icon: BellRing, proGated: true },
+      ],
+    },
+    {
       title: "ACCOUNT",
       items: [
         { id: "profile", label: "Profile", icon: User },
@@ -55,20 +63,21 @@ export default function Sidebar() {
       {/* Desktop & Tablet Sidebar */}
       <aside
         className={`fixed top-14 left-0 bottom-0 bg-sidebar-bg border-r border-border transition-all duration-300 z-30 font-sans hidden md:flex flex-col ${
-          sidebarCollapsed ? "w-16" : "w-60"
+          sidebarCollapsed ? "w-16" : "w-16 lg:w-60"
         }`}
       >
         <div className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-6">
           {navigation.map((group) => (
             <div key={group.title} className="flex flex-col gap-1">
               {!sidebarCollapsed && (
-                <h3 className="text-[10px] font-bold text-text-muted px-3 mb-1.5 tracking-wider font-sans uppercase">
+                <h3 className="text-[10px] font-bold text-text-muted px-3 mb-1.5 tracking-wider font-sans uppercase hidden lg:block">
                   {group.title}
                 </h3>
               )}
               {group.items.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeView === item.id;
+                const isLocked = item.proGated && apiPlan === "free";
 
                 return (
                   <button
@@ -83,7 +92,10 @@ export default function Sidebar() {
                   >
                     <Icon size={18} className="shrink-0" />
                     {!sidebarCollapsed && (
-                      <span className="truncate flex-1 text-left">{item.label}</span>
+                      <span className="truncate flex-1 text-left hidden lg:block">{item.label}</span>
+                    )}
+                    {!sidebarCollapsed && isLocked && (
+                      <Lock size={12} className="text-amber-500 shrink-0 hidden lg:block" />
                     )}
                   </button>
                 );

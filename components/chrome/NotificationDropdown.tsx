@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { X, Check, Trash2, BellRing, Info } from "lucide-react";
+import { Check, Trash2, BellRing, Info } from "lucide-react";
 
 interface NotificationDropdownProps {
   isOpen: boolean;
@@ -35,6 +35,52 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
+
+  // Pull real events on mount
+  useEffect(() => {
+    async function checkRealEvents() {
+      try {
+        const usageRes = await fetch("/api/usage");
+        if (usageRes.ok) {
+          const usage = await usageRes.json();
+          const ratio = usage.used / usage.limit;
+          if (ratio >= 0.8) {
+            const currentNotifs = useAppStore.getState().notifications;
+            const hasQuotaNotif = currentNotifs.some((n) => n.title === "Quota Warning");
+            if (!hasQuotaNotif) {
+              useAppStore.getState().addNotification({
+                title: "Quota Warning",
+                message: `Consumed ${Math.round(ratio * 100)}% of limit quota (${usage.used}/${usage.limit} reqs).`,
+                type: "alert",
+              });
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Failed to query usage metrics:", e);
+      }
+
+      try {
+        const alertsRes = await fetch("/api/alerts");
+        if (alertsRes.ok) {
+          const alertsData = await alertsRes.json();
+          const currentNotifs = useAppStore.getState().notifications;
+          const hasWebhookNotif = currentNotifs.some((n) => n.title === "Webhooks Active");
+          if (!hasWebhookNotif && alertsData.subscriptions && alertsData.subscriptions.length > 0) {
+            useAppStore.getState().addNotification({
+              title: "Webhooks Active",
+              message: `Telemetry webhooks active on endpoint: ${alertsData.subscriptions[0].url}`,
+              type: "info",
+            });
+          }
+        }
+      } catch (e) {
+        // Suppress expected 403 on free tier
+      }
+    }
+
+    checkRealEvents();
+  }, []);
 
   if (!isOpen) return null;
 

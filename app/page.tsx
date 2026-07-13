@@ -11,9 +11,11 @@ import Sidebar from "@/components/chrome/Sidebar";
 import Toast from "@/components/shared/Toast";
 import ErrorBanner from "@/components/shared/ErrorBanner";
 import EmptyState from "@/components/shared/EmptyState";
+import LockedFeatureBadge from "@/components/shared/LockedFeatureBadge";
 
 // Modals
 import SavedLocationsModal from "@/components/modals/SavedLocationsModal";
+import AlertSubscribeModal from "@/components/modals/AlertSubscribeModal";
 import KeyboardShortcutsModal from "@/components/modals/KeyboardShortcutsModal";
 import SettingsModal from "@/components/modals/SettingsModal";
 
@@ -271,6 +273,54 @@ export default function DashboardConsole() {
             </div>
           </div>
         );
+      case "alerts":
+        return (
+          <div className="bg-surface border border-border rounded-xl p-5 md:p-6 font-sans">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-display text-base font-bold text-text-primary flex items-center gap-2">
+                  Alerting & Webhook Channels
+                  {apiPlan === "free" && <Lock size={12} className="text-amber-500" />}
+                </h3>
+                <p className="text-xs text-text-muted mt-0.5">
+                  Pipe severe meteorological events to custom HTTP endpoints.
+                </p>
+              </div>
+              <button
+                onClick={() => setActiveModal("alert_subscribe")}
+                className="px-3 py-1.5 rounded text-xs font-semibold bg-accent hover:bg-accent/90 text-bg transition-colors flex items-center gap-1"
+              >
+                <Plus size={12} />
+                Configure webhook
+              </button>
+            </div>
+            
+            {apiPlan === "free" ? (
+              <div className="p-8 border border-dashed rounded-xl bg-surface-raised/50 border-border text-center mt-6">
+                <Lock className="text-text-muted opacity-40 mb-3 mx-auto" size={32} />
+                <h3 className="font-display text-sm font-bold text-text-primary mb-1">Gated configuration</h3>
+                <p className="text-xs text-text-muted max-w-sm mx-auto">
+                  Alert webhooks, telemetry callbacks, and SMS notifications require a Pro plan subscription. Toggle your active plan in the Usage & Quota section.
+                </p>
+              </div>
+            ) : (
+              <div className="border border-border rounded-lg bg-surface-raised p-4 text-xs mt-6">
+                <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-2">Registered webhooks</span>
+                <div className="divide-y divide-border">
+                  <div className="py-2.5 flex items-center justify-between">
+                    <div>
+                      <span className="font-mono text-text-primary font-bold">https://api.domain.com/weather-alerts</span>
+                      <span className="block text-[10px] text-text-muted mt-0.5">Events: alert.storm, alert.temp_extreme</span>
+                    </div>
+                    <span className="text-[9px] font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded uppercase">
+                      Active
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
       case "profile":
         return (
           <div className="bg-surface border border-border rounded-xl p-5 md:p-6 font-sans">
@@ -356,6 +406,7 @@ export default function DashboardConsole() {
 
       {/* Modals & Portal Overlays */}
       <SavedLocationsModal />
+      <AlertSubscribeModal />
       <KeyboardShortcutsModal />
       <SettingsModal />
       <Toast />

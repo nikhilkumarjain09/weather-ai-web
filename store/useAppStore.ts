@@ -43,8 +43,8 @@ interface AppState {
   dismissToast: (id: string) => void;
 
   // Modals
-  activeModal: "settings" | "shortcuts" | "saved_locations" | null;
-  setActiveModal: (modal: "settings" | "shortcuts" | "saved_locations" | null) => void;
+  activeModal: "settings" | "shortcuts" | "saved_locations" | "alert_subscribe" | null;
+  setActiveModal: (modal: "settings" | "shortcuts" | "saved_locations" | "alert_subscribe" | null) => void;
 
   // UI State
   activeView: string;

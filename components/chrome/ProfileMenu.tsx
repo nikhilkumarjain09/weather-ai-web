@@ -38,13 +38,6 @@ export default function ProfileMenu({ isOpen, onClose }: ProfileMenuProps) {
 
   if (!isOpen) return null;
 
-  const handleSignOut = () => {
-    setUserName(null);
-    showToast("Signed out successfully", "info");
-    setActiveModal("settings");
-    onClose();
-  };
-
   const handleThemeChange = (newTheme: typeof theme) => {
     setTheme(newTheme);
     showToast(`Theme changed to ${newTheme.charAt(0).toUpperCase() + newTheme.slice(1)}`, "info");
@@ -118,7 +111,7 @@ export default function ProfileMenu({ isOpen, onClose }: ProfileMenuProps) {
       </div>
 
       {/* Navigation Items */}
-      <div className="py-1 border-b border-border">
+      <div className="py-1">
         <button
           onClick={() => {
             setActiveModal("shortcuts");
@@ -149,17 +142,6 @@ export default function ProfileMenu({ isOpen, onClose }: ProfileMenuProps) {
         >
           <Settings size={16} />
           <span>Settings</span>
-        </button>
-      </div>
-
-      {/* Sign Out */}
-      <div className="py-1">
-        <button
-          onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-4 py-2 text-xs text-red-500 hover:bg-red-500/10 transition-colors"
-        >
-          <LogOut size={16} />
-          <span>Sign Out</span>
         </button>
       </div>
     </div>

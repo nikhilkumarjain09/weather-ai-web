@@ -5,11 +5,12 @@ import { useAppStore } from "@/store/useAppStore";
 import { Settings, X } from "lucide-react";
 
 export default function SettingsModal() {
-  const { activeModal, setActiveModal, userName, setUserName, savedLocations, showToast } = useAppStore();
+  const { activeModal, setActiveModal, userName, setUserName, savedLocations, unit, showToast } = useAppStore();
   const [nameInput, setNameInput] = useState(userName || "");
   const [defaultLocId, setDefaultLocId] = useState(
     savedLocations.find((loc) => loc.isDefault)?.id || ""
   );
+  const [tempUnit, setTempUnit] = useState<"C" | "F">(unit);
 
   const isOpen = activeModal === "settings";
 
@@ -17,12 +18,14 @@ export default function SettingsModal() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    if (nameInput.trim()) {
-      setUserName(nameInput.trim());
-    }
+    
+    // Save display name (optional)
+    setUserName(nameInput.trim() ? nameInput.trim() : null);
+
+    // Save unit preference
+    useAppStore.setState({ unit: tempUnit });
 
     // Update defaults in savedLocations list
-    // (In our store structure, we can map them)
     const { savedLocations: locations } = useAppStore.getState();
     const updated = locations.map((loc) => ({
       ...loc,
@@ -52,14 +55,14 @@ export default function SettingsModal() {
         <form onSubmit={handleSave} className="space-y-4">
           <div>
             <label className="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5">
-              Profile Display Name
+              Profile Display Name (Optional)
             </label>
             <input
               type="text"
               value={nameInput}
               onChange={(e) => setNameInput(e.target.value)}
+              placeholder="e.g. Developer"
               className="w-full bg-surface-raised border border-border rounded-lg px-3 py-2 text-xs text-text-primary focus:outline-none focus:border-accent/40"
-              required
             />
           </div>
 
@@ -83,17 +86,31 @@ export default function SettingsModal() {
 
           <div>
             <label className="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1.5">
-              Alert Stream Preferences
+              Temperature Unit Preference
             </label>
-            <div className="space-y-2 mt-2">
-              <label className="flex items-center gap-2 text-xs text-text-muted">
-                <input type="checkbox" defaultChecked className="rounded bg-surface-raised border-border text-accent focus:ring-accent" />
-                <span>Simulate severe weather webhooks</span>
-              </label>
-              <label className="flex items-center gap-2 text-xs text-text-muted">
-                <input type="checkbox" defaultChecked className="rounded bg-surface-raised border-border text-accent focus:ring-accent" />
-                <span>Notify on cached query refreshes</span>
-              </label>
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              <button
+                type="button"
+                onClick={() => setTempUnit("C")}
+                className={`py-2 rounded-lg text-xs font-semibold border transition-all ${
+                  tempUnit === "C"
+                    ? "bg-accent/15 border-accent text-accent font-bold"
+                    : "bg-surface-raised border-border text-text-muted hover:text-text-primary"
+                }`}
+              >
+                Celsius (°C)
+              </button>
+              <button
+                type="button"
+                onClick={() => setTempUnit("F")}
+                className={`py-2 rounded-lg text-xs font-semibold border transition-all ${
+                  tempUnit === "F"
+                    ? "bg-accent/15 border-accent text-accent font-bold"
+                    : "bg-surface-raised border-border text-text-muted hover:text-text-primary"
+                }`}
+              >
+                Fahrenheit (°F)
+              </button>
             </div>
           </div>
 
