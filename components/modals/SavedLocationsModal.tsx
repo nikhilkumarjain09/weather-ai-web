@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { MapPin, X, Plus, Trash2 } from "lucide-react";
+import { MapPin, X, Plus, Trash2, Pencil, Check } from "lucide-react";
 
 export default function SavedLocationsModal() {
   const { activeModal, setActiveModal, savedLocations, addSavedLocation, removeSavedLocation, showToast } = useAppStore();
@@ -10,6 +10,10 @@ export default function SavedLocationsModal() {
   const [latInput, setLatInput] = useState("");
   const [lonInput, setLonInput] = useState("");
   const [isDefault, setIsDefault] = useState(false);
+
+  // Renaming state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
 
   const isOpen = activeModal === "saved_locations";
 
@@ -40,13 +44,38 @@ export default function SavedLocationsModal() {
   };
 
   const handleRemove = (id: string, label: string) => {
+    if (editingId === id) {
+      setEditingId(null);
+    }
     removeSavedLocation(id);
     showToast(`Deleted location "${label}"`, "info");
   };
 
+  const handleStartRename = (id: string, currentLabel: string) => {
+    setEditingId(id);
+    setEditingName(currentLabel);
+  };
+
+  const handleSaveRename = (id: string) => {
+    if (!editingName.trim()) {
+      showToast("Location name cannot be empty", "danger");
+      return;
+    }
+
+    const { savedLocations: locations } = useAppStore.getState();
+    const updated = locations.map((loc) =>
+      loc.id === id ? { ...loc, name: editingName.trim() } : loc
+    );
+    useAppStore.setState({ savedLocations: updated });
+    
+    showToast(`Location renamed to "${editingName.trim()}"`, "success");
+    setEditingId(null);
+    setEditingName("");
+  };
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-sans">
-      <div className="bg-surface border border-border rounded-xl shadow-2xl max-w-md w-full p-6 relative animate-slide-in flex flex-col max-h-[500px]">
+      <div className="bg-surface border border-border rounded-xl shadow-2xl max-w-md w-full p-6 relative animate-slide-in flex flex-col max-h-[550px]">
         <button
           onClick={() => setActiveModal(null)}
           className="absolute top-4 right-4 text-text-muted hover:text-text-primary transition-colors"
@@ -66,17 +95,59 @@ export default function SavedLocationsModal() {
           ) : (
             savedLocations.map((loc) => (
               <div key={loc.id} className="flex items-center justify-between py-2 px-1 text-xs">
-                <div>
-                  <span className="font-semibold text-text-primary block">
-                    {loc.name} {loc.isDefault && <span className="text-[9px] text-accent font-bold uppercase">(Default)</span>}
-                  </span>
-                  <span className="text-[10px] text-text-muted font-mono">
-                    {loc.lat.toFixed(3)}°N, {loc.lon.toFixed(3)}°W
-                  </span>
-                </div>
+                {editingId === loc.id ? (
+                  <div className="flex-1 mr-2 flex items-center gap-1.5">
+                    <input
+                      type="text"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      className="bg-surface border border-accent/40 rounded px-2 py-0.5 text-xs text-text-primary focus:outline-none flex-1"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleSaveRename(loc.id)}
+                      className="p-1 rounded text-emerald-500 hover:bg-emerald-500/10 transition-colors"
+                    >
+                      <Check size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(null)}
+                      className="p-1 rounded text-text-muted hover:bg-surface-raised transition-colors"
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex-1 pr-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-semibold text-text-primary block truncate max-w-[200px]">
+                        {loc.name}
+                      </span>
+                      {loc.isDefault && (
+                        <span className="text-[8px] text-accent font-bold uppercase tracking-wider">
+                          (Default)
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleStartRename(loc.id, loc.name)}
+                        className="p-0.5 text-text-muted hover:text-text-primary transition-colors"
+                        title="Rename location"
+                      >
+                        <Pencil size={11} />
+                      </button>
+                    </div>
+                    <span className="text-[10px] text-text-muted font-mono block">
+                      {loc.lat.toFixed(3)}°N, {loc.lon.toFixed(3)}°W
+                    </span>
+                  </div>
+                )}
                 <button
+                  type="button"
                   onClick={() => handleRemove(loc.id, loc.name)}
-                  className="p-1 rounded text-text-muted hover:text-red-500 transition-colors"
+                  className="p-1 rounded text-text-muted hover:text-red-500 transition-colors shrink-0"
                 >
                   <Trash2 size={13} />
                 </button>

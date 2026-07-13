@@ -5,6 +5,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { CurrentWeather } from "@/lib/types";
 import { Layers, MapPin, RefreshCw, X, Thermometer, Wind, Droplets, Sun } from "lucide-react";
 import ErrorBanner from "@/components/shared/ErrorBanner";
+import EmptyState from "@/components/shared/EmptyState";
 
 interface ComparisonCardProps {
   locationId: string;
@@ -175,14 +176,18 @@ export default function ComparisonGrid() {
       </div>
 
       {/* Cards Grid */}
-      {activeComparisonLocations.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-12 border border-dashed rounded-xl bg-surface border-border text-center">
-          <Layers className="text-text-muted opacity-40 mb-3" size={32} />
-          <h3 className="font-display text-sm font-bold text-text-primary mb-1">No Comparison Node Selected</h3>
-          <p className="text-xs text-text-muted max-w-xs mb-4">
-            Select at least one location from the list above to instantiate comparison cards.
-          </p>
-        </div>
+      {savedLocations.length === 0 ? (
+        <EmptyState
+          icon={MapPin}
+          title="No Locations Saved Yet"
+          description="Register saved locations using search or the Saved Locations Modal to start comparing weather conditions."
+        />
+      ) : activeComparisonLocations.length === 0 ? (
+        <EmptyState
+          icon={Layers}
+          title="No Comparison Node Selected"
+          description="Select at least one location from the list above to instantiate comparison cards."
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {activeComparisonLocations.map((loc) => (
