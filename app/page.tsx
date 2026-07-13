@@ -483,7 +483,10 @@ export default function DashboardConsole() {
 
   return (
     <div className="min-h-screen bg-bg text-text-primary font-sans flex flex-col pt-24 pb-16 md:pb-0 relative">
-      <AnimatedBackground conditionCode={weather?.current?.conditionsCode || "sunny"} />
+      <AnimatedBackground
+        conditionCode={weather?.current?.conditionsCode || "sunny"}
+        isDay={weather?.current?.isDay ?? 1}
+      />
 
       {/* Chrome Shell */}
       <TopBar />

@@ -55,7 +55,7 @@ export default function TopBar() {
 
   return (
     <>
-      <header className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-5xl h-16 bg-slate-900/80 dark:bg-slate-950/80 backdrop-blur-xl border border-slate-200/20 dark:border-white/10 rounded-2xl flex items-center justify-between px-4 md:px-6 z-40 shadow-2xl transition-all duration-300">
+      <header className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-5xl h-16 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl flex items-center justify-between px-4 md:px-6 z-40 shadow-2xl transition-all duration-300">
         
         {/* Brand logo */}
         <div className="flex items-center gap-2.5 shrink-0">
@@ -63,8 +63,8 @@ export default function TopBar() {
             A
           </div>
           <div className="flex flex-col hidden sm:flex">
-            <span className="font-display font-bold text-xs tracking-tight text-white leading-none">Aeris</span>
-            <span className="text-[7px] text-text-muted font-display font-bold uppercase tracking-widest leading-none mt-1">
+            <span className="font-display font-bold text-xs tracking-tight text-slate-900 dark:text-white leading-none font-sans">Aeris</span>
+            <span className="text-[7px] text-slate-500 dark:text-slate-400 font-display font-bold uppercase tracking-widest leading-none mt-1">
               WeatherAI
             </span>
           </div>
@@ -84,7 +84,7 @@ export default function TopBar() {
                 setIsNotifOpen(!isNotifOpen);
                 setIsProfileOpen(false);
               }}
-              className="p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-text-muted hover:text-text-primary transition-all relative hover:scale-105"
+              className="p-2 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all relative hover:scale-105 flex items-center justify-center"
             >
               <Bell size={15} />
               {unreadCount > 0 && (
@@ -101,12 +101,12 @@ export default function TopBar() {
                 setIsProfileOpen(!isProfileOpen);
                 setIsNotifOpen(false);
               }}
-              className="flex items-center gap-2 p-1 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group text-left hover:scale-[1.02]"
+              className="flex items-center gap-2 p-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition-all group text-left hover:scale-[1.02]"
             >
               <div className="w-6 h-6 rounded-lg bg-accent/15 border border-accent/20 flex items-center justify-center text-[9px] font-bold text-accent">
                 {initial}
               </div>
-              <ChevronDown size={11} className="text-text-muted group-hover:text-text-primary transition-transform duration-200" />
+              <ChevronDown size={11} className="text-slate-500 dark:text-slate-400 group-hover:text-slate-900 group-hover:dark:text-white transition-transform duration-200" />
             </button>
             <ProfileMenu isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
           </div>
@@ -140,20 +140,20 @@ export default function TopBar() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-72 bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-2xl border-l border-white/5 p-6 z-50 flex flex-col justify-between shadow-2xl font-sans"
+              className="fixed top-0 right-0 bottom-0 w-72 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-l border-slate-200 dark:border-white/5 p-6 z-50 flex flex-col justify-between shadow-2xl font-sans"
             >
               <div className="space-y-6">
                 {/* Header */}
-                <div className="flex items-center justify-between pb-4 border-b border-white/5">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/5">
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-lg bg-accent flex items-center justify-center font-display font-bold text-bg text-[10px]">
                       A
                     </div>
-                    <span className="font-display font-bold text-sm text-white">Menu Navigation</span>
+                    <span className="font-display font-bold text-sm text-slate-900 dark:text-white">Menu Navigation</span>
                   </div>
                   <button
                     onClick={() => setIsMenuOpen(false)}
-                    className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-text-muted hover:text-white transition-colors"
+                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                   >
                     <X size={14} />
                   </button>
@@ -173,7 +173,7 @@ export default function TopBar() {
                         className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs transition-all border ${
                           isActive
                             ? "bg-accent/15 border-accent/20 text-accent font-bold"
-                            : "bg-transparent border-transparent text-text-muted hover:text-text-primary hover:bg-white/5"
+                            : "bg-transparent border-transparent text-slate-500 dark:text-text-muted hover:text-slate-900 dark:hover:text-text-primary hover:bg-slate-100 dark:hover:bg-white/5"
                         }`}
                       >
                         <Icon size={16} />
@@ -191,10 +191,10 @@ export default function TopBar() {
 
               {/* Bottom Brand footer */}
               <div className="text-center space-y-1">
-                <span className="text-[9px] text-text-muted font-display font-bold uppercase tracking-wider block">
+                <span className="text-[9px] text-slate-400 dark:text-slate-500 font-display font-bold uppercase tracking-wider block">
                   Aeris Weather Platform
                 </span>
-                <span className="text-[8px] text-text-muted/60 block leading-snug">
+                <span className="text-[8px] text-slate-400/60 dark:text-slate-500/60 block leading-snug">
                   Designed by AVITA. All systems functional.
                 </span>
               </div>

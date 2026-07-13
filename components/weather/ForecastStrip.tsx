@@ -123,7 +123,7 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
   };
 
   return (
-    <div className="glass-panel p-6 md:p-8 relative overflow-hidden bg-slate-950/40 border-white/5 shadow-2xl">
+    <div className="glass-panel p-6 md:p-8 relative overflow-hidden bg-white/40 dark:bg-slate-950/40 border-slate-200/50 dark:border-white/5 shadow-2xl">
       <div className="flex items-center justify-between mb-6">
         <div className="space-y-0.5">
           <span className="text-[10px] font-bold text-accent uppercase tracking-widest block font-display">

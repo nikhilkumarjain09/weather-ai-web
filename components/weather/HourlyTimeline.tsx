@@ -58,7 +58,7 @@ export default function HourlyTimeline({
   });
 
   return (
-    <div className="glass-panel p-6 md:p-8 relative overflow-hidden bg-slate-950/40 border-white/5 shadow-2xl">
+    <div className="glass-panel p-6 md:p-8 relative overflow-hidden bg-white/40 dark:bg-slate-950/40 border-slate-200/50 dark:border-white/5 shadow-2xl">
       <div className="space-y-0.5">
         <span className="text-[10px] font-bold text-accent uppercase tracking-widest block font-display">
           Coming up
@@ -76,7 +76,7 @@ export default function HourlyTimeline({
             initial={animationsEnabled ? { opacity: 0, scale: 0.9, y: 10 } : false}
             animate={animationsEnabled ? { opacity: 1, scale: 1, y: 0 } : false}
             transition={{ duration: 0.3, delay: idx * 0.015 }}
-            className="flex flex-col items-center justify-between text-center min-w-[76px] bg-white/5 border border-white/5 rounded-2xl p-4 hover:border-accent/40 transition-all duration-300 cursor-pointer shrink-0 hover:scale-105"
+            className="flex flex-col items-center justify-between text-center min-w-[76px] bg-slate-100/40 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 rounded-2xl p-4 hover:border-accent/40 transition-all duration-300 cursor-pointer shrink-0 hover:scale-105"
           >
             <span className="text-[10px] font-bold text-text-muted tracking-tight">{item.label}</span>
 

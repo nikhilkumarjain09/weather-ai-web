@@ -7,6 +7,7 @@ import { useTheme } from "next-themes";
 
 interface AnimatedBackgroundProps {
   conditionCode: string;
+  isDay?: number;
 }
 
 interface GradientTheme {
@@ -14,35 +15,37 @@ interface GradientTheme {
   glowColor: string;
 }
 
-export default function AnimatedBackground({ conditionCode }: AnimatedBackgroundProps) {
+export default function AnimatedBackground({ conditionCode, isDay = 1 }: AnimatedBackgroundProps) {
   const { animationsEnabled } = usePreferencesStore();
   const { resolvedTheme } = useTheme();
   const [lightning, setLightning] = useState(false);
-  const [lightningStrikePos, setLightningStrikePos] = useState(50); // percentage horizontally
+  const [lightningStrikePos, setLightningStrikePos] = useState(50);
+
+  const code = conditionCode.toLowerCase();
+  const resolvedIsNight = isDay === 0 || code === "night";
+  const resolvedIsDay = isDay === 1 && !resolvedIsNight;
+
+  const isRain = code === "rainy" || code === "stormy";
+  const isSnow = code === "snowy";
+  const isCloud = code === "cloudy";
+  const isSun = code === "sunny";
+  const isWind = code === "windy";
 
   // Periodic lightning flashes for stormy weather in dark mode
   useEffect(() => {
-    if (conditionCode !== "stormy" || !animationsEnabled || resolvedTheme === "light") return;
+    if (code !== "stormy" || !animationsEnabled || resolvedTheme === "light" || resolvedIsNight) return;
     
     const interval = setInterval(() => {
-      setLightningStrikePos(Math.random() * 80 + 10); // keep away from edges
+      setLightningStrikePos(Math.random() * 80 + 10);
       setLightning(true);
       const timer = setTimeout(() => setLightning(false), 250);
       return () => clearTimeout(timer);
     }, 5000 + Math.random() * 6000);
 
     return () => clearInterval(interval);
-  }, [conditionCode, animationsEnabled, resolvedTheme]);
+  }, [code, animationsEnabled, resolvedTheme, resolvedIsNight]);
 
   if (!animationsEnabled) return null;
-
-  const code = conditionCode.toLowerCase();
-  const isRain = code === "rainy" || code === "stormy";
-  const isSnow = code === "snowy";
-  const isCloud = code === "cloudy";
-  const isSun = code === "sunny";
-  const isWind = code === "windy";
-  const isNight = code === "night";
 
   // Dynamic premium background gradients
   let theme: GradientTheme = {
@@ -50,8 +53,14 @@ export default function AnimatedBackground({ conditionCode }: AnimatedBackground
     glowColor: "rgba(99, 102, 241, 0.08)",
   };
 
-  if (resolvedTheme === "light") {
-    // Elegant, bright light-mode colors corresponding to conditions
+  if (resolvedIsNight) {
+    // Starry night sky colors
+    theme = {
+      classes: "from-[#02040b] via-[#050c18] to-[#010204]",
+      glowColor: "rgba(99, 102, 241, 0.04)",
+    };
+  } else if (resolvedTheme === "light") {
+    // Bright, elegant light-mode day colors
     if (isSun) {
       theme = {
         classes: "from-[#e0f2fe] via-[#fef3c7] to-[#dbeafe]",
@@ -79,7 +88,7 @@ export default function AnimatedBackground({ conditionCode }: AnimatedBackground
       };
     }
   } else {
-    // Luxurious, rich dark-mode gradients
+    // Sleek dark-mode day colors
     if (isSun) {
       theme = {
         classes: "from-[#0c1a30] via-[#112446] to-[#081226]",
@@ -105,11 +114,6 @@ export default function AnimatedBackground({ conditionCode }: AnimatedBackground
         classes: "from-[#09152b] via-[#122548] to-[#060e1d]",
         glowColor: "rgba(45, 212, 191, 0.08)",
       };
-    } else if (isNight) {
-      theme = {
-        classes: "from-[#02040a] via-[#050b14] to-[#010205]",
-        glowColor: "rgba(99, 102, 241, 0.05)",
-      };
     }
   }
 
@@ -119,7 +123,9 @@ export default function AnimatedBackground({ conditionCode }: AnimatedBackground
     if (lightning) {
       root.style.setProperty("--bg", resolvedTheme === "light" ? "#f1f5f9" : "#2e2059");
     } else {
-      if (resolvedTheme === "light") {
+      if (resolvedIsNight) {
+        root.style.setProperty("--bg", "#02040b");
+      } else if (resolvedTheme === "light") {
         root.style.setProperty("--bg", isSun ? "#fef3c7" : isRain ? "#e2e8f0" : "#f8fafc");
       } else {
         root.style.setProperty("--bg", isSun ? "#071022" : isRain ? "#070b14" : "#030712");
@@ -132,14 +138,32 @@ export default function AnimatedBackground({ conditionCode }: AnimatedBackground
       {/* 1. Base Gradient Layer */}
       <div className={`absolute inset-0 bg-gradient-to-b ${theme.classes} transition-all duration-1000`} />
 
-      {/* 2. Glow Blobs */}
+      {/* 2. Twinkling Stars Overlay for Night */}
+      {resolvedIsNight && (
+        <div className="absolute inset-0 z-0 opacity-40">
+          {Array.from({ length: 45 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+              style={{
+                top: `${(i * 1.3 + Math.random() * 5) % 65}%`,
+                left: `${(i * 2.2 + Math.random() * 8) % 100}%`,
+                animationDelay: `${Math.random() * 4}s`,
+                animationDuration: `${1.5 + Math.random() * 2}s`
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* 3. Glow Blobs */}
       <div
         className="absolute -top-48 left-1/4 w-[500px] h-[500px] rounded-full filter blur-[120px] animate-pulse-glow"
         style={{ backgroundColor: theme.glowColor }}
       />
 
-      {/* 3. Sunlight / Sunbeam rays */}
-      {isSun && (
+      {/* 4. Sunlight / Sunbeam rays */}
+      {isSun && !resolvedIsNight && (
         <div className="absolute top-0 right-0 w-[600px] h-[600px] pointer-events-none">
           <motion.div
             animate={{ rotate: 360 }}
@@ -149,18 +173,16 @@ export default function AnimatedBackground({ conditionCode }: AnimatedBackground
         </div>
       )}
 
-      {/* 4. Stormy lightning overlay and bolts */}
+      {/* 5. Stormy lightning overlay and bolts */}
       <AnimatePresence>
         {lightning && (
           <>
-            {/* Ambient Flash */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: resolvedTheme === "light" ? 0.1 : 0.22 }}
               exit={{ opacity: 0 }}
               className="absolute inset-0 bg-white dark:bg-purple-100 z-10"
             />
-            {/* Glowing Bolt Shape */}
             <svg
               className="absolute inset-y-0 w-32 h-full z-10 opacity-75"
               style={{ left: `${lightningStrikePos}%` }}
@@ -181,7 +203,7 @@ export default function AnimatedBackground({ conditionCode }: AnimatedBackground
         )}
       </AnimatePresence>
 
-      {/* 5. Animated Raindrops */}
+      {/* 6. Animated Raindrops */}
       {isRain && (
         <div className="absolute inset-0 flex justify-between px-8 opacity-40">
           {Array.from({ length: 30 }).map((_, i) => (
@@ -205,7 +227,7 @@ export default function AnimatedBackground({ conditionCode }: AnimatedBackground
         </div>
       )}
 
-      {/* 6. Falling Snowflakes */}
+      {/* 7. Falling Snowflakes */}
       {isSnow && (
         <div className="absolute inset-0 flex justify-around opacity-60">
           {Array.from({ length: 40 }).map((_, i) => (
@@ -232,8 +254,8 @@ export default function AnimatedBackground({ conditionCode }: AnimatedBackground
         </div>
       )}
 
-      {/* 7. Realistic Puffy Floating Clouds Layer */}
-      {(!isSun && !isNight) && (
+      {/* 8. Realistic Puffy Floating Clouds Layer */}
+      {(resolvedIsDay || code === "cloudy" || isRain || isSnow) && (
         <div className="absolute inset-0">
           {Array.from({ length: 6 }).map((_, i) => {
             const sizeWidth = 250 + (i % 3) * 100;

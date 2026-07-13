@@ -66,6 +66,7 @@ export interface CurrentWeatherEntity {
   lat: number;
   lon: number;
   aqi?: number;
+  isDay?: number;
 }
 
 export interface ForecastDayEntity {

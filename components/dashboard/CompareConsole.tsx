@@ -123,11 +123,11 @@ export default function CompareConsole() {
           <select
             value={cityAId}
             onChange={(e) => setCityAId(e.target.value)}
-            className="bg-surface border border-border rounded-xl px-3 py-2 text-xs text-text-primary focus:outline-none"
+            className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
           >
-            <option value="">Choose a city</option>
+            <option value="" className="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200">Choose a city</option>
             {savedLocations.map((loc) => (
-              <option key={loc.id} value={loc.id}>
+              <option key={loc.id} value={loc.id} className="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200">
                 {loc.name}
               </option>
             ))}
@@ -141,11 +141,11 @@ export default function CompareConsole() {
           <select
             value={cityBId}
             onChange={(e) => setCityBId(e.target.value)}
-            className="bg-surface border border-border rounded-xl px-3 py-2 text-xs text-text-primary focus:outline-none"
+            className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
           >
-            <option value="">Choose a city</option>
+            <option value="" className="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200">Choose a city</option>
             {savedLocations.map((loc) => (
-              <option key={loc.id} value={loc.id}>
+              <option key={loc.id} value={loc.id} className="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200">
                 {loc.name}
               </option>
             ))}

@@ -98,6 +98,7 @@ export function mapApiResponse(data: any): any {
       lat,
       lon,
       aqi: data.current.aqi ?? 42,
+      isDay: data.current.is_day ?? 1,
     };
 
     let mappedForecast: any[] = [];

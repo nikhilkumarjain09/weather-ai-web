@@ -133,7 +133,7 @@ export default function CurrentConditions({
   ];
 
   return (
-    <div className="glass-panel p-6 md:p-8 space-y-8 relative overflow-hidden bg-slate-950/40 border-white/5 shadow-2xl">
+    <div className="glass-panel p-6 md:p-8 space-y-8 relative overflow-hidden bg-white/40 dark:bg-slate-950/40 border-slate-200/50 dark:border-white/5 shadow-2xl">
       {/* Dynamic top ambient glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-gradient-to-b from-accent/10 to-transparent blur-2xl pointer-events-none" />
 
