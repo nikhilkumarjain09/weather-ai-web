@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { ForecastDay } from "@/lib/types";
 import {
   Sun,
@@ -10,7 +10,15 @@ import {
   CloudSnow,
   CloudLightning,
   Droplet,
+  ChevronDown,
+  ChevronUp,
+  X,
+  Wind,
+  Droplets,
+  Zap,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { usePreferencesStore } from "@/store/preferencesStore";
 
 interface ForecastStripProps {
   days: ForecastDay[];
@@ -18,6 +26,9 @@ interface ForecastStripProps {
 }
 
 export default function ForecastStrip({ days, unit }: ForecastStripProps) {
+  const { animationsEnabled } = usePreferencesStore();
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
   const iconMap: Record<string, React.ComponentType<any>> = {
     sunny: Sun,
     cloudy: CloudSun,
@@ -44,7 +55,7 @@ export default function ForecastStrip({ days, unit }: ForecastStripProps) {
     return date.toLocaleDateString([], { month: "short", day: "numeric" });
   };
 
-  // Sparkline coordinates calculations (visible on 7-column desktop layout)
+  // Sparkline coordinates calculations
   const renderSparkline = () => {
     if (!days || days.length < 2) return null;
 
@@ -53,13 +64,10 @@ export default function ForecastStrip({ days, unit }: ForecastStripProps) {
     const maxTemp = Math.max(...temps);
     const range = maxTemp - minTemp || 1;
 
-    // Grid details: 7 columns. Width: 700. Height: 60.
-    // Each column width = 100. Center of column i is 50 + i * 100.
     const points = days.map((day, i) => {
       const x = 50 + i * 100;
       const avg = (day.minTemp + day.maxTemp) / 2;
       const ratio = (avg - minTemp) / range;
-      // Map Y from 10 to 50
       const y = 50 - ratio * 40;
       return { x, y };
     });
@@ -95,6 +103,10 @@ export default function ForecastStrip({ days, unit }: ForecastStripProps) {
     );
   };
 
+  const handleToggleExpand = (idx: number) => {
+    setExpandedIndex(expandedIndex === idx ? null : idx);
+  };
+
   return (
     <div className="bg-surface border border-border rounded-xl p-5 md:p-6 font-sans relative">
       <h3 className="font-display text-base font-bold text-text-primary mb-4">7-Day Forecast</h3>
@@ -104,12 +116,17 @@ export default function ForecastStrip({ days, unit }: ForecastStripProps) {
         {renderSparkline()}
 
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-          {days.map((day) => {
+          {days.map((day, idx) => {
             const IconComponent = iconMap[day.conditionsCode] || Cloud;
+            const isExpanded = expandedIndex === idx;
+
             return (
               <div
                 key={day.date}
-                className="bg-surface-raised border border-border rounded-lg p-3 flex flex-col items-center text-center hover:border-accent/30 transition-colors z-20"
+                onClick={() => handleToggleExpand(idx)}
+                className={`bg-surface-raised border rounded-lg p-3 flex flex-col items-center text-center hover:border-accent/50 transition-all z-20 cursor-pointer ${
+                  isExpanded ? "border-accent ring-1 ring-accent/20 bg-accent-tint/10" : "border-border"
+                }`}
               >
                 <span className="text-xs font-bold text-text-primary">{getDayName(day.date)}</span>
                 <span className="text-[10px] text-text-muted mt-0.5">{getFormattedDate(day.date)}</span>
@@ -135,11 +152,81 @@ export default function ForecastStrip({ days, unit }: ForecastStripProps) {
                 ) : (
                   <div className="h-4 mt-2" />
                 )}
+
+                <div className="text-text-muted hover:text-text-primary mt-2">
+                  {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                </div>
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* Expandable Details Drawer Section */}
+      <AnimatePresence>
+        {expandedIndex !== null && (
+          <motion.div
+            initial={animationsEnabled ? { opacity: 0, height: 0, marginTop: 0 } : {}}
+            animate={animationsEnabled ? { opacity: 1, height: "auto", marginTop: 16 } : {}}
+            exit={animationsEnabled ? { opacity: 0, height: 0, marginTop: 0 } : {}}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden bg-surface-raised border border-border rounded-lg p-4 font-sans text-xs"
+          >
+            <div className="flex justify-between items-center pb-2.5 border-b border-border/40 mb-3">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-text-primary">
+                  Weather Details: {getFormattedDate(days[expandedIndex].date)}
+                </span>
+                <span className="text-[10px] px-2 py-0.5 bg-accent-tint/50 border border-accent/20 rounded text-accent font-semibold">
+                  {days[expandedIndex].conditionsText}
+                </span>
+              </div>
+              <button
+                onClick={() => setExpandedIndex(null)}
+                className="text-text-muted hover:text-text-primary p-0.5"
+              >
+                <X size={14} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="flex items-center gap-2">
+                <Wind size={14} className="text-text-muted" />
+                <div>
+                  <span className="block text-[9px] uppercase font-bold text-text-muted">Wind projection</span>
+                  <span className="font-mono text-xs text-text-primary font-bold">14 km/h</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Droplets size={14} className="text-text-muted" />
+                <div>
+                  <span className="block text-[9px] uppercase font-bold text-text-muted">Estimated Humidity</span>
+                  <span className="font-mono text-xs text-text-primary font-bold">54%</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Zap size={14} className="text-text-muted" />
+                <div>
+                  <span className="block text-[9px] uppercase font-bold text-text-muted">UV Exposure</span>
+                  <span className="font-mono text-xs text-text-primary font-bold">Low (2/10)</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Droplet size={14} className="text-text-muted" />
+                <div>
+                  <span className="block text-[9px] uppercase font-bold text-text-muted">Precip. Risk</span>
+                  <span className="font-mono text-xs text-text-primary font-bold">
+                    {days[expandedIndex].precipChance}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

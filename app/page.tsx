@@ -10,6 +10,7 @@ import TopBar from "@/components/chrome/TopBar";
 import Sidebar from "@/components/chrome/Sidebar";
 import Toast from "@/components/shared/Toast";
 import ErrorBanner from "@/components/shared/ErrorBanner";
+import CommandPalette from "@/components/chrome/CommandPalette";
 
 // Modals
 import SavedLocationsModal from "@/components/modals/SavedLocationsModal";
@@ -21,12 +22,16 @@ import SettingsModal from "@/components/modals/SettingsModal";
 import StatCard from "@/components/dashboard/StatCard";
 import ComparisonGrid from "@/components/dashboard/ComparisonGrid";
 import CurrentConditions from "@/components/weather/CurrentConditions";
+import HourlyTimeline from "@/components/weather/HourlyTimeline";
 import ForecastStrip from "@/components/weather/ForecastStrip";
+import WeatherCharts from "@/components/dashboard/WeatherCharts";
+import WeatherMap from "@/components/map/WeatherMap";
 import HistoricalTrendChart from "@/components/weather/HistoricalTrendChart";
 import AiSummaryPanel from "@/components/weather/AiSummaryPanel";
+import AnimatedBackground from "@/components/weather/AnimatedBackground";
 
 // Controls / Power Panels
-import LocationSearch from "@/components/controls/LocationSearch";
+import SearchBar from "@/components/controls/SearchBar";
 import UnitToggle from "@/components/controls/UnitToggle";
 import UsagePanel from "@/components/controls/UsagePanel";
 
@@ -120,8 +125,6 @@ export default function DashboardConsole() {
       }
       
       setWeather(data);
-
-
 
       // Record in historical trend logs
       if (data.current) {
@@ -220,7 +223,29 @@ export default function DashboardConsole() {
                   onRefresh={fetchWeather}
                   isRefreshing={loading}
                 />
+
+                <HourlyTimeline
+                  currentTemp={weather.current.temp}
+                  minTemp={weather.forecast[0]?.minTemp ?? weather.current.temp - 5}
+                  maxTemp={weather.forecast[0]?.maxTemp ?? weather.current.temp + 5}
+                  conditionCode={weather.current.conditionsCode}
+                  precipChance={weather.forecast[0]?.precipChance ?? 0}
+                />
+
                 <ForecastStrip days={weather.forecast} unit={unit} />
+
+                <WeatherCharts
+                  forecast={weather.forecast}
+                  currentHumidity={weather.current.humidity}
+                  currentWindSpeed={weather.current.windSpeed}
+                  currentPressure={weather.current.pressure}
+                />
+
+                <WeatherMap
+                  lat={weather.current.lat}
+                  lon={weather.current.lon}
+                />
+
                 <AiSummaryPanel
                   lat={weather.current.lat}
                   lon={weather.current.lon}
@@ -351,7 +376,9 @@ export default function DashboardConsole() {
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text-primary font-sans flex flex-col pt-14 pb-16 md:pb-0 md:pl-60">
+    <div className="min-h-screen bg-bg text-text-primary font-sans flex flex-col pt-14 pb-16 md:pb-0 md:pl-60 relative">
+      <AnimatedBackground conditionCode={weather?.current?.conditionsCode || "sunny"} />
+
       {/* Chrome Shell */}
       <TopBar />
       <Sidebar />
@@ -373,7 +400,7 @@ export default function DashboardConsole() {
           </div>
 
           <div className="flex items-center gap-3">
-            <LocationSearch />
+            <SearchBar />
             <UnitToggle />
           </div>
         </div>
@@ -415,6 +442,7 @@ export default function DashboardConsole() {
       <AlertSubscribeModal />
       <KeyboardShortcutsModal />
       <SettingsModal />
+      <CommandPalette />
       <Toast />
     </div>
   );
