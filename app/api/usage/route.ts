@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { requestWeatherApi } from "@/lib/weatherClient";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const data = await requestWeatherApi("/v1/usage");
     

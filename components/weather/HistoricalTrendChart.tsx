@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { getHistoricalTrends, HistoricalEntry } from "@/lib/historicalStore";
-import { TrendingUp, RefreshCw, Thermometer, Download, Info } from "lucide-react";
+import { TrendingUp, RefreshCw, Download, Info } from "lucide-react";
 import EmptyState from "@/components/shared/EmptyState";
 
 interface HistoricalTrendChartProps {
@@ -17,10 +17,10 @@ export default function HistoricalTrendChart({ locationName, unit }: HistoricalT
   const [range, setRange] = useState<7 | 30 | 90>(30);
   const [metric, setMetric] = useState<"temp" | "humidity">("temp");
 
-  const loadData = () => {
+  const loadData = useCallback(() => {
     const raw = getHistoricalTrends(locationName);
     setData(raw);
-  };
+  }, [locationName]);
 
   useEffect(() => {
     loadData();
@@ -28,7 +28,7 @@ export default function HistoricalTrendChart({ locationName, unit }: HistoricalT
     // Listen for custom events when new current condition details are recorded
     window.addEventListener("aeris-data-fetched", loadData);
     return () => window.removeEventListener("aeris-data-fetched", loadData);
-  }, [locationName]);
+  }, [loadData]);
 
   const convertTemp = (c: number) => {
     if (unit === "F") {

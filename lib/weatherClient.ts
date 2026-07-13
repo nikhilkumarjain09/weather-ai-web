@@ -53,7 +53,7 @@ export async function requestWeatherApi(
       let errData: any = {};
       try {
         errData = await res.json();
-      } catch (e) {}
+      } catch {}
 
       // Normalize error shape to match { error: { code, message } }
       const errorObj = {

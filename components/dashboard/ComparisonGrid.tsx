@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { CurrentWeather } from "@/lib/types";
 import { Layers, MapPin, RefreshCw, X, Thermometer, Wind, Droplets, Sun } from "lucide-react";
@@ -21,7 +21,7 @@ function ComparisonCard({ name, lat, lon, unit, onRemove }: ComparisonCardProps)
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchWeather = async () => {
+  const fetchWeather = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -36,11 +36,11 @@ function ComparisonCard({ name, lat, lon, unit, onRemove }: ComparisonCardProps)
     } finally {
       setLoading(false);
     }
-  };
+  }, [lat, lon, name]);
 
   useEffect(() => {
     fetchWeather();
-  }, [lat, lon, name]);
+  }, [fetchWeather]);
 
   const convertTemp = (c: number) => {
     if (unit === "F") {

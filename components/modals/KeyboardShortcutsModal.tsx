@@ -32,8 +32,14 @@ export default function KeyboardShortcutsModal() {
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-sans">
-      <div className="bg-surface border border-border rounded-xl shadow-2xl max-w-sm w-full p-6 relative animate-slide-in">
+    <div
+      onClick={() => setActiveModal(null)}
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-sans"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-surface border border-border rounded-xl shadow-2xl max-w-sm w-full p-6 relative animate-slide-in"
+      >
         <button
           onClick={() => setActiveModal(null)}
           className="absolute top-4 right-4 text-text-muted hover:text-text-primary transition-colors"

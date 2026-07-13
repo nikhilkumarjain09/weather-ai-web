@@ -74,7 +74,7 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
             });
           }
         }
-      } catch (e) {
+      } catch {
         // Suppress expected 403 on free tier
       }
     }

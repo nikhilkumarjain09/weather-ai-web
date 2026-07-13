@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { Moon, Sun, Monitor, Thermometer, Keyboard, BookOpen, Settings, LogOut } from "lucide-react";
+import { Moon, Sun, Monitor, Thermometer, Keyboard, BookOpen, Settings } from "lucide-react";
 
 interface ProfileMenuProps {
   isOpen: boolean;
@@ -10,7 +10,7 @@ interface ProfileMenuProps {
 }
 
 export default function ProfileMenu({ isOpen, onClose }: ProfileMenuProps) {
-  const { theme, setTheme, unit, toggleUnit, setActiveModal, setUserName, showToast } = useAppStore();
+  const { theme, setTheme, unit, toggleUnit, setActiveModal, showToast } = useAppStore();
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

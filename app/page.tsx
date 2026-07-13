@@ -10,8 +10,6 @@ import TopBar from "@/components/chrome/TopBar";
 import Sidebar from "@/components/chrome/Sidebar";
 import Toast from "@/components/shared/Toast";
 import ErrorBanner from "@/components/shared/ErrorBanner";
-import EmptyState from "@/components/shared/EmptyState";
-import LockedFeatureBadge from "@/components/shared/LockedFeatureBadge";
 
 // Modals
 import SavedLocationsModal from "@/components/modals/SavedLocationsModal";
