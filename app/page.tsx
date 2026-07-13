@@ -82,6 +82,8 @@ export default function DashboardConsole() {
 
   useEffect(() => {
     fetchUsage();
+    window.addEventListener("aeris-usage-updated", fetchUsage);
+    return () => window.removeEventListener("aeris-usage-updated", fetchUsage);
   }, [fetchUsage, weather]);
 
   // Sync client-side theme class to document element

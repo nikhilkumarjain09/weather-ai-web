@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useAppStore } from "@/store/useAppStore";
 import { getHistoricalTrends, HistoricalEntry } from "@/lib/historicalStore";
-import { TrendingUp, RefreshCw, Thermometer } from "lucide-react";
+import { TrendingUp, RefreshCw, Thermometer, Download, Info } from "lucide-react";
 import EmptyState from "@/components/shared/EmptyState";
 
 interface HistoricalTrendChartProps {
@@ -11,6 +12,7 @@ interface HistoricalTrendChartProps {
 }
 
 export default function HistoricalTrendChart({ locationName, unit }: HistoricalTrendChartProps) {
+  const { showToast } = useAppStore();
   const [data, setData] = useState<HistoricalEntry[]>([]);
   const [range, setRange] = useState<7 | 30 | 90>(30);
   const [metric, setMetric] = useState<"temp" | "humidity">("temp");
@@ -22,7 +24,7 @@ export default function HistoricalTrendChart({ locationName, unit }: HistoricalT
 
   useEffect(() => {
     loadData();
-    
+
     // Listen for custom events when new current condition details are recorded
     window.addEventListener("aeris-data-fetched", loadData);
     return () => window.removeEventListener("aeris-data-fetched", loadData);
@@ -43,19 +45,53 @@ export default function HistoricalTrendChart({ locationName, unit }: HistoricalT
       displayVal: metric === "temp" ? convertTemp(d.temp) : d.humidity,
     }));
 
+  const handleExportCSV = () => {
+    if (data.length === 0) {
+      showToast("No historical data collected to export yet", "danger");
+      return;
+    }
+
+    const headers = ["Timestamp (ISO)", `Temperature (°${unit})`, "Humidity (%)"];
+    const rows = data.map((d) => [
+      d.timestamp,
+      unit === "F" ? convertTemp(d.temp) : d.temp,
+      d.humidity,
+    ]);
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute(
+      "download",
+      `aeris_historical_${locationName.toLowerCase().replace(/[^a-z0-9]/g, "_")}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showToast("CSV data logs exported successfully", "success");
+  };
+
   if (filteredData.length < 2) {
     return (
       <div className="bg-surface border border-border rounded-xl p-5 md:p-6 font-sans">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
           <h3 className="font-display text-base font-bold text-text-primary flex items-center gap-2">
             <TrendingUp className="text-accent" size={18} />
             Historical Trends
           </h3>
+          <span className="text-[9px] font-bold text-accent bg-accent/10 border border-accent/20 px-1.5 py-0.5 rounded uppercase tracking-wider">
+            Local Tracking Logs
+          </span>
         </div>
         <EmptyState
           icon={TrendingUp}
-          title="Insufficient Historical Data"
-          description="We require at least 2 days of cached sessions for this location to map historical trend charts. Make standard queries to accumulate chart points."
+          title="Insufficient Local Log Data"
+          description="At least 2 days of cached sessions for this location are required to map trend charts. Run weather queries to accumulate coordinates log points."
         />
       </div>
     );
@@ -93,9 +129,7 @@ export default function HistoricalTrendChart({ locationName, unit }: HistoricalT
   }));
 
   // Build SVG Path
-  const linePath = points
-    .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
-    .join(" ");
+  const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
 
   const areaPath = `
     ${linePath}
@@ -109,16 +143,21 @@ export default function HistoricalTrendChart({ locationName, unit }: HistoricalT
       {/* Header controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h3 className="font-display text-base font-bold text-text-primary flex items-center gap-2">
-            <TrendingUp className="text-accent" size={18} />
-            Historical Trends
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-display text-base font-bold text-text-primary flex items-center gap-2">
+              <TrendingUp className="text-accent" size={18} />
+              Historical Trends
+            </h3>
+            <span className="text-[9px] font-bold text-accent bg-accent/10 border border-accent/20 px-1.5 py-0.5 rounded uppercase tracking-wider">
+              Local Tracking
+            </span>
+          </div>
           <p className="text-xs text-text-muted mt-0.5">
             Plotting changes in {metric === "temp" ? "temperature" : "humidity"} for {locationName}.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Metric selector */}
           <div className="flex bg-surface-raised p-0.5 rounded border border-border">
             <button
@@ -153,6 +192,15 @@ export default function HistoricalTrendChart({ locationName, unit }: HistoricalT
               </button>
             ))}
           </div>
+
+          {/* CSV Export Button */}
+          <button
+            onClick={handleExportCSV}
+            title="Download CSV logs"
+            className="p-1.5 rounded bg-surface border border-border hover:bg-surface-raised transition-colors text-text-muted hover:text-text-primary flex items-center gap-1 text-[10px] font-bold uppercase"
+          >
+            <Download size={12} />
+          </button>
         </div>
       </div>
 
@@ -209,7 +257,6 @@ export default function HistoricalTrendChart({ locationName, unit }: HistoricalT
                 r="3.5"
                 className="fill-bg stroke-accent stroke-[2px] cursor-pointer hover:r-5 transition-all"
               />
-              {/* Tooltip on hover */}
               <g className="opacity-0 group-hover/point:opacity-100 transition-opacity duration-200 pointer-events-none">
                 <rect
                   x={p.x - 30}
@@ -233,27 +280,35 @@ export default function HistoricalTrendChart({ locationName, unit }: HistoricalT
           ))}
 
           {/* X Axis labels */}
-          {points.filter((_, i) => i === 0 || i === points.length - 1 || (points.length > 5 && i === Math.floor(points.length / 2))).map((p, i) => (
-            <text
-              key={i}
-              x={p.x}
-              y={height - 10}
-              textAnchor="middle"
-              className="fill-text-muted font-sans text-[9px] font-semibold"
-            >
-              {p.date}
-            </text>
-          ))}
+          {points
+            .filter(
+              (_, i) =>
+                i === 0 ||
+                i === points.length - 1 ||
+                (points.length > 5 && i === Math.floor(points.length / 2))
+            )
+            .map((p, i) => (
+              <text
+                key={i}
+                x={p.x}
+                y={height - 10}
+                textAnchor="middle"
+                className="fill-text-muted font-sans text-[9px] font-semibold"
+              >
+                {p.date}
+              </text>
+            ))}
         </svg>
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
-        <span className="text-[10px] text-text-muted font-medium">
-          * Trends compiled from local query sessions.
+      <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between border-t border-border pt-3 gap-2">
+        <span className="text-[10px] text-text-muted font-medium flex items-center gap-1">
+          <Info size={10} className="text-accent" />
+          This is a local session log showing client-side data (capped at 30 entries), not a WeatherAI server historical endpoint.
         </span>
         <button
           onClick={loadData}
-          className="text-accent hover:text-accent/80 text-[10px] font-bold flex items-center gap-1 uppercase transition-colors"
+          className="text-accent hover:text-accent/80 text-[10px] font-bold flex items-center gap-1 uppercase transition-colors shrink-0"
         >
           <RefreshCw size={10} />
           Sync Chart

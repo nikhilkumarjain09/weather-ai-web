@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { Gauge, ShieldCheck, RefreshCw, Zap } from "lucide-react";
+import { Gauge, RefreshCw, Zap } from "lucide-react";
 
 export default function UsagePanel() {
   const { apiPlan, setApiPlan, showToast } = useAppStore();
@@ -22,7 +22,7 @@ export default function UsagePanel() {
         });
       }
     } catch (e) {
-      console.error(e);
+      console.error("Failed to fetch usage quota metrics:", e);
     } finally {
       setLoading(false);
     }
@@ -36,9 +36,33 @@ export default function UsagePanel() {
     const nextPlan = apiPlan === "free" ? "pro" : "free";
     setApiPlan(nextPlan);
     showToast(`Simulated subscription plan changed to ${nextPlan.toUpperCase()}`, "success");
+    // Broadcast plan change to notify dashboard pages to update usage panels
+    window.dispatchEvent(new Event("aeris-usage-updated"));
   };
 
   const percentage = Math.min(100, Math.round((usage.used / usage.limit) * 100));
+
+  // Color-coded thresholds: <50% Accent/Teal, 50-80% Amber/Warning, >80% Red/Danger
+  const getThresholdStyle = (pct: number) => {
+    if (pct >= 80) {
+      return {
+        bar: "bg-red-500",
+        text: "text-red-500",
+      };
+    }
+    if (pct >= 50) {
+      return {
+        bar: "bg-amber-500",
+        text: "text-amber-500",
+      };
+    }
+    return {
+      bar: "bg-accent",
+      text: "text-accent",
+    };
+  };
+
+  const threshold = getThresholdStyle(percentage);
 
   return (
     <div className="bg-surface border border-border rounded-xl p-5 md:p-6 font-sans">
@@ -74,13 +98,13 @@ export default function UsagePanel() {
 
           <div className="w-full bg-surface-raised border border-border rounded-full h-3 overflow-hidden">
             <div
-              className="bg-accent h-full rounded-full transition-all duration-500"
+              className={`${threshold.bar} h-full rounded-full transition-all duration-500`}
               style={{ width: `${percentage}%` }}
             ></div>
           </div>
 
           <div className="flex justify-between text-[10px] font-bold text-text-muted uppercase tracking-wider">
-            <span>{percentage}% Used</span>
+            <span className={threshold.text}>{percentage}% Used</span>
             <span>Resets in {usage.resetDays} days</span>
           </div>
         </div>
