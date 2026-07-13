@@ -349,10 +349,10 @@ export default function DashboardConsole() {
 
                 <HourlyTimeline
                   currentTemp={weather.current.temp}
-                  minTemp={weather.forecast[0]?.minTemp ?? weather.current.temp - 5}
-                  maxTemp={weather.forecast[0]?.maxTemp ?? weather.current.temp + 5}
+                  minTemp={weather.forecast?.[0]?.minTemp ?? weather.current.temp - 5}
+                  maxTemp={weather.forecast?.[0]?.maxTemp ?? weather.current.temp + 5}
                   conditionCode={weather.current.conditionsCode}
-                  precipChance={weather.forecast[0]?.precipChance ?? 0}
+                  precipChance={weather.forecast?.[0]?.precipChance ?? 0}
                 />
 
                 <ForecastStrip days={weather.forecast} unit={unit} lat={weather.current.lat} lon={weather.current.lon} />
