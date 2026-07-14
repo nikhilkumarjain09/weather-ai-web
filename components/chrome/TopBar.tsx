@@ -74,11 +74,13 @@ export default function TopBar({ weather = null }: TopBarProps) {
               WeatherAI
             </span>
           </div>
-          {activeLocation && (
+          {activeLocation ? (
             <div className="flex items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-200 text-[9px] md:text-[10px] font-bold tracking-tight max-w-[90px] sm:max-w-[130px] md:max-w-[170px] truncate ml-1 animate-slide-in">
               <MapPin size={9} className="text-accent shrink-0 animate-pulse" />
               <span className="truncate">{activeLocation.name}</span>
             </div>
+          ) : (
+            <div className="h-5 w-24 md:w-32 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl animate-pulse ml-1 shrink-0" />
           )}
         </div>
 

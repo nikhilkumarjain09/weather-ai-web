@@ -9,9 +9,10 @@ import { Map, MapPin, RefreshCw } from "lucide-react";
 interface WeatherMapProps {
   lat?: number;
   lon?: number;
+  loading?: boolean;
 }
 
-export default function WeatherMap({ lat = 0, lon = 0 }: WeatherMapProps) {
+export default function WeatherMap({ lat = 0, lon = 0, loading }: WeatherMapProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { mapPreference, setMapPreference } = usePreferencesStore();
   const { addSavedLocation } = useFavoritesStore();
@@ -137,6 +138,23 @@ export default function WeatherMap({ lat = 0, lon = 0 }: WeatherMapProps) {
       cancelAnimationFrame(animationFrameId);
     };
   }, [mapPreference, radarSpeed, clickCoords]);
+
+  if (loading) {
+    return (
+      <div className="bg-surface border border-border rounded-xl p-5 md:p-6 font-sans transition-all hover:border-accent/30 relative overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+          <div className="space-y-2">
+            <span className="text-[10px] font-bold text-accent uppercase tracking-widest block font-display">
+              Interactive radar mapping
+            </span>
+            <div className="h-5 w-48 bg-slate-200 dark:bg-white/10 rounded animate-pulse" />
+          </div>
+          <div className="h-8 w-40 bg-slate-100/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl animate-pulse" />
+        </div>
+        <div className="w-full h-80 bg-slate-100/30 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 rounded-2xl animate-pulse" />
+      </div>
+    );
+  }
 
   // Click on map to fetch custom coordinates
   const handleMapClick = (e: React.MouseEvent<HTMLCanvasElement>) => {

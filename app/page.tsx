@@ -303,13 +303,16 @@ export default function DashboardConsole() {
     return () => window.removeEventListener("aeris-detect-location", handleDetectLocation);
   }, [requestLocationAndFetch]);
 
-  // Startup: Geolocate and load live weather
+  // Startup: Geolocate and load live weather if no active location is set or if it's a dynamic location
   useEffect(() => {
-    if (mounted && userName && !startupResolvedRef.current) {
+    if (mounted && !startupResolvedRef.current) {
       startupResolvedRef.current = true;
-      requestLocationAndFetch();
+      const isDynamicLocation = !activeLocation || activeLocation.id === "curr-gps" || activeLocation.id === "curr-ip" || activeLocation.name === "Current Location";
+      if (isDynamicLocation) {
+        requestLocationAndFetch();
+      }
     }
-  }, [mounted, requestLocationAndFetch, userName]);
+  }, [mounted, requestLocationAndFetch, activeLocation]);
 
   // Global Hotkey Manager
   useEffect(() => {
@@ -369,18 +372,42 @@ export default function DashboardConsole() {
         return (
           <div className="space-y-6">
             {error && <ErrorBanner message={error} onRetry={fetchWeather} isLoading={loading} />}
-            {loading && !weather && (
-              <div className="h-60 rounded-xl bg-surface border border-border animate-pulse flex items-center justify-center">
-                <span className="text-xs text-text-muted">Getting today&apos;s weather...</span>
-              </div>
-            )}
-            {weather && !loading && (
+            
+            {(loading && !weather) ? (
+              <>
+                <CurrentConditions
+                  unit={unit}
+                  onRefresh={fetchWeather}
+                  isRefreshing={loading}
+                  loading={true}
+                />
+
+                <HourlyTimeline
+                  loading={true}
+                />
+
+                <ForecastStrip unit={unit} loading={true} />
+
+                <WeatherCharts
+                  loading={true}
+                />
+
+                <WeatherMap
+                  loading={true}
+                />
+
+                <AiSummaryPanel
+                  loading={true}
+                />
+              </>
+            ) : weather ? (
               <>
                 <CurrentConditions
                   data={weather.current}
                   unit={unit}
                   onRefresh={fetchWeather}
                   isRefreshing={loading}
+                  loading={loading}
                 />
 
                 <HourlyTimeline
@@ -389,29 +416,33 @@ export default function DashboardConsole() {
                   maxTemp={weather.forecast?.[0]?.maxTemp ?? weather.current.temp + 5}
                   conditionCode={weather.current.conditionsCode}
                   precipChance={weather.forecast?.[0]?.precipChance ?? 0}
+                  loading={loading}
                 />
 
-                <ForecastStrip days={weather.forecast} unit={unit} lat={weather.current.lat} lon={weather.current.lon} />
+                <ForecastStrip days={weather.forecast} unit={unit} lat={weather.current.lat} lon={weather.current.lon} loading={loading} />
 
                 <WeatherCharts
                   forecast={weather.forecast}
                   currentHumidity={weather.current.humidity}
                   currentWindSpeed={weather.current.windSpeed}
                   currentPressure={weather.current.pressure}
+                  loading={loading}
                 />
 
                 <WeatherMap
                   lat={weather.current.lat}
                   lon={weather.current.lon}
+                  loading={loading}
                 />
 
                 <AiSummaryPanel
                   lat={weather.current.lat}
                   lon={weather.current.lon}
                   locationName={weather.current.locationName}
+                  loading={loading}
                 />
               </>
-            )}
+            ) : null}
           </div>
         );
       case "trends":
@@ -586,18 +617,21 @@ export default function DashboardConsole() {
             icon={Thermometer}
             value={weather?.current ? `${Math.round(unit === "F" ? (weather.current.temp * 9/5 + 32) : weather.current.temp)}°${unit}` : "--"}
             caption="Right now"
+            loading={loading || !weather}
           />
           <StatCard
             label="Feels Like"
             icon={Thermometer}
             value={weather?.current ? `${Math.round(unit === "F" ? (weather.current.feelsLike * 9/5 + 32) : weather.current.feelsLike)}°${unit}` : "--"}
             caption="How it actually feels"
+            loading={loading || !weather}
           />
           <StatCard
             label="Humidity"
             icon={Droplets}
             value={weather?.current ? `${weather.current.humidity}%` : "--"}
             caption="Moisture level in the air"
+            loading={loading || !weather}
           />
         </div>
 

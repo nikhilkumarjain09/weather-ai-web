@@ -20,9 +20,10 @@ import { TrendingUp, Percent, Wind, Droplets, Gauge } from "lucide-react";
 
 interface WeatherChartsProps {
   forecast?: ForecastDayEntity[];
-  currentHumidity: number;
-  currentWindSpeed: number;
-  currentPressure: number;
+  currentHumidity?: number;
+  currentWindSpeed?: number;
+  currentPressure?: number;
+  loading?: boolean;
 }
 
 export default function WeatherCharts({
@@ -30,8 +31,38 @@ export default function WeatherCharts({
   currentHumidity,
   currentWindSpeed,
   currentPressure,
+  loading,
 }: WeatherChartsProps) {
   const { chartPreference, setChartPreference, unit } = usePreferencesStore();
+
+  if (loading || !forecast) {
+    return (
+      <div className="glass-panel p-6 md:p-8 relative overflow-hidden bg-white/40 dark:bg-slate-950/40 border-slate-200/50 dark:border-white/5 shadow-2xl space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <span className="text-[10px] font-bold text-accent uppercase tracking-widest block font-display">
+              Weather analytics
+            </span>
+            <div className="h-5 w-64 bg-slate-200 dark:bg-white/10 rounded animate-pulse" />
+          </div>
+          <div className="h-8 w-60 bg-slate-100/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl animate-pulse" />
+        </div>
+        <div className="w-full h-64 bg-slate-100/30 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 rounded-2xl animate-pulse flex items-center justify-center">
+          <div className="h-32 w-11/12 border-b border-l border-dashed border-slate-200/40 dark:border-white/10 relative flex items-end justify-between p-4">
+            <div className="h-16 w-8 bg-slate-200 dark:bg-white/10 rounded animate-pulse" />
+            <div className="h-24 w-8 bg-slate-200 dark:bg-white/10 rounded animate-pulse" />
+            <div className="h-32 w-8 bg-slate-200 dark:bg-white/10 rounded animate-pulse" />
+            <div className="h-20 w-8 bg-slate-200 dark:bg-white/10 rounded animate-pulse" />
+            <div className="h-28 w-8 bg-slate-200 dark:bg-white/10 rounded animate-pulse" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const curHum = currentHumidity ?? 50;
+  const curWind = currentWindSpeed ?? 10;
+  const curPress = currentPressure ?? 1010;
 
   const convertTemp = (c: number) => {
     if (unit === "F") {
@@ -50,13 +81,13 @@ export default function WeatherCharts({
     const seed = idx * 1.5;
     const derivedHumidity = Math.max(
       15,
-      Math.min(95, Math.round(currentHumidity + Math.sin(seed) * 12))
+      Math.min(95, Math.round(curHum + Math.sin(seed) * 12))
     );
     const derivedWind = Math.max(
       2,
-      Math.min(50, Math.round(currentWindSpeed + Math.cos(seed) * 5))
+      Math.min(50, Math.round(curWind + Math.cos(seed) * 5))
     );
-    const derivedPressure = Math.round(currentPressure + Math.sin(seed * 2) * 8);
+    const derivedPressure = Math.round(curPress + Math.sin(seed * 2) * 8);
 
     return {
       name: getDayName(day.date),

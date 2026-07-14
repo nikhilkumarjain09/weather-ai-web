@@ -7,11 +7,12 @@ import { Droplet } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface HourlyTimelineProps {
-  currentTemp: number;
-  minTemp: number;
-  maxTemp: number;
-  conditionCode: string;
-  precipChance: number;
+  currentTemp?: number;
+  minTemp?: number;
+  maxTemp?: number;
+  conditionCode?: string;
+  precipChance?: number;
+  loading?: boolean;
 }
 
 export default function HourlyTimeline({
@@ -20,8 +21,43 @@ export default function HourlyTimeline({
   maxTemp,
   conditionCode,
   precipChance,
+  loading,
 }: HourlyTimelineProps) {
   const { unit, animationsEnabled } = usePreferencesStore();
+
+  if (loading) {
+    return (
+      <div className="glass-panel p-6 md:p-8 relative overflow-hidden bg-white/40 dark:bg-slate-950/40 border-slate-200/50 dark:border-white/5 shadow-2xl">
+        <div className="space-y-2">
+          <span className="text-[10px] font-bold text-accent uppercase tracking-widest block font-display">
+            Coming up
+          </span>
+          <div className="h-5 w-48 bg-slate-200 dark:bg-white/10 rounded animate-pulse" />
+        </div>
+
+        {/* Horizontal Scroll Timeline Skeleton */}
+        <div className="flex gap-4 overflow-x-auto py-5 mt-5 scrollbar-thin">
+          {Array.from({ length: 8 }).map((_, idx) => (
+            <div
+              key={idx}
+              className="flex flex-col items-center justify-between text-center min-w-[76px] bg-slate-100/40 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 rounded-2xl p-4 shrink-0"
+            >
+              <div className="h-3 w-8 bg-slate-200 dark:bg-white/5 animate-pulse rounded" />
+              <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-white/10 animate-pulse my-3" />
+              <div className="h-4 w-6 bg-slate-200 dark:bg-white/10 animate-pulse rounded" />
+              <div className="h-3 w-8 bg-slate-200 dark:bg-white/5 animate-pulse rounded mt-2" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const curTemp = currentTemp ?? 20;
+  const mnTemp = minTemp ?? 15;
+  const mxTemp = maxTemp ?? 25;
+  const condCode = conditionCode ?? "sunny";
+  const pChance = precipChance ?? 0;
 
   const convertTemp = (c: number) => {
     if (unit === "F") {
@@ -40,11 +76,12 @@ export default function HourlyTimeline({
 
     const rad = ((hourVal - 10) / 24) * 2 * Math.PI;
     const tempOffset = (Math.sin(rad) + 1) / 2;
-    const rawTemp = minTemp + (maxTemp - minTemp) * tempOffset;
-    const temp = i === 0 ? currentTemp : Math.round(rawTemp);
+    const rawTemp = mnTemp + (mxTemp - mnTemp) * tempOffset;
+    const temp = i === 0 ? curTemp : Math.round(rawTemp);
 
     const rainOffset = Math.sin((hourVal / 24) * Math.PI) * 15;
-    const rain = Math.max(0, Math.min(100, Math.round(precipChance + rainOffset)));
+    const rain = Math.max(0, Math.min(100, Math.round(pChance + rainOffset)));
+
 
     const windOffset = Math.cos((hourVal / 24) * Math.PI) * 4;
     const wind = Math.max(2, Math.round(12 + windOffset));
@@ -81,7 +118,7 @@ export default function HourlyTimeline({
             <span className="text-[10px] font-bold text-text-muted tracking-tight">{item.label}</span>
 
             <div className="my-3 drop-shadow-[0_0_8px_rgba(99,102,241,0.15)]">
-              <AnimatedWeatherIcon code={conditionCode} size={24} />
+              <AnimatedWeatherIcon code={condCode} size={24} />
             </div>
 
             <span className="font-display text-xs font-extrabold text-text-primary">

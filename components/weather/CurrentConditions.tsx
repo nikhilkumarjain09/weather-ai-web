@@ -22,10 +22,11 @@ import {
 } from "lucide-react";
 
 interface CurrentConditionsProps {
-  data: CurrentWeatherEntity;
+  data?: CurrentWeatherEntity;
   unit: "C" | "F";
   onRefresh: () => void;
   isRefreshing: boolean;
+  loading?: boolean;
 }
 
 export default function CurrentConditions({
@@ -33,8 +34,58 @@ export default function CurrentConditions({
   unit,
   onRefresh,
   isRefreshing,
+  loading,
 }: CurrentConditionsProps) {
   const { userName, activeLocation } = useAppStore();
+
+  if (loading || !data) {
+    return (
+      <div className="glass-panel p-6 md:p-8 space-y-8 relative overflow-hidden bg-white/40 dark:bg-slate-950/40 border-slate-200/50 dark:border-white/5 shadow-2xl">
+        {/* Dynamic top ambient glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-gradient-to-b from-accent/10 to-transparent blur-2xl pointer-events-none" />
+
+        {/* Header greeting & refresh */}
+        <div className="flex items-center justify-between pb-6 border-b border-slate-100 dark:border-white/5 relative z-10">
+          <div className="space-y-2 w-full max-w-xs">
+            <span className="text-[10px] font-bold text-accent uppercase tracking-widest block font-display">
+              Active Station Analytics
+            </span>
+            <div className="h-6 w-48 bg-slate-200 dark:bg-white/10 rounded animate-pulse" />
+            <div className="h-4 w-32 bg-slate-200 dark:bg-white/5 rounded animate-pulse" />
+          </div>
+          <div className="p-3 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-text-muted">
+            <RefreshCw size={15} className="animate-spin opacity-50" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+          {/* Hero Widget Skeleton */}
+          <div className="lg:col-span-5 flex flex-col items-center text-center p-6 bg-slate-100/40 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 rounded-2xl relative overflow-hidden">
+            <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-white/10 animate-pulse mb-4" />
+            <div className="h-16 w-32 bg-slate-200 dark:bg-white/10 animate-pulse rounded-xl mb-3" />
+            <div className="h-4 w-24 bg-slate-200 dark:bg-white/5 animate-pulse rounded" />
+            <div className="mt-5 h-6 w-32 bg-slate-200 dark:bg-white/5 animate-pulse rounded-full" />
+          </div>
+
+          {/* Detailed Stats Grid Skeleton */}
+          <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {Array.from({ length: 9 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5"
+              >
+                <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-white/10 animate-pulse shrink-0" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-2.5 w-12 bg-slate-200 dark:bg-white/5 animate-pulse rounded" />
+                  <div className="h-3.5 w-16 bg-slate-200 dark:bg-white/10 animate-pulse rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const convertTemp = (c: number) => {
     if (unit === "F") {

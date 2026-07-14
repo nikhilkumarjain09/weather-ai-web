@@ -7,20 +7,38 @@ import { weatherService } from "@/services/weather/service";
 import LockedFeatureBadge from "@/components/shared/LockedFeatureBadge";
 
 interface AiSummaryPanelProps {
-  lat: number;
-  lon: number;
-  locationName: string;
+  lat?: number;
+  lon?: number;
+  locationName?: string;
+  loading?: boolean;
 }
 
-export default function AiSummaryPanel({ lat, lon, locationName }: AiSummaryPanelProps) {
+export default function AiSummaryPanel({ lat = 0, lon = 0, locationName = "", loading }: AiSummaryPanelProps) {
   const { showToast, apiPlan } = useAppStore();
   const [isExpanded, setIsExpanded] = useState(false);
   const [insights, setInsights] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingInsights, setLoadingInsights] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  if (loading) {
+    return (
+      <div className="bg-surface border border-border rounded-xl p-5 md:p-6 font-sans transition-all hover:border-accent/30 relative overflow-hidden">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 w-full">
+            <div className="w-9.5 h-9.5 rounded bg-surface-raised border border-border animate-pulse shrink-0 bg-slate-200 dark:bg-white/5" />
+            <div className="space-y-2 flex-1">
+              <div className="h-4 w-60 bg-slate-200 dark:bg-white/10 animate-pulse rounded" />
+              <div className="h-3 w-40 bg-slate-200 dark:bg-white/5 animate-pulse rounded" />
+            </div>
+          </div>
+          <div className="w-4 h-4 bg-slate-200 dark:bg-white/5 animate-pulse rounded" />
+        </div>
+      </div>
+    );
+  }
+
   const fetchAiInsights = async () => {
-    setLoading(true);
+    setLoadingInsights(true);
     setError(null);
     try {
       const res = await weatherService.getInsights({ lat, lon });
@@ -39,7 +57,7 @@ export default function AiSummaryPanel({ lat, lon, locationName }: AiSummaryPane
       }
       showToast("We couldn't load the weather story right now.", "danger");
     } finally {
-      setLoading(false);
+      setLoadingInsights(false);
     }
   };
 
@@ -52,7 +70,7 @@ export default function AiSummaryPanel({ lat, lon, locationName }: AiSummaryPane
     }
     const nextState = !isExpanded;
     setIsExpanded(nextState);
-    if (nextState && !insights && !loading) {
+    if (nextState && !insights && !loadingInsights) {
       fetchAiInsights();
     }
   };
@@ -87,7 +105,7 @@ export default function AiSummaryPanel({ lat, lon, locationName }: AiSummaryPane
       >
         <div className="flex items-center gap-3">
           <div className="p-2 rounded bg-surface-raised border border-border text-accent shrink-0">
-            <Bot size={18} className={loading ? "animate-pulse" : ""} />
+            <Bot size={18} className={loadingInsights ? "animate-pulse" : ""} />
           </div>
           <div>
             <h3 className="font-display text-sm md:text-base font-bold text-text-primary group-hover:text-accent transition-colors flex items-center gap-2">
@@ -113,7 +131,7 @@ export default function AiSummaryPanel({ lat, lon, locationName }: AiSummaryPane
       {/* Expanded Panel Details */}
       {isExpanded && (
         <div className="mt-5 border-t border-border pt-5 space-y-6 animate-slide-in">
-          {loading ? (
+          {loadingInsights ? (
             <div className="space-y-3 py-2 animate-pulse">
               <div className="h-3 bg-surface-raised border border-border rounded-full w-full"></div>
               <div className="h-3 bg-surface-raised border border-border rounded-full w-5/6"></div>

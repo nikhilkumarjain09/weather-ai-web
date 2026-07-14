@@ -19,13 +19,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePreferencesStore } from "@/store/preferencesStore";
 
 interface ForecastStripProps {
-  days: ForecastDayEntity[];
+  days?: ForecastDayEntity[];
   unit: "C" | "F";
   lat?: number;
   lon?: number;
+  loading?: boolean;
 }
 
-export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripProps) {
+export default function ForecastStrip({ days, unit, lat, lon, loading }: ForecastStripProps) {
   const { animationsEnabled } = usePreferencesStore();
   const { apiPlan, showToast } = useAppStore();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
@@ -68,6 +69,36 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
       fetchProForecast();
     }
   }, [forecastMode, apiPlan, lat, lon, showToast]);
+
+  if (loading) {
+    return (
+      <div className="glass-panel p-6 md:p-8 relative overflow-hidden bg-white/40 dark:bg-slate-950/40 border-slate-200/50 dark:border-white/5 shadow-2xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="space-y-2">
+            <span className="text-[10px] font-bold text-accent uppercase tracking-widest block font-display">
+              Coming up
+            </span>
+            <div className="h-5 w-24 bg-slate-200 dark:bg-white/10 rounded animate-pulse" />
+          </div>
+          <div className="h-8 w-24 bg-slate-100/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl animate-pulse" />
+        </div>
+
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, idx) => (
+            <div
+              key={idx}
+              className="flex items-center justify-between p-4 bg-slate-100/40 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 rounded-2xl"
+            >
+              <div className="h-4 w-16 bg-slate-200 dark:bg-white/10 animate-pulse rounded" />
+              <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-white/10 animate-pulse" />
+              <div className="h-4 w-12 bg-slate-200 dark:bg-white/10 animate-pulse rounded" />
+              <div className="h-4 w-20 bg-slate-200 dark:bg-white/5 animate-pulse rounded" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const activeDays = (forecastMode === "7" || apiPlan === "free" ? days : proForecast) || [];
 

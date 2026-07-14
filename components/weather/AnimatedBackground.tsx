@@ -137,9 +137,15 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
       {/* 1. Base Gradient Layer */}
       <div className={`absolute inset-0 bg-gradient-to-b ${theme.classes} transition-all duration-1000`} />
 
-      {/* 2. Twinkling Stars Overlay for Night */}
+      {/* 2. Twinkling Stars & Space View for Night */}
       {resolvedIsNight && (
-        <div className="absolute inset-0 z-0 opacity-40">
+        <div className="absolute inset-0 z-0 select-none pointer-events-none">
+          {/* Nebula dust */}
+          <div className="absolute top-[10%] left-[15%] w-96 h-96 rounded-full bg-purple-900/10 filter blur-[100px] animate-pulse-glow" />
+          <div className="absolute bottom-[20%] right-[15%] w-[400px] h-[400px] rounded-full bg-indigo-900/10 filter blur-[120px]" />
+          <div className="absolute top-[40%] right-[25%] w-80 h-80 rounded-full bg-teal-950/10 filter blur-[90px]" />
+
+          {/* Twinkling Stars */}
           {Array.from({ length: 45 }).map((_, i) => (
             <div
               key={i}
@@ -152,6 +158,89 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
               }}
             />
           ))}
+
+          {/* Constellation dashed lines */}
+          <svg className="absolute inset-0 w-full h-full opacity-10" stroke="white" strokeWidth="0.5" strokeDasharray="2 4">
+            <line x1="10%" y1="20%" x2="18%" y2="12%" />
+            <line x1="18%" y1="12%" x2="25%" y2="22%" />
+            <line x1="25%" y1="22%" x2="30%" y2="15%" />
+
+            <line x1="70%" y1="40%" x2="75%" y2="30%" />
+            <line x1="75%" y1="30%" x2="85%" y2="35%" />
+          </svg>
+
+          {/* Pinned Planet (Saturn) */}
+          <div className="absolute top-[15%] right-[12%] w-20 h-12 opacity-25 hover:opacity-40 transition-opacity">
+            <svg viewBox="0 0 100 60" fill="none" className="w-full h-full text-indigo-300">
+              <ellipse cx="50" cy="30" rx="35" ry="7" stroke="currentColor" strokeWidth="1.5" transform="rotate(-15 50 30)" className="opacity-60" />
+              <circle cx="50" cy="30" r="14" fill="#090d1f" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M 16 31.5 A 35 7 0 0 0 84 28.5" stroke="currentColor" strokeWidth="1.5" transform="rotate(-15 50 30)" className="opacity-80" />
+            </svg>
+          </div>
+
+          {/* Pinned Planet (Mars or distant moon) */}
+          <div className="absolute top-[25%] left-[8%] w-10 h-10 opacity-15">
+            <svg viewBox="0 0 40 40" fill="none" className="w-full h-full text-rose-400">
+              <circle cx="20" cy="20" r="12" fill="#0c0a1a" stroke="currentColor" strokeWidth="1.5" />
+              {/* craters */}
+              <circle cx="16" cy="16" r="2" fill="currentColor" className="opacity-40" />
+              <circle cx="24" cy="22" r="3" fill="currentColor" className="opacity-40" />
+            </svg>
+          </div>
+
+          {/* Shooting Stars */}
+          {Array.from({ length: 3 }).map((_, i) => (
+            <motion.div
+              key={i}
+              initial={{ x: "85%", y: "-10%", opacity: 0 }}
+              animate={{ x: "-20%", y: "90%", opacity: [0, 1, 1, 0] }}
+              transition={{
+                duration: 1.5 + Math.random(),
+                repeat: Infinity,
+                repeatDelay: 10 + Math.random() * 15,
+                ease: "easeInOut",
+                delay: i * 6,
+              }}
+              className="absolute w-24 h-[1px] bg-gradient-to-r from-transparent via-white to-transparent transform -rotate-[45deg] origin-left"
+            />
+          ))}
+        </div>
+      )}
+
+      {/* 9. Cartoonic Floating Clouds for Day Light Mode */}
+      {resolvedTheme === "light" && !resolvedIsNight && (
+        <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
+          {Array.from({ length: 5 }).map((_, i) => {
+            const size = 80 + (i % 3) * 40; // 80 to 160px width
+            const duration = 45 + i * 15; // 45s to 105s speed
+            const yOffset = 5 + i * 14; // vertical offsets: 5%, 19%, 33%, 47%, 61%
+            const delay = i * -12; // negative delay to distribute clouds pre-render
+
+            return (
+              <motion.div
+                key={i}
+                initial={{ x: "-200px", y: `${yOffset}%` }}
+                animate={{ x: "100vw" }}
+                transition={{
+                  duration,
+                  repeat: Infinity,
+                  ease: "linear",
+                  delay,
+                }}
+                className="absolute"
+                style={{ width: `${size}px` }}
+              >
+                <svg viewBox="0 0 100 60" fill="none" className="w-full h-full">
+                  <path
+                    d="M 20 40 A 15 15 0 0 1 45 25 A 22 22 0 0 1 85 30 A 15 15 0 0 1 95 45 A 12 12 0 0 1 85 55 L 20 55 A 12 12 0 0 1 20 40 Z"
+                    fill="rgba(255, 255, 255, 0.85)"
+                    stroke="rgba(226, 232, 240, 0.95)"
+                    strokeWidth="1.5"
+                  />
+                </svg>
+              </motion.div>
+            );
+          })}
         </div>
       )}
 
