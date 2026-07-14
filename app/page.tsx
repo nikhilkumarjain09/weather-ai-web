@@ -124,12 +124,15 @@ export default function DashboardConsole() {
     return () => window.removeEventListener("aeris-usage-updated", fetchUsage);
   }, [fetchUsage, weather]);
 
-  // Sync client-side theme class to document element
+  // Sync client-side theme class to document element (force dark mode styles at night)
   useEffect(() => {
     const root = document.documentElement;
+    const isNight = weather?.current?.isDay === 0 || weather?.current?.conditionsCode?.toLowerCase() === "night";
+    
     const isDark =
       theme === "dark" ||
-      (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches) ||
+      isNight;
 
     if (isDark) {
       root.classList.add("dark");
@@ -138,7 +141,7 @@ export default function DashboardConsole() {
       root.classList.add("light");
       root.classList.remove("dark");
     }
-  }, [theme]);
+  }, [theme, weather]);
 
   // Track hydration mount state
   useEffect(() => {

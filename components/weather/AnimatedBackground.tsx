@@ -252,6 +252,38 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
             </svg>
           </div>
 
+          {/* Bottom-Left Galaxy (Andromeda style) */}
+          <motion.div
+            animate={{ rotate: [0, 360] }}
+            transition={{ duration: 240, repeat: Infinity, ease: "linear" }}
+            className="absolute bottom-[10%] left-[6%] pointer-events-none select-none"
+          >
+            <svg viewBox="0 0 160 100" className="w-56 h-36 text-indigo-400 opacity-20 hover:opacity-35 transition-opacity duration-500">
+              <ellipse cx="80" cy="50" rx="14" ry="8" fill="white" className="blur-[4px]" />
+              <ellipse cx="80" cy="50" rx="30" ry="15" fill="var(--color-accent)" className="opacity-30 blur-[8px]" />
+              <path d="M 80 50 Q 110 30 130 50 T 150 70" stroke="currentColor" strokeWidth="1.5" fill="none" strokeDasharray="3 6" className="opacity-70" />
+              <path d="M 80 50 Q 50 70 30 50 T 10 30" stroke="currentColor" strokeWidth="1.5" fill="none" strokeDasharray="3 6" className="opacity-70" />
+              <path d="M 80 50 Q 100 70 120 60 T 140 40" stroke="currentColor" strokeWidth="1" fill="none" strokeDasharray="2 4" className="opacity-50" />
+              <path d="M 80 50 Q 60 30 40 40 T 20 60" stroke="currentColor" strokeWidth="1" fill="none" strokeDasharray="2 4" className="opacity-50" />
+            </svg>
+          </motion.div>
+
+          {/* Bottom-Right Galaxy (Pinwheel style) */}
+          <motion.div
+            animate={{ rotate: [360, 0] }}
+            transition={{ duration: 200, repeat: Infinity, ease: "linear" }}
+            className="absolute bottom-[8%] right-[8%] pointer-events-none select-none"
+          >
+            <svg viewBox="0 0 120 120" className="w-44 h-44 text-teal-400 opacity-15 hover:opacity-30 transition-opacity duration-500">
+              <circle cx="60" cy="60" r="10" fill="white" className="blur-[3px]" />
+              <circle cx="60" cy="60" r="25" fill="#2dd4bf" className="opacity-25 blur-[6px]" />
+              <path d="M 60 60 C 80 40, 90 70, 100 80" stroke="currentColor" strokeWidth="1.5" fill="none" strokeDasharray="4 4" className="opacity-65" />
+              <path d="M 60 60 C 40 80, 30 50, 20 40" stroke="currentColor" strokeWidth="1.5" fill="none" strokeDasharray="4 4" className="opacity-65" />
+              <path d="M 60 60 C 80 80, 50 90, 40 100" stroke="currentColor" strokeWidth="1.5" fill="none" strokeDasharray="4 4" className="opacity-65" />
+              <path d="M 60 60 C 40 40, 70 30, 80 20" stroke="currentColor" strokeWidth="1.5" fill="none" strokeDasharray="4 4" className="opacity-65" />
+            </svg>
+          </motion.div>
+
           {/* Shooting Stars */}
           {Array.from({ length: 3 }).map((_, i) => (
             <motion.div
@@ -274,16 +306,16 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
       {/* 9. Cartoonic Floating Clouds for Day Light Mode */}
       {!showSpaceView && (
         <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
-          {Array.from({ length: 15 }).map((_, i) => {
+          {Array.from({ length: 22 }).map((_, i) => {
             const seedWidth = i * 23 + 17;
             const seedSpeed = i * 37 + 13;
             const seedHeight = i * 43 + 19;
             const seedDelay = i * 59 + 29;
 
             const size = 80 + Math.floor(pseudoRandom(seedWidth) * 140); // 80 to 220px width
-            const duration = 40 + Math.floor(pseudoRandom(seedSpeed) * 70); // 40s to 110s speed
-            const yOffset = 3 + Math.floor(pseudoRandom(seedHeight) * 82); // spread 3% to 85% (top to bottom)
-            const delay = pseudoRandom(seedDelay) * -90; // negative delay to pre-distribute
+            const duration = 40 + Math.floor(pseudoRandom(seedSpeed) * 80); // 40s to 120s speed
+            const yOffset = 3 + Math.floor(pseudoRandom(seedHeight) * 91); // spread 3% to 94% (top to bottom)
+            const delay = pseudoRandom(seedDelay) * -120; // negative delay to pre-distribute
 
             const styleIndex = i % 3;
             let pathD = "M 20 40 A 15 15 0 0 1 45 25 A 22 22 0 0 1 85 30 A 15 15 0 0 1 95 45 A 12 12 0 0 1 85 55 L 20 55 A 12 12 0 0 1 20 40 Z"; // Style A (Standard)
@@ -421,7 +453,7 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
 
       {/* 8. Realistic Puffy Floating Clouds Layer */}
       <div className="absolute inset-0">
-        {Array.from({ length: 12 }).map((_, i) => {
+        {Array.from({ length: 18 }).map((_, i) => {
           const seedWidth = i * 19 + 7;
           const seedHeight = i * 31 + 13;
           const seedSpeed = i * 43 + 17;
@@ -431,7 +463,7 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
           const sizeWidth = 200 + Math.floor(pseudoRandom(seedWidth) * 250); // 200 to 450px width
           const sizeHeight = 60 + Math.floor(pseudoRandom(seedHeight) * 80); // 60 to 140px height
           const duration = 50 + Math.floor(pseudoRandom(seedSpeed) * 80); // 50s to 130s speed
-          const yOffset = 3 + Math.floor(pseudoRandom(seedY) * 87); // spread 3% to 90% (top to bottom)
+          const yOffset = 3 + Math.floor(pseudoRandom(seedY) * 91); // spread 3% to 94% (top to bottom)
           const blurVal = 40 + Math.floor(pseudoRandom(seedBlur) * 45); // blur 40px to 85px (different styles)
           
           let cloudClass = "bg-white/40 border-white/10 dark:bg-slate-900/30 dark:border-white/5";
