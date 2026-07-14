@@ -99,8 +99,7 @@ export default function DashboardConsole() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const [isOfflineMode, setIsOfflineMode] = useState(false);
-  const [lastUpdatedTime, setLastUpdatedTime] = useState("");
+
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const startupResolvedRef = useRef(false);
@@ -150,7 +149,6 @@ export default function DashboardConsole() {
   const fetchWeather = useCallback(async () => {
     setLoading(true);
     setError(null);
-    setIsOfflineMode(false);
     
     let lat = activeLocation?.lat;
     let lon = activeLocation?.lon;
@@ -221,8 +219,6 @@ export default function DashboardConsole() {
       const cachedResponse = getLastSuccessfulResponse();
       if (cachedResponse) {
         setWeather(cachedResponse.data);
-        setIsOfflineMode(true);
-        setLastUpdatedTime(new Date(cachedResponse.timestamp).toLocaleTimeString());
         showToast("Offline mode: loaded cached response", "warning");
       } else {
         setError(err.message || "Failed to retrieve meteorology data.");
@@ -584,7 +580,7 @@ export default function DashboardConsole() {
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text-primary font-sans flex flex-col pt-24 pb-16 md:pb-0 relative">
+    <div className="min-h-screen bg-transparent text-text-primary font-sans flex flex-col pt-24 pb-16 md:pb-0 relative">
       <AnimatedBackground
         conditionCode={weather?.current?.conditionsCode || "sunny"}
         isDay={weather?.current?.isDay ?? 1}
@@ -614,19 +610,7 @@ export default function DashboardConsole() {
           </div>
         </div>
 
-        {isOfflineMode && (
-          <div className="bg-amber-500/10 border border-amber-500/20 text-amber-500 p-3 rounded-lg flex items-center justify-between text-xs animate-slide-in">
-            <span className="font-medium">
-              Offline Mode: Displaying last cached weather conditions (Last updated: {lastUpdatedTime}).
-            </span>
-            <button
-              onClick={fetchWeather}
-              className="px-2.5 py-1 bg-amber-500 text-bg hover:bg-amber-600 rounded font-bold uppercase text-[10px] transition-colors"
-            >
-              Retry Connection
-            </button>
-          </div>
-        )}
+
 
         {/* Dashboard Stat Cards row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

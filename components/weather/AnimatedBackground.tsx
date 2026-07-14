@@ -22,7 +22,7 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
 
   const code = conditionCode.toLowerCase();
   const resolvedIsNight = isDay === 0 || code === "night";
-  const showSpaceView = isDark || resolvedIsNight;
+  const showSpaceView = resolvedIsNight;
 
   const isRain = code === "rainy" || code === "stormy";
   const isSnow = code === "snowy";
@@ -67,11 +67,17 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
     glowColor: "rgba(99, 102, 241, 0.08)",
   };
 
-  if (showSpaceView) {
+  if (resolvedIsNight) {
     // Starry night sky/space colors
     bgTheme = {
       classes: "from-[#02040b] via-[#050c18] to-[#010204]",
       glowColor: "rgba(99, 102, 241, 0.04)",
+    };
+  } else if (isDark) {
+    // Sleek dark-mode day colors
+    bgTheme = {
+      classes: "from-[#0b0f19] via-[#161f38] to-[#0a0d16]",
+      glowColor: "rgba(99, 102, 241, 0.08)",
     };
   } else {
     // Bright, elegant light-mode day colors
@@ -109,8 +115,10 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
     if (lightning) {
       root.style.setProperty("--bg", !isDark ? "#f1f5f9" : "#2e2059");
     } else {
-      if (showSpaceView) {
+      if (resolvedIsNight) {
         root.style.setProperty("--bg", "#02040b");
+      } else if (isDark) {
+        root.style.setProperty("--bg", "#0a0d16");
       } else {
         root.style.setProperty("--bg", isSun ? "#fef3c7" : isRain ? "#e2e8f0" : "#f8fafc");
       }
@@ -218,8 +226,8 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
                 <svg viewBox="0 0 100 60" fill="none" className="w-full h-full">
                   <path
                     d="M 20 40 A 15 15 0 0 1 45 25 A 22 22 0 0 1 85 30 A 15 15 0 0 1 95 45 A 12 12 0 0 1 85 55 L 20 55 A 12 12 0 0 1 20 40 Z"
-                    fill="rgba(255, 255, 255, 0.85)"
-                    stroke="rgba(226, 232, 240, 0.95)"
+                    fill={isDark ? "rgba(30, 41, 59, 0.55)" : "rgba(255, 255, 255, 0.85)"}
+                    stroke={isDark ? "rgba(71, 85, 105, 0.45)" : "rgba(226, 232, 240, 0.95)"}
                     strokeWidth="1.5"
                   />
                 </svg>
