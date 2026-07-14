@@ -248,6 +248,7 @@ export default function DashboardConsole() {
 
   const requestLocationAndFetch = useCallback(async () => {
     if (typeof navigator !== "undefined" && navigator.geolocation) {
+      setLoading(true);
       try {
         const position = await new Promise<GeolocationPosition>((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 6000 });
@@ -272,13 +273,17 @@ export default function DashboardConsole() {
           console.warn("Reverse geocode failed", e);
         }
 
-        setActiveLocation({
-          id: "curr-gps",
-          name,
-          lat,
-          lon,
-          isDefault: false,
-        });
+        if (activeLocation?.lat === lat && activeLocation?.lon === lon) {
+          fetchWeather();
+        } else {
+          setActiveLocation({
+            id: "curr-gps",
+            name,
+            lat,
+            lon,
+            isDefault: false,
+          });
+        }
         showToast(`Focus location set to: ${name}`, "success");
       } catch {
         // Fallback to IP lookup
@@ -287,28 +292,36 @@ export default function DashboardConsole() {
           const lat = clientLoc.lat;
           const lon = clientLoc.lon;
           saveLastCoordinates(lat, lon);
-          setActiveLocation({
-            id: "curr-ip",
-            name: clientLoc.city,
-            lat,
-            lon,
-            isDefault: false,
-          });
+          if (activeLocation?.lat === lat && activeLocation?.lon === lon) {
+            fetchWeather();
+          } else {
+            setActiveLocation({
+              id: "curr-ip",
+              name: clientLoc.city,
+              lat,
+              lon,
+              isDefault: false,
+            });
+          }
           showToast(`Location resolved via IP: ${clientLoc.city}`, "info");
         } catch {
           // Default coords fallback
-          setActiveLocation({
-            id: "default-sf",
-            name: "San Francisco, CA",
-            lat: 37.7749,
-            lon: -122.4194,
-            isDefault: false,
-          });
+          if (activeLocation?.lat === 37.7749 && activeLocation?.lon === -122.4194) {
+            fetchWeather();
+          } else {
+            setActiveLocation({
+              id: "default-sf",
+              name: "San Francisco, CA",
+              lat: 37.7749,
+              lon: -122.4194,
+              isDefault: false,
+            });
+          }
           showToast("Using default station: San Francisco", "warning");
         }
       }
     }
-  }, [setActiveLocation, showToast]);
+  }, [activeLocation, setActiveLocation, fetchWeather, showToast]);
 
   // Listen for geolocate requests from SearchBar or CommandPalette
   useEffect(() => {
