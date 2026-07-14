@@ -80,7 +80,7 @@ export default function AiInsightsModal({ isOpen, onClose, weather }: AiInsights
             </div>
             <div>
               <h2 className="font-display text-base font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
-                Groq Weather Insights
+                AI Weather Insights
               </h2>
               <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block mt-0.5">
                 Focus Station: {weather?.current.locationName || "Detecting..."}
@@ -157,7 +157,7 @@ export default function AiInsightsModal({ isOpen, onClose, weather }: AiInsights
         {/* Modal Footer Brand */}
         <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-white/5 text-[9px] text-slate-400 dark:text-slate-500 font-semibold relative z-10">
           <span className="flex items-center gap-1">
-            <CheckCircle size={10} className="text-accent" /> Powered by Groq Llama-3.1
+            <CheckCircle size={10} className="text-accent" /> Powered by Advanced AI Model
           </span>
           <span>Aeris Platform</span>
         </div>

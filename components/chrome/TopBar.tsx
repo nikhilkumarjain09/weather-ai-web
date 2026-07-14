@@ -93,7 +93,7 @@ export default function TopBar({ weather = null }: TopBarProps) {
             <button
               onClick={() => setIsInsightsOpen(true)}
               className="p-2 rounded-xl bg-accent text-white hover:bg-accent/90 transition-all hover:scale-105 flex items-center justify-center shadow-lg shadow-accent/15"
-              title="Get Groq AI Insights"
+              title="Get AI Weather Insights"
             >
               <Sparkles size={14} className="animate-pulse" />
             </button>
