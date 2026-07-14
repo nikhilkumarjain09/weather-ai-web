@@ -1,4 +1,4 @@
-const BASE_URL = "https://api.weather-ai.co";
+const BASE_URL = process.env.WEATHER_AI_BASE_URL || "https://api.weather-ai.co";
 
 export interface ApiError {
   error: {
@@ -14,7 +14,7 @@ export async function requestWeatherApi(
   options?: RequestInit,
   retries = 2
 ): Promise<any> {
-  const apiKey = process.env.WEATHERAI_KEY;
+  const apiKey = process.env.WEATHER_AI_API_KEY || process.env.WEATHERAI_KEY;
 
   // Construct URL
   const urlPath = path.startsWith("/") ? path : `/${path}`;

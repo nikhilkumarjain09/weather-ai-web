@@ -55,6 +55,31 @@ import {
   Droplets,
 } from "lucide-react";
 
+async function getClientIpLocation() {
+  try {
+    const res = await fetch("https://ipapi.co/json/");
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data.latitude === "number" && typeof data.longitude === "number") {
+        return {
+          lat: data.latitude,
+          lon: data.longitude,
+          city: data.city || "My Location",
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("Client-side IP geolocator failed, using backend proxy", err);
+  }
+  
+  const ipRes = await weatherService.getIpLookup();
+  return {
+    lat: ipRes.location.lat,
+    lon: ipRes.location.lon,
+    city: ipRes.location.city,
+  };
+}
+
 export default function DashboardConsole() {
   const {
     userName,
@@ -141,11 +166,13 @@ export default function DashboardConsole() {
         } catch {
           // Denied or timeout -> fallback to IP Lookup
           try {
-            const ipRes = await weatherService.getIpLookup();
-            lat = ipRes.location.lat;
-            lon = ipRes.location.lon;
-            saveLastCoordinates(lat, lon);
-            showToast(`Location resolved from IP: ${ipRes.location.city}`, "info");
+            const clientLoc = await getClientIpLocation();
+            lat = clientLoc.lat;
+            lon = clientLoc.lon;
+            if (lat !== undefined && lon !== undefined) {
+              saveLastCoordinates(lat, lon);
+            }
+            showToast(`Location resolved from IP: ${clientLoc.city}`, "info");
           } catch {
             // Default coords fallback
             lat = 37.7749;
@@ -226,18 +253,18 @@ export default function DashboardConsole() {
       } catch {
         // Fallback to IP lookup
         try {
-          const ipRes = await weatherService.getIpLookup();
-          const lat = ipRes.location.lat;
-          const lon = ipRes.location.lon;
+          const clientLoc = await getClientIpLocation();
+          const lat = clientLoc.lat;
+          const lon = clientLoc.lon;
           saveLastCoordinates(lat, lon);
           setActiveLocation({
             id: "curr-ip",
-            name: ipRes.location.city,
+            name: clientLoc.city,
             lat,
             lon,
             isDefault: false,
           });
-          showToast(`Location resolved via IP: ${ipRes.location.city}`, "info");
+          showToast(`Location resolved via IP: ${clientLoc.city}`, "info");
         } catch {
           // Default coords
           showToast("Using default station: San Francisco", "warning");
