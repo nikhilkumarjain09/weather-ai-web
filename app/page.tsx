@@ -102,6 +102,7 @@ export default function DashboardConsole() {
   const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [lastUpdatedTime, setLastUpdatedTime] = useState("");
   const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const fetchUsage = useCallback(async () => {
     try {
@@ -138,6 +139,11 @@ export default function DashboardConsole() {
       root.classList.remove("dark");
     }
   }, [theme]);
+
+  // Track hydration mount state
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Main Weather Fetch Logic
   const fetchWeather = useCallback(async () => {
@@ -228,10 +234,10 @@ export default function DashboardConsole() {
 
   // Welcome Modal first-launch trigger
   useEffect(() => {
-    if (!userName) {
+    if (mounted && !userName) {
       setWelcomeOpen(true);
     }
-  }, [userName]);
+  }, [mounted, userName]);
 
   const requestLocationAndFetch = useCallback(async () => {
     if (typeof navigator !== "undefined" && navigator.geolocation) {
@@ -272,6 +278,15 @@ export default function DashboardConsole() {
       }
     }
   }, [setActiveLocation, showToast]);
+
+  // Listen for geolocate requests from SearchBar or CommandPalette
+  useEffect(() => {
+    function handleDetectLocation() {
+      requestLocationAndFetch();
+    }
+    window.addEventListener("aeris-detect-location", handleDetectLocation);
+    return () => window.removeEventListener("aeris-detect-location", handleDetectLocation);
+  }, [requestLocationAndFetch]);
 
   // Startup: Load default saved location if set
   useEffect(() => {

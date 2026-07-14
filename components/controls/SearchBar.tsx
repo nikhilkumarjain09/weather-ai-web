@@ -54,7 +54,7 @@ export default function SearchBar() {
       }
     }
     document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
+    return () => document.addEventListener("mousedown", handleOutsideClick);
   }, []);
 
   // Real-time geocoding search querying Nominatim API & falling back to weather-geo proxy
@@ -183,13 +183,19 @@ export default function SearchBar() {
     }
   };
 
+  const triggerLiveLocation = () => {
+    window.dispatchEvent(new Event("aeris-detect-location"));
+    setFocused(false);
+    setQuery("");
+  };
+
   const hasQuery = query.length > 0;
 
   return (
     <div ref={containerRef} className="relative w-full max-w-md font-sans z-30">
       {/* Search Input Bar */}
-      <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 focus-within:border-accent/40 focus-within:ring-1 focus-within:ring-accent/15 transition-all">
-        <Search size={13} className="text-text-muted shrink-0" />
+      <div className="flex items-center gap-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-1.5 focus-within:border-accent/40 focus-within:ring-1 focus-within:ring-accent/15 transition-all">
+        <Search size={13} className="text-slate-400 dark:text-slate-500 shrink-0" />
         <input
           ref={inputRef}
           type="text"
@@ -201,7 +207,7 @@ export default function SearchBar() {
           }}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="flex-1 bg-transparent text-xs text-white focus:outline-none placeholder-text-muted font-sans font-medium"
+          className="flex-1 bg-transparent text-xs text-slate-800 dark:text-slate-100 focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 font-sans font-medium"
         />
         {hasQuery ? (
           <button
@@ -210,12 +216,12 @@ export default function SearchBar() {
               setResults([]);
               setSelectedIndex(-1);
             }}
-            className="text-text-muted hover:text-white p-0.5"
+            className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white p-0.5"
           >
             <X size={13} />
           </button>
         ) : (
-          <span className="text-[10px] text-text-muted font-mono bg-white/5 border border-white/5 px-1.5 py-0.5 rounded select-none shrink-0 pointer-events-none">
+          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 px-1.5 py-0.5 rounded select-none shrink-0 pointer-events-none">
             /
           </span>
         )}
@@ -223,11 +229,20 @@ export default function SearchBar() {
 
       {/* Autocomplete & suggestions dropdown menu */}
       {focused && (
-        <div className="absolute left-0 right-0 mt-1.5 bg-slate-900/95 dark:bg-slate-950/95 border border-white/5 rounded-2xl shadow-2xl overflow-hidden divide-y divide-white/5 z-50 backdrop-blur-xl">
+        <div className="absolute left-0 right-0 mt-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden divide-y divide-slate-100 dark:divide-white/5 z-50 backdrop-blur-xl animate-slide-in">
+          {/* Dynamic Locate Button */}
+          <button
+            onClick={triggerLiveLocation}
+            className="w-full flex items-center gap-2.5 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-350 hover:text-slate-900 dark:hover:text-white transition-all text-left text-xs font-semibold"
+          >
+            <Compass size={14} className="text-accent animate-pulse shrink-0" />
+            <span>Use Current Location</span>
+          </button>
+
           {/* Autocomplete Query Results */}
           {results.length > 0 ? (
             <div className="py-1.5">
-              <span className="block px-4 py-1 text-[9px] font-bold text-text-muted uppercase tracking-wider">
+              <span className="block px-4 py-1 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Suggestions
               </span>
               {results.map((city, idx) => {
@@ -239,7 +254,7 @@ export default function SearchBar() {
                   <div
                     key={`${city.lat}-${city.lon}`}
                     className={`flex items-center justify-between px-4 py-2 cursor-pointer ${
-                      isSelected ? "bg-accent/10 text-accent" : "hover:bg-white/5 text-text-muted hover:text-white"
+                      isSelected ? "bg-accent/10 text-accent" : "hover:bg-slate-50 dark:hover:bg-white/5 text-slate-500 dark:text-slate-450 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
                     <button
@@ -248,10 +263,10 @@ export default function SearchBar() {
                     >
                       <MapPin size={13} className="text-accent shrink-0" />
                       <div className="truncate">
-                        <span className="text-xs font-semibold block truncate text-white">
+                        <span className="text-xs font-semibold block truncate text-slate-700 dark:text-slate-200">
                           {city.name}
                         </span>
-                        <span className="text-[9px] text-text-muted font-mono">
+                        <span className="text-[9px] text-slate-400 dark:text-slate-500 font-mono">
                           {city.lat.toFixed(3)}°N, {city.lon.toFixed(3)}°W
                         </span>
                       </div>
@@ -259,7 +274,7 @@ export default function SearchBar() {
                     <button
                       onClick={() => handleSelect(city, true)}
                       title="Add to saved favorites"
-                      className="p-1 rounded text-text-muted hover:text-accent transition-colors"
+                      className="p-1 rounded text-slate-400 dark:text-slate-500 hover:text-accent transition-colors"
                     >
                       <Star size={13} className={isSaved ? "fill-accent text-accent" : ""} />
                     </button>
@@ -271,7 +286,7 @@ export default function SearchBar() {
             /* Recent Queries and History lists */
             <div className="py-1.5">
               <div className="flex items-center justify-between px-4 py-1">
-                <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
+                <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1">
                   <History size={10} />
                   Recently viewed
                 </span>
@@ -283,12 +298,12 @@ export default function SearchBar() {
                     key={`${city.lat}-${city.lon}`}
                     onClick={() => handleSelect(city, false)}
                     className={`flex items-center gap-2.5 px-4 py-2 cursor-pointer ${
-                      isSelected ? "bg-accent/10 text-accent" : "hover:bg-white/5 text-text-muted hover:text-white"
+                      isSelected ? "bg-accent/10 text-accent" : "hover:bg-slate-50 dark:hover:bg-white/5 text-slate-500 dark:text-slate-450 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
-                    <History size={12} className="text-text-muted shrink-0" />
+                    <History size={12} className="text-slate-400 dark:text-slate-500 shrink-0" />
                     <div className="flex-1 truncate">
-                      <span className="text-xs font-semibold block truncate text-white">
+                      <span className="text-xs font-semibold block truncate text-slate-700 dark:text-slate-200">
                         {city.name}
                       </span>
                     </div>
@@ -299,7 +314,7 @@ export default function SearchBar() {
           ) : (
             /* Popular suggestion indicators */
             <div className="py-1.5">
-              <span className="block px-4 py-1 text-[9px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
+              <span className="block px-4 py-1 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1">
                 <Compass size={10} />
                 Popular cities
               </span>
@@ -308,10 +323,10 @@ export default function SearchBar() {
                   <button
                     key={city.name}
                     onClick={() => handleSelect(city, false)}
-                    className="flex items-center gap-1.5 p-2 rounded-xl bg-white/5 hover:bg-accent/10 hover:text-accent text-left text-[11px] text-text-muted transition-all truncate border border-transparent hover:border-accent/15"
+                    className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 dark:bg-white/5 hover:bg-accent/10 hover:text-accent text-left text-[11px] text-slate-500 dark:text-slate-400 transition-all truncate border border-slate-200/50 dark:border-white/5"
                   >
                     <MapPin size={10} className="shrink-0 text-accent" />
-                    <span className="truncate text-white font-medium">{city.name}</span>
+                    <span className="truncate text-slate-700 dark:text-slate-200 font-medium">{city.name}</span>
                   </button>
                 ))}
               </div>

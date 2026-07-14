@@ -19,7 +19,6 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
   const [step, setStep] = useState(1);
   const [nameInput, setNameInput] = useState("");
   const [tempUnit, setTempUnit] = useState<"C" | "F">(unit);
-  const [enableAi, setEnableAi] = useState(true);
 
   if (!isOpen) return null;
 
@@ -43,12 +42,13 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
     handleNextStep();
   };
 
-  const handleFinish = () => {
+  const handleFinish = (enableAi: boolean) => {
     // Save configurations to global stores
     setUserName(nameInput.trim());
     setUnit(tempUnit);
     localStorage.setItem("aeris-ai-enabled", JSON.stringify(enableAi));
     
+    showToast("Welcome to Aeris Weather Platform!", "success");
     onClose();
   };
 
@@ -71,7 +71,7 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
             >
               <div className="space-y-2">
                 <span className="text-3xl block">👋</span>
-                <h2 className="font-display text-2xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
+                <h2 className="font-display text-2xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight font-sans">
                   Welcome
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
@@ -98,7 +98,7 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
             >
               <div className="space-y-2 text-center">
                 <span className="text-3xl block">😊</span>
-                <h2 className="font-display text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
+                <h2 className="font-display text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight font-sans">
                   What should we call you?
                 </h2>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
@@ -139,7 +139,7 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
             >
               <div className="space-y-2">
                 <span className="text-3xl block">📍</span>
-                <h2 className="font-display text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
+                <h2 className="font-display text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight font-sans">
                   Can we use your location?
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
@@ -174,7 +174,7 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
             >
               <div className="space-y-2 text-center">
                 <span className="text-3xl block">🌡️</span>
-                <h2 className="font-display text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
+                <h2 className="font-display text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight font-sans">
                   How would you like to see the temperature?
                 </h2>
               </div>
@@ -220,7 +220,7 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
             >
               <div className="space-y-2 text-center">
                 <span className="text-3xl block">✨</span>
-                <h2 className="font-display text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
+                <h2 className="font-display text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight font-sans">
                   Want daily weather tips?
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
@@ -230,51 +230,18 @@ export default function WelcomeModal({ isOpen, onClose, onRequestLocation }: Wel
 
               <div className="space-y-3">
                 <button
-                  onClick={() => {
-                    setEnableAi(true);
-                    setStep(6);
-                  }}
+                  onClick={() => handleFinish(true)}
                   className="w-full py-3 bg-accent hover:bg-accent/90 text-white dark:text-bg font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-lg shadow-accent/15"
                 >
                   Yes, show tips
                 </button>
                 <button
-                  onClick={() => {
-                    setEnableAi(false);
-                    setStep(6);
-                  }}
+                  onClick={() => handleFinish(false)}
                   className="w-full py-3 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300"
                 >
                   Skip for now
                 </button>
               </div>
-            </motion.div>
-          )}
-
-          {step === 6 && (
-            <motion.div
-              key="step6"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: -20 }}
-              className="space-y-6 text-center"
-            >
-              <div className="space-y-2">
-                <span className="text-3xl block">🎉</span>
-                <h2 className="font-display text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
-                  You&apos;re all set!
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                  Let&apos;s check today&apos;s weather.
-                </p>
-              </div>
-
-              <button
-                onClick={handleFinish}
-                className="w-full py-3 bg-accent hover:bg-accent/90 text-white dark:text-bg font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-lg shadow-accent/15"
-              >
-                Go to Dashboard
-              </button>
             </motion.div>
           )}
         </AnimatePresence>
