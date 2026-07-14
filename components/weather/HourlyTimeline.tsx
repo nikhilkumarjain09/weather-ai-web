@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { usePreferencesStore } from "@/store/preferencesStore";
 import AnimatedWeatherIcon from "@/components/shared/AnimatedWeatherIcon";
-import { Droplet } from "lucide-react";
+import { Droplet, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface HourlyTimelineProps {
@@ -24,6 +24,57 @@ export default function HourlyTimeline({
   loading,
 }: HourlyTimelineProps) {
   const { unit, animationsEnabled } = usePreferencesStore();
+  
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [showLeftBtn, setShowLeftBtn] = useState(false);
+  const [showRightBtn, setShowRightBtn] = useState(true);
+
+  const updateScrollState = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setShowLeftBtn(scrollLeft > 10);
+      setShowRightBtn(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(updateScrollState, 500);
+    window.addEventListener("resize", updateScrollState);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, [loading]);
+
+  const startScrolling = (direction: "left" | "right") => {
+    stopScrolling();
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const step = direction === "left" ? -6 : 6;
+    
+    // Smooth continuous scroll interval
+    scrollIntervalRef.current = setInterval(() => {
+      container.scrollLeft += step;
+      updateScrollState();
+    }, 12);
+  };
+
+  const stopScrolling = () => {
+    if (scrollIntervalRef.current) {
+      clearInterval(scrollIntervalRef.current);
+      scrollIntervalRef.current = null;
+    }
+  };
+
+  const handleScrollClick = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      const amount = direction === "left" ? -240 : 240;
+      scrollRef.current.scrollBy({ left: amount, behavior: "smooth" });
+      setTimeout(updateScrollState, 350);
+    }
+  };
 
   if (loading) {
     return (
@@ -105,43 +156,88 @@ export default function HourlyTimeline({
         </h3>
       </div>
 
-      {/* Horizontal Scroll Timeline */}
-      <div className="flex gap-4 overflow-x-auto py-5 mt-5 select-none scrollbar-thin scrollbar-thumb-white/10 scroll-smooth">
-        {hourlyData.map((item, idx) => (
-          <motion.div
-            key={idx}
-            initial={animationsEnabled ? { opacity: 0, scale: 0.9, y: 10 } : false}
-            animate={animationsEnabled ? { opacity: 1, scale: 1, y: 0 } : false}
-            transition={{ duration: 0.3, delay: idx * 0.015 }}
-            className="flex flex-col items-center justify-between text-center min-w-[96px] bg-surface-raised border border-border rounded-2xl p-4 hover:border-accent/40 transition-all duration-300 cursor-pointer shrink-0 hover:scale-105 shadow-sm"
-          >
-            <span className="text-[11px] font-extrabold text-text-primary tracking-tight">{item.label}</span>
+      {/* Horizontal Scroll Timeline Wrapper */}
+      <div className="relative group/timeline mt-5">
+        {/* Left Blur Mask & Navigation Button */}
+        {showLeftBtn && (
+          <>
+            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white/10 dark:from-slate-950/10 to-transparent backdrop-blur-[2px] pointer-events-none z-10 transition-all duration-300" />
+            <button
+              onMouseDown={() => startScrolling("left")}
+              onMouseUp={stopScrolling}
+              onMouseLeave={stopScrolling}
+              onTouchStart={() => startScrolling("left")}
+              onTouchEnd={stopScrolling}
+              onClick={() => handleScrollClick("left")}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-surface-raised border border-border shadow-lg flex items-center justify-center text-text-primary z-20 hover:scale-110 active:scale-95 transition-all cursor-pointer select-none opacity-0 group-hover/timeline:opacity-100 focus:opacity-100"
+              aria-label="Scroll Left"
+            >
+              <ChevronLeft size={16} />
+            </button>
+          </>
+        )}
 
-            <div className="my-2.5 drop-shadow-[0_0_8px_rgba(99,102,241,0.2)]">
-              <AnimatedWeatherIcon code={condCode} size={28} />
-            </div>
+        {/* Right Blur Mask & Navigation Button */}
+        {showRightBtn && (
+          <>
+            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white/10 dark:from-slate-950/10 to-transparent backdrop-blur-[2px] pointer-events-none z-10 transition-all duration-300" />
+            <button
+              onMouseDown={() => startScrolling("right")}
+              onMouseUp={stopScrolling}
+              onMouseLeave={stopScrolling}
+              onTouchStart={() => startScrolling("right")}
+              onTouchEnd={stopScrolling}
+              onClick={() => handleScrollClick("right")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-surface-raised border border-border shadow-lg flex items-center justify-center text-text-primary z-20 hover:scale-110 active:scale-95 transition-all cursor-pointer select-none opacity-0 group-hover/timeline:opacity-100 focus:opacity-100"
+              aria-label="Scroll Right"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </>
+        )}
 
-            <span className="font-display text-sm font-extrabold text-text-primary leading-none">
-              {convertTemp(item.temp)}°
-            </span>
+        {/* Horizontal Scroll Timeline with padding gutters to prevent hover scale clipping */}
+        <div
+          ref={scrollRef}
+          onScroll={updateScrollState}
+          className="flex gap-4 overflow-x-auto py-5 px-5 select-none scrollbar-thin scrollbar-thumb-white/10 scroll-smooth"
+        >
+          {hourlyData.map((item, idx) => (
+            <motion.div
+              key={idx}
+              initial={animationsEnabled ? { opacity: 0, scale: 0.9, y: 10 } : false}
+              animate={animationsEnabled ? { opacity: 1, scale: 1, y: 0 } : false}
+              transition={{ duration: 0.3, delay: idx * 0.015 }}
+              className="flex flex-col items-center justify-between text-center min-w-[96px] bg-surface-raised border border-border rounded-2xl p-4 hover:border-accent/40 transition-all duration-300 cursor-pointer shrink-0 hover:scale-105 shadow-sm"
+            >
+              <span className="text-[11px] font-extrabold text-text-primary tracking-tight">{item.label}</span>
 
-            {item.rain > 0 ? (
-              <div className="flex items-center gap-0.5 mt-2 text-[9px] font-extrabold text-sky-500 dark:text-sky-400 uppercase tracking-wider">
-                <Droplet size={9} className="text-sky-500 dark:text-sky-400" />
-                <span>{item.rain}% Rain</span>
+              <div className="my-2.5 drop-shadow-[0_0_8px_rgba(99,102,241,0.2)]">
+                <AnimatedWeatherIcon code={condCode} size={28} />
               </div>
-            ) : (
-              <div className="flex items-center gap-0.5 mt-2 text-[9px] font-bold text-text-muted/50 uppercase tracking-wider">
-                <span>0% Rain</span>
-              </div>
-            )}
 
-            <div className="mt-2 text-[9px] font-bold text-text-muted flex items-center gap-1">
-              <span className="opacity-80">💨</span>
-              <span>{item.wind} km/h</span>
-            </div>
-          </motion.div>
-        ))}
+              <span className="font-display text-sm font-extrabold text-text-primary leading-none">
+                {convertTemp(item.temp)}°
+              </span>
+
+              {item.rain > 0 ? (
+                <div className="flex items-center gap-0.5 mt-2 text-[9px] font-extrabold text-sky-500 dark:text-sky-400 uppercase tracking-wider">
+                  <Droplet size={9} className="text-sky-500 dark:text-sky-400" />
+                  <span>{item.rain}% Rain</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-0.5 mt-2 text-[9px] font-bold text-text-muted/50 uppercase tracking-wider">
+                  <span>0% Rain</span>
+                </div>
+              )}
+
+              <div className="mt-2 text-[9px] font-bold text-text-muted flex items-center gap-1">
+                <span className="opacity-80">💨</span>
+                <span>{item.wind} km/h</span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </div>
   );

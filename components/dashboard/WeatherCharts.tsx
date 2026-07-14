@@ -124,7 +124,7 @@ export default function WeatherCharts({
         </div>
 
         {/* Tab Controls Selector */}
-        <div className="flex flex-wrap bg-slate-100/50 dark:bg-white/5 p-0.5 rounded-xl border border-slate-200 dark:border-white/10 gap-0.5 self-start lg:self-auto">
+        <div className="flex flex-wrap bg-surface p-0.5 rounded-xl border border-border gap-0.5 self-start lg:self-auto">
           {chartTabs.map((tab) => {
             const TabIcon = tab.icon;
             const isActive = tab.id === chartPreference;

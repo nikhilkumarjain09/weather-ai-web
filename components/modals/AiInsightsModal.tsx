@@ -129,14 +129,14 @@ export default function AiInsightsModal({ isOpen, onClose, weather }: AiInsights
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-slate-450 hover:text-slate-900 dark:hover:text-white transition-colors"
+            className="p-1.5 rounded-lg bg-surface hover:bg-surface-raised border border-border text-text-muted hover:text-text-primary transition-colors"
           >
             <X size={15} />
           </button>
         </div>
 
         {/* Modal Tabs Navigator */}
-        <div className="flex bg-slate-100/50 dark:bg-white/5 p-1 rounded-xl border border-slate-200/50 dark:border-white/5 relative z-10">
+        <div className="flex bg-surface p-1 rounded-xl border border-border relative z-10">
           {(["summary", "prediction", "tips"] as const).map((tab) => (
             <button
               key={tab}

@@ -164,7 +164,7 @@ export default function ForecastStrip({ days, unit, lat, lon, loading }: Forecas
             This week
           </h3>
         </div>
-        <div className="flex bg-slate-100/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-0.5">
+        <div className="flex bg-surface border border-border rounded-xl p-0.5">
           <button
             onClick={() => setForecastMode("7")}
             className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${
