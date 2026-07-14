@@ -165,7 +165,7 @@ export default function DashboardConsole() {
       } else if (typeof navigator !== "undefined" && navigator.geolocation) {
         try {
           const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 6000 });
+            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
           });
           lat = position.coords.latitude;
           lon = position.coords.longitude;
@@ -251,7 +251,7 @@ export default function DashboardConsole() {
       setLoading(true);
       try {
         const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 6000 });
+          navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
         });
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
