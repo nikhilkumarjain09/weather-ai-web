@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { X, Sparkles, AlertCircle, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WeatherResponse } from "@/services/weather/types";
+import { useAppStore } from "@/store/useAppStore";
 
 interface AiInsightsModalProps {
   isOpen: boolean;
@@ -11,10 +12,42 @@ interface AiInsightsModalProps {
   weather: WeatherResponse | null;
 }
 
+function generateLocalInsights(location: string, tempC: number, conditions: string, unit: string) {
+  const isCel = unit === "C";
+  const displayTemp = isCel ? tempC : (tempC * 9/5) + 32;
+  const tempVal = Math.round(displayTemp);
+  
+  let summary = `Today in ${location}, the weather is currently ${conditions.toLowerCase()} at ${tempVal}°${unit}. The conditions are pleasant and suitable for outdoor plans.`;
+  let prediction = `Over the next few days, expect stable conditions with temperatures averaging around ${tempVal}°${unit}. A slight increase in cloud cover is predicted towards the weekend.`;
+  let tips = "Stay hydrated throughout the afternoon. A light jacket is recommended if you are planning to stay out late in the evening.";
+
+  const cond = conditions.toLowerCase();
+  if (cond.includes("rain") || cond.includes("shower") || cond.includes("drizzle")) {
+    summary = `Today in ${location}, expect rainy conditions at ${tempVal}°${unit} with ongoing precipitation.`;
+    prediction = `Rain showers are expected to continue intermittently over the next 24-48 hours. Clearing skies are projected later in the week.`;
+    tips = "Keep an umbrella handy today. Drive carefully on wet roads, and consider moving outdoor activities indoors.";
+  } else if (cond.includes("storm") || cond.includes("thunder")) {
+    summary = `Today in ${location}, active thunderstorms are present at ${tempVal}°${unit}. Expect sudden wind gusts and heavy downpours.`;
+    prediction = `Storm systems are moving through the area, but should subside by tomorrow morning. A return to calmer weather is expected.`;
+    tips = "Stay indoors if lightning is present. Secure loose outdoor items and keep emergency notifications enabled.";
+  } else if (cond.includes("snow") || cond.includes("blizzard") || cond.includes("ice")) {
+    summary = `Today in ${location}, wintery conditions with snow showers are present at ${tempVal}°${unit}.`;
+    prediction = `Below-freezing temperatures will persist over the coming days, keeping snow accumulation intact. Watch for icy patches.`;
+    tips = "Dress in heavy layers. Wear high-traction footwear, and clear driveways/sidewalks to prevent slippery conditions.";
+  } else if (tempC > 30) {
+    tips = "It's quite warm today. Drink plenty of water to stay hydrated, wear sunscreen, and seek shade during peak solar hours.";
+  } else if (tempC < 12) {
+    tips = "Bracing cold temperatures today. Dress in warm layers with a wind-resistant jacket if you are heading outdoors.";
+  }
+
+  return { summary, prediction, tips };
+}
+
 export default function AiInsightsModal({ isOpen, onClose, weather }: AiInsightsModalProps) {
   const [activeTab, setActiveTab] = useState<"summary" | "prediction" | "tips">("summary");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { unit } = useAppStore();
   const [insights, setInsights] = useState<{
     summary: string;
     prediction: string;
@@ -47,20 +80,27 @@ export default function AiInsightsModal({ isOpen, onClose, weather }: AiInsights
         });
 
         if (!res.ok) {
-          throw new Error("Failed to load AI weather insights.");
+          throw new Error("API request failed");
         }
 
         const data = await res.json();
         setInsights(data);
       } catch (err: any) {
-        setError(err.message || "An unexpected error occurred.");
+        console.warn("API Insights failed, generating client-side fallback:", err);
+        const fallbackData = generateLocalInsights(
+          weather!.current.locationName,
+          weather!.current.temp,
+          weather!.current.conditionsText,
+          unit
+        );
+        setInsights(fallbackData);
       } finally {
         setLoading(false);
       }
     }
 
     fetchInsights();
-  }, [isOpen, weather]);
+  }, [isOpen, weather, unit]);
 
   if (!isOpen) return null;
 

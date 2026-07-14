@@ -204,7 +204,7 @@ export default function CurrentConditions({
         <button
           onClick={onRefresh}
           disabled={isRefreshing}
-          className="p-3 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 transition-all text-text-muted hover:text-text-primary disabled:opacity-50 hover:scale-105"
+          className="p-3 rounded-xl bg-surface border border-border hover:bg-surface-raised transition-all text-text-muted hover:text-text-primary disabled:opacity-50 hover:scale-105"
         >
           <RefreshCw size={15} className={isRefreshing ? "animate-spin" : ""} />
         </button>
@@ -212,7 +212,7 @@ export default function CurrentConditions({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
         {/* Massive Apple Weather hero temp widget */}
-        <div className="lg:col-span-5 flex flex-col items-center text-center p-6 bg-slate-100/40 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 rounded-2xl relative overflow-hidden group">
+        <div className="lg:col-span-5 flex flex-col items-center text-center p-6 bg-surface-raised border border-border rounded-2xl relative overflow-hidden group">
           {/* Subtle background animated sun rays */}
           <div className="absolute inset-0 bg-gradient-to-b from-accent/5 to-transparent pointer-events-none" />
           
@@ -240,9 +240,9 @@ export default function CurrentConditions({
             return (
               <div
                 key={idx}
-                className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 hover:border-accent/30 transition-all duration-300 hover:scale-[1.02] shadow-sm"
+                className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-raised border border-border hover:border-accent/30 transition-all duration-300 hover:scale-[1.02] shadow-sm"
               >
-                <div className="p-2 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-text-muted shrink-0">
+                <div className="p-2 rounded-lg bg-surface border border-border text-text-muted shrink-0">
                   <StatIcon size={14} className="text-accent" />
                 </div>
                 <div className="space-y-0.5">

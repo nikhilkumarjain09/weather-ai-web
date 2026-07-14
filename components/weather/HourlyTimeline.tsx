@@ -40,12 +40,13 @@ export default function HourlyTimeline({
           {Array.from({ length: 8 }).map((_, idx) => (
             <div
               key={idx}
-              className="flex flex-col items-center justify-between text-center min-w-[76px] bg-slate-100/40 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 rounded-2xl p-4 shrink-0"
+              className="flex flex-col items-center justify-between text-center min-w-[96px] bg-surface-raised border border-border rounded-2xl p-4 shrink-0"
             >
-              <div className="h-3 w-8 bg-slate-200 dark:bg-white/5 animate-pulse rounded" />
-              <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-white/10 animate-pulse my-3" />
-              <div className="h-4 w-6 bg-slate-200 dark:bg-white/10 animate-pulse rounded" />
-              <div className="h-3 w-8 bg-slate-200 dark:bg-white/5 animate-pulse rounded mt-2" />
+              <div className="h-3 w-12 bg-surface animate-pulse rounded" />
+              <div className="w-7 h-7 rounded-full bg-surface animate-pulse my-3" />
+              <div className="h-4 w-10 bg-surface animate-pulse rounded" />
+              <div className="h-3 w-14 bg-surface animate-pulse rounded mt-2" />
+              <div className="h-3 w-12 bg-surface animate-pulse rounded mt-1.5" />
             </div>
           ))}
         </div>
@@ -82,7 +83,6 @@ export default function HourlyTimeline({
     const rainOffset = Math.sin((hourVal / 24) * Math.PI) * 15;
     const rain = Math.max(0, Math.min(100, Math.round(pChance + rainOffset)));
 
-
     const windOffset = Math.cos((hourVal / 24) * Math.PI) * 4;
     const wind = Math.max(2, Math.round(12 + windOffset));
 
@@ -113,26 +113,33 @@ export default function HourlyTimeline({
             initial={animationsEnabled ? { opacity: 0, scale: 0.9, y: 10 } : false}
             animate={animationsEnabled ? { opacity: 1, scale: 1, y: 0 } : false}
             transition={{ duration: 0.3, delay: idx * 0.015 }}
-            className="flex flex-col items-center justify-between text-center min-w-[76px] bg-slate-100/40 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 rounded-2xl p-4 hover:border-accent/40 transition-all duration-300 cursor-pointer shrink-0 hover:scale-105"
+            className="flex flex-col items-center justify-between text-center min-w-[96px] bg-surface-raised border border-border rounded-2xl p-4 hover:border-accent/40 transition-all duration-300 cursor-pointer shrink-0 hover:scale-105 shadow-sm"
           >
-            <span className="text-[10px] font-bold text-text-muted tracking-tight">{item.label}</span>
+            <span className="text-[11px] font-extrabold text-text-primary tracking-tight">{item.label}</span>
 
-            <div className="my-3 drop-shadow-[0_0_8px_rgba(99,102,241,0.15)]">
-              <AnimatedWeatherIcon code={condCode} size={24} />
+            <div className="my-2.5 drop-shadow-[0_0_8px_rgba(99,102,241,0.2)]">
+              <AnimatedWeatherIcon code={condCode} size={28} />
             </div>
 
-            <span className="font-display text-xs font-extrabold text-text-primary">
+            <span className="font-display text-sm font-extrabold text-text-primary leading-none">
               {convertTemp(item.temp)}°
             </span>
 
             {item.rain > 0 ? (
-              <div className="flex items-center gap-0.5 mt-2 text-[9px] font-bold text-accent uppercase tracking-wider">
-                <Droplet size={8} />
-                <span>{item.rain}%</span>
+              <div className="flex items-center gap-0.5 mt-2 text-[9px] font-extrabold text-sky-500 dark:text-sky-400 uppercase tracking-wider">
+                <Droplet size={9} className="text-sky-500 dark:text-sky-400" />
+                <span>{item.rain}% Rain</span>
               </div>
             ) : (
-              <div className="h-3.5 mt-2" />
+              <div className="flex items-center gap-0.5 mt-2 text-[9px] font-bold text-text-muted/50 uppercase tracking-wider">
+                <span>0% Rain</span>
+              </div>
             )}
+
+            <div className="mt-2 text-[9px] font-bold text-text-muted flex items-center gap-1">
+              <span className="opacity-80">💨</span>
+              <span>{item.wind} km/h</span>
+            </div>
           </motion.div>
         ))}
       </div>

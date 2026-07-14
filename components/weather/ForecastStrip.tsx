@@ -87,12 +87,12 @@ export default function ForecastStrip({ days, unit, lat, lon, loading }: Forecas
           {Array.from({ length: 5 }).map((_, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-between p-4 bg-slate-100/40 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 rounded-2xl"
+              className="flex items-center justify-between p-4 bg-surface-raised border border-border rounded-2xl"
             >
-              <div className="h-4 w-16 bg-slate-200 dark:bg-white/10 animate-pulse rounded" />
-              <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-white/10 animate-pulse" />
-              <div className="h-4 w-12 bg-slate-200 dark:bg-white/10 animate-pulse rounded" />
-              <div className="h-4 w-20 bg-slate-200 dark:bg-white/5 animate-pulse rounded" />
+              <div className="h-4 w-16 bg-surface animate-pulse rounded" />
+              <div className="w-7 h-7 rounded-full bg-surface animate-pulse" />
+              <div className="h-4 w-12 bg-surface animate-pulse rounded" />
+              <div className="h-4 w-24 bg-surface animate-pulse rounded" />
             </div>
           ))}
         </div>
@@ -209,36 +209,39 @@ export default function ForecastStrip({ days, unit, lat, lon, loading }: Forecas
                   <div
                     key={day.date}
                     onClick={() => handleToggleExpand(idx)}
-                    className={`bg-slate-100/40 dark:bg-white/5 border rounded-2xl p-4 flex flex-col items-center text-center hover:border-accent/40 transition-all duration-300 z-20 cursor-pointer hover:scale-[1.03] ${
-                      isExpanded ? "border-accent ring-1 ring-accent/25 bg-accent-tint/10" : "border-slate-200/50 dark:border-white/5"
+                    className={`bg-surface-raised border rounded-2xl p-5 flex flex-col items-center text-center hover:border-accent/40 transition-all duration-300 z-20 cursor-pointer hover:scale-[1.03] shadow-md ${
+                      isExpanded ? "border-accent ring-1 ring-accent/25 bg-accent-tint/10" : "border-border"
                     }`}
                   >
-                    <span className="text-xs font-bold text-text-primary tracking-tight font-display">{getDayName(day.date)}</span>
-                    <span className="text-[9px] text-text-muted mt-0.5 font-medium">{getFormattedDate(day.date)}</span>
+                    <span className="text-sm font-extrabold text-text-primary tracking-tight font-display">{getDayName(day.date)}</span>
+                    <span className="text-[10px] text-text-muted mt-0.5 font-semibold">{getFormattedDate(day.date)}</span>
+                    <span className="text-[9.5px] font-bold text-text-muted mt-1.5 truncate max-w-[90px] block leading-none">{day.conditionsText}</span>
 
-                    <div className="my-4 drop-shadow-[0_0_10px_rgba(99,102,241,0.2)]">
-                      <AnimatedWeatherIcon code={day.conditionsCode} size={28} />
+                    <div className="my-3.5 drop-shadow-[0_0_12px_rgba(99,102,241,0.35)] dark:drop-shadow-[0_0_15px_rgba(99,102,241,0.55)]">
+                      <AnimatedWeatherIcon code={day.conditionsCode} size={36} />
                     </div>
 
-                    <div className="flex items-center gap-2 justify-center mt-1">
-                      <span className="font-display text-xs font-bold text-text-primary">
+                    <div className="flex items-center gap-2 justify-center mt-2.5">
+                      <span className="font-display text-xs font-extrabold text-text-primary">
                         {convertTemp(day.maxTemp)}°
                       </span>
-                      <span className="font-display text-[10px] text-text-muted">
+                      <span className="font-display text-[10px] text-text-muted font-bold">
                         {convertTemp(day.minTemp)}°
                       </span>
                     </div>
 
                     {day.precipChance > 0 ? (
-                      <div className="flex items-center gap-0.5 mt-2 text-[9px] font-bold text-accent tracking-wide uppercase">
-                        <Droplet size={10} />
-                        <span>{day.precipChance}%</span>
+                      <div className="flex items-center gap-0.5 mt-2.5 text-[9px] font-extrabold text-sky-500 dark:text-sky-400 tracking-wide uppercase">
+                        <Droplet size={10} className="text-sky-500 dark:text-sky-400" />
+                        <span>{day.precipChance}% Rain</span>
                       </div>
                     ) : (
-                      <div className="h-4 mt-2" />
+                      <div className="text-[9px] font-bold text-text-muted/50 mt-2.5 uppercase tracking-wider">
+                        0% Rain
+                      </div>
                     )}
 
-                    <div className="text-text-muted hover:text-text-primary mt-2">
+                    <div className="text-text-muted hover:text-text-primary mt-2.5">
                       {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                     </div>
                   </div>
@@ -247,7 +250,7 @@ export default function ForecastStrip({ days, unit, lat, lon, loading }: Forecas
 
               {/* Free Plan Lock Slots overlay if on Free Plan and Mode is 14 */}
               {forecastMode === "14" && apiPlan === "free" && (
-                <div className="col-span-full border border-dashed border-slate-200 dark:border-white/10 rounded-2xl p-6 text-center bg-slate-50/50 dark:bg-white/5 flex flex-col items-center justify-center gap-3 relative mt-4">
+                <div className="col-span-full border border-dashed border-border rounded-2xl p-6 text-center bg-surface flex flex-col items-center justify-center gap-3 relative mt-4">
                   <div className="w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center text-accent">
                     <Lock size={16} />
                   </div>
@@ -272,7 +275,7 @@ export default function ForecastStrip({ days, unit, lat, lon, loading }: Forecas
             animate={animationsEnabled ? { opacity: 1, height: "auto", marginTop: 16 } : {}}
             exit={animationsEnabled ? { opacity: 0, height: 0, marginTop: 0 } : {}}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden bg-slate-50/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 font-sans text-xs"
+            className="overflow-hidden bg-surface border border-border rounded-2xl p-4 font-sans text-xs"
           >
             <div className="flex justify-between items-center pb-2.5 border-b border-slate-100 dark:border-white/5 mb-3">
               <div className="flex items-center gap-2">
