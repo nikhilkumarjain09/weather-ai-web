@@ -80,7 +80,7 @@ export function mapApiResponse(data: any): any {
   if (data.current) {
     const lat = data.lat ?? -1.2921;
     const lon = data.lon ?? 36.8219;
-    const city = data.geo?.city ?? data.locationName ?? "Nairobi";
+    const city = data.geo?.city ?? data.locationName ?? "Current Location";
 
     const mappedCurrent = {
       temp: data.current.temperature ?? data.current.temp ?? 20,

@@ -237,6 +237,7 @@ export default function DashboardConsole() {
 
   // Trigger weather query on location shift
   useEffect(() => {
+    setWeather(null);
     fetchWeather();
   }, [fetchWeather]);
 
@@ -256,14 +257,31 @@ export default function DashboardConsole() {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
         saveLastCoordinates(lat, lon);
+        
+        let name = "Current Location";
+        try {
+          const revRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`, {
+            headers: {
+              "User-Agent": "AerisWeatherAI/1.0"
+            }
+          });
+          if (revRes.ok) {
+            const revData = await revRes.json();
+            const addr = revData.address;
+            name = addr?.city || addr?.town || addr?.village || addr?.suburb || addr?.municipality || addr?.county || revData.display_name.split(",")[0] || "Current Location";
+          }
+        } catch (e) {
+          console.warn("Reverse geocode failed", e);
+        }
+
         setActiveLocation({
           id: "curr-gps",
-          name: "Current Location",
+          name,
           lat,
           lon,
           isDefault: false,
         });
-        showToast("Switched weather focus to GPS location", "success");
+        showToast(`Focus location set to: ${name}`, "success");
       } catch {
         // Fallback to IP lookup
         try {

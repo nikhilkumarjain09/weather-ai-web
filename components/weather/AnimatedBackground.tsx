@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePreferencesStore } from "@/store/preferencesStore";
-import { useTheme } from "next-themes";
 
 interface AnimatedBackgroundProps {
   conditionCode: string;
@@ -16,23 +15,39 @@ interface GradientTheme {
 }
 
 export default function AnimatedBackground({ conditionCode, isDay = 1 }: AnimatedBackgroundProps) {
-  const { animationsEnabled } = usePreferencesStore();
-  const { resolvedTheme } = useTheme();
+  const { theme, animationsEnabled } = usePreferencesStore();
+  const [isDark, setIsDark] = useState(false);
   const [lightning, setLightning] = useState(false);
   const [lightningStrikePos, setLightningStrikePos] = useState(50);
 
   const code = conditionCode.toLowerCase();
   const resolvedIsNight = isDay === 0 || code === "night";
+  const showSpaceView = isDark || resolvedIsNight;
 
   const isRain = code === "rainy" || code === "stormy";
   const isSnow = code === "snowy";
   const isCloud = code === "cloudy";
   const isSun = code === "sunny";
-  const isWind = code === "windy";
+
+  useEffect(() => {
+    const checkDark = () => {
+      const darkTheme = theme === "dark" || 
+        (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      setIsDark(darkTheme);
+    };
+    checkDark();
+    
+    if (theme === "system" && typeof window !== "undefined") {
+      const media = window.matchMedia("(prefers-color-scheme: dark)");
+      const listener = () => checkDark();
+      media.addEventListener("change", listener);
+      return () => media.removeEventListener("change", listener);
+    }
+  }, [theme]);
 
   // Periodic lightning flashes for stormy weather in dark mode
   useEffect(() => {
-    if (code !== "stormy" || !animationsEnabled || resolvedTheme === "light" || resolvedIsNight) return;
+    if (code !== "stormy" || !animationsEnabled || !isDark || resolvedIsNight) return;
     
     const interval = setInterval(() => {
       setLightningStrikePos(Math.random() * 80 + 10);
@@ -42,76 +57,48 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
     }, 5000 + Math.random() * 6000);
 
     return () => clearInterval(interval);
-  }, [code, animationsEnabled, resolvedTheme, resolvedIsNight]);
+  }, [code, animationsEnabled, isDark, resolvedIsNight]);
 
   if (!animationsEnabled) return null;
 
   // Dynamic premium background gradients
-  let theme: GradientTheme = {
+  let bgTheme: GradientTheme = {
     classes: "from-[#080b18] via-[#0c102b] to-[#04060f]",
     glowColor: "rgba(99, 102, 241, 0.08)",
   };
 
-  if (resolvedIsNight) {
-    // Starry night sky colors
-    theme = {
+  if (showSpaceView) {
+    // Starry night sky/space colors
+    bgTheme = {
       classes: "from-[#02040b] via-[#050c18] to-[#010204]",
       glowColor: "rgba(99, 102, 241, 0.04)",
     };
-  } else if (resolvedTheme === "light") {
+  } else {
     // Bright, elegant light-mode day colors
     if (isSun) {
-      theme = {
+      bgTheme = {
         classes: "from-[#e0f2fe] via-[#fef3c7] to-[#dbeafe]",
         glowColor: "rgba(245, 158, 11, 0.35)",
       };
     } else if (isRain) {
-      theme = {
+      bgTheme = {
         classes: "from-[#f1f5f9] via-[#e2e8f0] to-[#cbd5e1]",
         glowColor: "rgba(56, 189, 248, 0.25)",
       };
     } else if (isSnow) {
-      theme = {
+      bgTheme = {
         classes: "from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0]",
         glowColor: "rgba(203, 213, 225, 0.2)",
       };
     } else if (isCloud) {
-      theme = {
+      bgTheme = {
         classes: "from-[#f8fafc] via-[#f1f5f9] to-[#cbd5e1]",
         glowColor: "rgba(148, 163, 184, 0.2)",
       };
     } else {
-      theme = {
+      bgTheme = {
         classes: "from-[#e0f2fe] via-[#f1f5f9] to-[#e2e8f0]",
         glowColor: "rgba(45, 212, 191, 0.25)",
-      };
-    }
-  } else {
-    // Sleek dark-mode day colors
-    if (isSun) {
-      theme = {
-        classes: "from-[#0c1a30] via-[#112446] to-[#081226]",
-        glowColor: "rgba(245, 158, 11, 0.12)",
-      };
-    } else if (isRain) {
-      theme = {
-        classes: "from-[#0a0f1d] via-[#131a35] to-[#070b14]",
-        glowColor: "rgba(56, 189, 248, 0.08)",
-      };
-    } else if (isSnow) {
-      theme = {
-        classes: "from-[#111827] via-[#1f2937] to-[#0f172a]",
-        glowColor: "rgba(255, 255, 255, 0.06)",
-      };
-    } else if (isCloud) {
-      theme = {
-        classes: "from-[#0b0f19] via-[#161f38] to-[#0a0d16]",
-        glowColor: "rgba(148, 163, 184, 0.06)",
-      };
-    } else if (isWind) {
-      theme = {
-        classes: "from-[#09152b] via-[#122548] to-[#060e1d]",
-        glowColor: "rgba(45, 212, 191, 0.08)",
       };
     }
   }
@@ -120,14 +107,12 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
   if (typeof document !== "undefined") {
     const root = document.documentElement;
     if (lightning) {
-      root.style.setProperty("--bg", resolvedTheme === "light" ? "#f1f5f9" : "#2e2059");
+      root.style.setProperty("--bg", !isDark ? "#f1f5f9" : "#2e2059");
     } else {
-      if (resolvedIsNight) {
+      if (showSpaceView) {
         root.style.setProperty("--bg", "#02040b");
-      } else if (resolvedTheme === "light") {
-        root.style.setProperty("--bg", isSun ? "#fef3c7" : isRain ? "#e2e8f0" : "#f8fafc");
       } else {
-        root.style.setProperty("--bg", isSun ? "#071022" : isRain ? "#070b14" : "#030712");
+        root.style.setProperty("--bg", isSun ? "#fef3c7" : isRain ? "#e2e8f0" : "#f8fafc");
       }
     }
   }
@@ -135,10 +120,10 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none -z-20 transition-all duration-1000">
       {/* 1. Base Gradient Layer */}
-      <div className={`absolute inset-0 bg-gradient-to-b ${theme.classes} transition-all duration-1000`} />
+      <div className={`absolute inset-0 bg-gradient-to-b ${bgTheme.classes} transition-all duration-1000`} />
 
       {/* 2. Twinkling Stars & Space View for Night */}
-      {resolvedIsNight && (
+      {showSpaceView && (
         <div className="absolute inset-0 z-0 select-none pointer-events-none">
           {/* Nebula dust */}
           <div className="absolute top-[10%] left-[15%] w-96 h-96 rounded-full bg-purple-900/10 filter blur-[100px] animate-pulse-glow" />
@@ -208,7 +193,7 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
       )}
 
       {/* 9. Cartoonic Floating Clouds for Day Light Mode */}
-      {resolvedTheme === "light" && !resolvedIsNight && (
+      {!showSpaceView && (
         <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
           {Array.from({ length: 5 }).map((_, i) => {
             const size = 80 + (i % 3) * 40; // 80 to 160px width
@@ -247,11 +232,11 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
       {/* 3. Glow Blobs */}
       <div
         className="absolute -top-48 left-1/4 w-[500px] h-[500px] rounded-full filter blur-[120px] animate-pulse-glow"
-        style={{ backgroundColor: theme.glowColor }}
+        style={{ backgroundColor: bgTheme.glowColor }}
       />
 
       {/* 4. Sunlight / Sunbeam rays */}
-      {isSun && !resolvedIsNight && (
+      {isSun && !showSpaceView && (
         <div className="absolute top-0 right-0 w-[600px] h-[600px] pointer-events-none">
           <motion.div
             animate={{ rotate: 360 }}
@@ -267,7 +252,7 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
           <>
             <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: resolvedTheme === "light" ? 0.1 : 0.22 }}
+              animate={{ opacity: !isDark ? 0.1 : 0.22 }}
               exit={{ opacity: 0 }}
               className="absolute inset-0 bg-white dark:bg-purple-100 z-10"
             />
@@ -279,7 +264,7 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
             >
               <path
                 d="M 50 0 L 40 35 L 60 30 L 35 65 L 55 60 L 50 100"
-                stroke={resolvedTheme === "light" ? "#f59e0b" : "#a855f7"}
+                stroke={!isDark ? "#f59e0b" : "#a855f7"}
                 strokeWidth="2.5"
                 fill="none"
                 strokeLinecap="round"
@@ -369,7 +354,7 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
               style={{
                 width: `${sizeWidth}px`,
                 height: `${sizeHeight}px`,
-                opacity: resolvedTheme === "light" ? 0.65 : 0.3,
+                opacity: !isDark ? 0.65 : 0.3,
               }}
             />
           );
