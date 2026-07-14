@@ -23,7 +23,6 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
 
   const code = conditionCode.toLowerCase();
   const resolvedIsNight = isDay === 0 || code === "night";
-  const resolvedIsDay = isDay === 1 && !resolvedIsNight;
 
   const isRain = code === "rainy" || code === "stormy";
   const isSnow = code === "snowy";
@@ -255,40 +254,38 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
       )}
 
       {/* 8. Realistic Puffy Floating Clouds Layer */}
-      {(resolvedIsDay || code === "cloudy" || isRain || isSnow) && (
-        <div className="absolute inset-0">
-          {Array.from({ length: 6 }).map((_, i) => {
-            const sizeWidth = 250 + (i % 3) * 100;
-            const sizeHeight = 70 + (i % 2) * 40;
-            const duration = 60 + i * 25;
-            
-            let cloudClass = "bg-white/40 border-white/10 dark:bg-slate-900/30 dark:border-white/5";
-            if (isRain || code === "stormy") {
-              cloudClass = "bg-slate-300/30 dark:bg-slate-950/40 border-slate-400/10 dark:border-white/5";
-            }
-            
-            return (
-              <motion.div
-                key={i}
-                initial={{ x: "-100%", y: `${10 + i * 14}%` }}
-                animate={{ x: "100vw" }}
-                transition={{
-                  duration,
-                  repeat: Infinity,
-                  ease: "linear",
-                  delay: i * -15,
-                }}
-                className={`absolute rounded-full filter blur-[50px] dark:blur-[60px] border ${cloudClass}`}
-                style={{
-                  width: `${sizeWidth}px`,
-                  height: `${sizeHeight}px`,
-                  opacity: resolvedTheme === "light" ? 0.65 : 0.3,
-                }}
-              />
-            );
-          })}
-        </div>
-      )}
+      <div className="absolute inset-0">
+        {Array.from({ length: 6 }).map((_, i) => {
+          const sizeWidth = 250 + (i % 3) * 100;
+          const sizeHeight = 70 + (i % 2) * 40;
+          const duration = 60 + i * 25;
+          
+          let cloudClass = "bg-white/40 border-white/10 dark:bg-slate-900/30 dark:border-white/5";
+          if (isRain || code === "stormy") {
+            cloudClass = "bg-slate-300/30 dark:bg-slate-950/40 border-slate-400/10 dark:border-white/5";
+          }
+          
+          return (
+            <motion.div
+              key={i}
+              initial={{ x: "-100%", y: `${10 + i * 14}%` }}
+              animate={{ x: "100vw" }}
+              transition={{
+                duration,
+                repeat: Infinity,
+                ease: "linear",
+                delay: i * -15,
+              }}
+              className={`absolute rounded-full filter blur-[50px] dark:blur-[60px] border ${cloudClass}`}
+              style={{
+                width: `${sizeWidth}px`,
+                height: `${sizeHeight}px`,
+                opacity: resolvedTheme === "light" ? 0.65 : 0.3,
+              }}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -27,7 +27,9 @@ export const metadata: Metadata = {
   description: "A premium developer-grade consumer weather analytics dashboard built on the WeatherAI platform.",
   manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/assets/weather-icon.svg",
+    shortcut: "/assets/weather-icon.svg",
+    apple: "/assets/weather-icon.svg",
   },
 };
 

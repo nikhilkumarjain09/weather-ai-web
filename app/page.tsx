@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { WeatherResponse } from "@/services/weather/types";
 import { addHistoricalEntry } from "@/lib/historicalStore";
@@ -103,6 +103,7 @@ export default function DashboardConsole() {
   const [lastUpdatedTime, setLastUpdatedTime] = useState("");
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const startupResolvedRef = useRef(false);
 
   const fetchUsage = useCallback(async () => {
     try {
@@ -290,7 +291,8 @@ export default function DashboardConsole() {
 
   // Startup: Load default saved location if set
   useEffect(() => {
-    if (userName) {
+    if (mounted && userName && !startupResolvedRef.current) {
+      startupResolvedRef.current = true;
       const defaultLoc = savedLocations.find((loc) => loc.isDefault);
       if (defaultLoc) {
         setActiveLocation(defaultLoc);
@@ -298,7 +300,7 @@ export default function DashboardConsole() {
         fetchWeather();
       }
     }
-  }, [savedLocations, setActiveLocation, fetchWeather, userName]);
+  }, [mounted, savedLocations, setActiveLocation, fetchWeather, userName]);
 
   // Global Hotkey Manager
   useEffect(() => {

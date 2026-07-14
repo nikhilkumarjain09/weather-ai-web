@@ -133,7 +133,7 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
             This week
           </h3>
         </div>
-        <div className="flex bg-white/5 border border-white/10 rounded-xl p-0.5">
+        <div className="flex bg-slate-100/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-0.5">
           <button
             onClick={() => setForecastMode("7")}
             className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${
@@ -178,8 +178,8 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
                   <div
                     key={day.date}
                     onClick={() => handleToggleExpand(idx)}
-                    className={`bg-white/5 border rounded-2xl p-4 flex flex-col items-center text-center hover:border-accent/40 transition-all duration-300 z-20 cursor-pointer hover:scale-[1.03] ${
-                      isExpanded ? "border-accent ring-1 ring-accent/25 bg-accent-tint/10" : "border-white/5"
+                    className={`bg-slate-100/40 dark:bg-white/5 border rounded-2xl p-4 flex flex-col items-center text-center hover:border-accent/40 transition-all duration-300 z-20 cursor-pointer hover:scale-[1.03] ${
+                      isExpanded ? "border-accent ring-1 ring-accent/25 bg-accent-tint/10" : "border-slate-200/50 dark:border-white/5"
                     }`}
                   >
                     <span className="text-xs font-bold text-text-primary tracking-tight font-display">{getDayName(day.date)}</span>
@@ -216,7 +216,7 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
 
               {/* Free Plan Lock Slots overlay if on Free Plan and Mode is 14 */}
               {forecastMode === "14" && apiPlan === "free" && (
-                <div className="col-span-full border border-dashed border-white/10 rounded-2xl p-6 text-center bg-white/5 flex flex-col items-center justify-center gap-3 relative mt-4">
+                <div className="col-span-full border border-dashed border-slate-200 dark:border-white/10 rounded-2xl p-6 text-center bg-slate-50/50 dark:bg-white/5 flex flex-col items-center justify-center gap-3 relative mt-4">
                   <div className="w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center text-accent">
                     <Lock size={16} />
                   </div>
@@ -241,9 +241,9 @@ export default function ForecastStrip({ days, unit, lat, lon }: ForecastStripPro
             animate={animationsEnabled ? { opacity: 1, height: "auto", marginTop: 16 } : {}}
             exit={animationsEnabled ? { opacity: 0, height: 0, marginTop: 0 } : {}}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden bg-white/5 border border-white/10 rounded-2xl p-4 font-sans text-xs"
+            className="overflow-hidden bg-slate-50/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 font-sans text-xs"
           >
-            <div className="flex justify-between items-center pb-2.5 border-b border-white/5 mb-3">
+            <div className="flex justify-between items-center pb-2.5 border-b border-slate-100 dark:border-white/5 mb-3">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-text-primary">
                   Today&apos;s weather details: {getFormattedDate(activeDays[expandedIndex].date)}

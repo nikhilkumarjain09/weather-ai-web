@@ -9,7 +9,7 @@ import SearchBar from "../controls/SearchBar";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function TopBar() {
-  const { userName, notifications, activeView, setActiveView, apiPlan } = useAppStore();
+  const { userName, notifications, activeView, setActiveView, apiPlan, activeLocation } = useAppStore();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -59,15 +59,21 @@ export default function TopBar() {
         
         {/* Brand logo */}
         <div className="flex items-center gap-2.5 shrink-0">
-          <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-accent via-indigo-600 to-purple-600 flex items-center justify-center font-display font-black text-white text-xs shadow-lg shadow-accent/25 hover:scale-105 transition-transform duration-300">
-            A
+          <div className="w-7 h-7 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center p-1.5 shadow-md hover:scale-105 transition-transform duration-300">
+            <img src="/assets/weather-icon.svg" alt="Aeris Logo" className="w-full h-full object-contain" />
           </div>
-          <div className="flex flex-col hidden sm:flex">
+          <div className="flex flex-col hidden md:flex">
             <span className="font-display font-bold text-xs tracking-tight text-slate-900 dark:text-white leading-none font-sans">Aeris</span>
             <span className="text-[7px] text-slate-500 dark:text-slate-400 font-display font-bold uppercase tracking-widest leading-none mt-1">
               WeatherAI
             </span>
           </div>
+          {activeLocation && (
+            <div className="flex items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-200 text-[9px] md:text-[10px] font-bold tracking-tight max-w-[90px] sm:max-w-[130px] md:max-w-[170px] truncate ml-1 animate-slide-in">
+              <MapPin size={9} className="text-accent shrink-0 animate-pulse" />
+              <span className="truncate">{activeLocation.name}</span>
+            </div>
+          )}
         </div>
 
         {/* Embedded Center Search Bar */}
@@ -146,8 +152,8 @@ export default function TopBar() {
                 {/* Header */}
                 <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/5">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-accent flex items-center justify-center font-display font-bold text-bg text-[10px]">
-                      A
+                    <div className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center p-1 hover:scale-105 transition-transform duration-300">
+                      <img src="/assets/weather-icon.svg" alt="Aeris Logo" className="w-full h-full object-contain" />
                     </div>
                     <span className="font-display font-bold text-sm text-slate-900 dark:text-white">Menu Navigation</span>
                   </div>

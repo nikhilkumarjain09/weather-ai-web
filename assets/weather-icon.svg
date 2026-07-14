@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%" fill="none">
+  <!-- Premium Dark Mode Background Grid (Optional / App Icon Style) -->
+  <rect width="256" height="256" rx="56" fill="#0B0F19"/>
+  <path d="M0 64H256M0 128H256M0 192H256M64 0V256M128 0V256M192 0V256" stroke="#1E293B" stroke-width="1" opacity="0.3"/>
+
+  <!-- Gradients -->
+  <defs>
+    <linearGradient id="aeris-primary" x1="32" y1="224" x2="224" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>   <!-- Cyan / Wind -->
+      <stop offset="50%" stop-color="#6366F1"/>  <!-- Indigo / Atmosphere -->
+      <stop offset="100%" stop-color="#EC4899"/> <!-- Pink / AI Synthesis Alert -->
+    </linearGradient>
+    <radialGradient id="glow" cx="128" cy="80" r="80" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Ambient Glow Behind the Peak -->
+  <circle cx="128" cy="90" r="60" fill="url(#glow)"/>
+
+  <!-- The "A" Isobaric Data Curve -->
+  <path d="M56 200 
+           C 80 200, 90 140, 105 110 
+           L 128 64 
+           L 151 110 
+           C 166 140, 176 200, 200 200" 
+        stroke="url(#aeris-primary)" 
+        stroke-width="18" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+
+  <!-- The Interactive Analytics Crossbar (Sparkline style) -->
+  <path d="M88 140 
+           Q 110 125, 128 140 
+           T 168 140" 
+        stroke="url(#aeris-primary)" 
+        stroke-width="12" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+
+  <!-- Real-time Data Node (Webhook / Alert Indicator) -->
+  <circle cx="128" cy="64" r="7" fill="#FFFFFF"/>
+  <circle cx="128" cy="64" r="14" stroke="#FFFFFF" stroke-width="2" opacity="0.5"/>
+</svg>
