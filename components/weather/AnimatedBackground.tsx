@@ -36,14 +36,26 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
   const [isDark, setIsDark] = useState(false);
   const [lightning, setLightning] = useState(false);
   const [lightningStrikePos, setLightningStrikePos] = useState(50);
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const activeIsMobile = mounted && isMobile;
 
   const code = conditionCode.toLowerCase();
   const resolvedIsNight = Number(isDay) === 0 || code === "night";
   const showSpaceView = resolvedIsNight;
 
-  const stars1 = React.useMemo(() => generateStars(500, 2400, 2400, 100), []);
-  const stars2 = React.useMemo(() => generateStars(350, 2400, 2400, 200), []);
-  const stars3 = React.useMemo(() => generateStars(150, 2400, 2400, 300), []);
+  const stars1 = React.useMemo(() => generateStars(activeIsMobile ? 120 : 500, 2400, 2400, 100), [activeIsMobile]);
+  const stars2 = React.useMemo(() => generateStars(activeIsMobile ? 80 : 350, 2400, 2400, 200), [activeIsMobile]);
+  const stars3 = React.useMemo(() => generateStars(activeIsMobile ? 40 : 150, 2400, 2400, 300), [activeIsMobile]);
 
   const isRain = code === "rainy" || code === "stormy";
   const isSnow = code === "snowy";
@@ -154,10 +166,14 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
       {/* 2. Twinkling Stars & Space View for Night */}
       {showSpaceView && (
         <div className="absolute inset-0 z-0 select-none pointer-events-none">
-          {/* Nebula dust */}
-          <div className="absolute top-[10%] left-[15%] w-96 h-96 rounded-full bg-purple-900/10 filter blur-[100px] animate-pulse-glow" />
-          <div className="absolute bottom-[20%] right-[15%] w-[400px] h-[400px] rounded-full bg-indigo-900/10 filter blur-[120px]" />
-          <div className="absolute top-[40%] right-[25%] w-80 h-80 rounded-full bg-teal-950/10 filter blur-[90px]" />
+          {/* Nebula dust (scaled down and static on mobile to save GPU memory) */}
+          <div className={`absolute top-[10%] left-[15%] ${activeIsMobile ? "w-48 h-48 blur-[50px]" : "w-96 h-96 blur-[100px] animate-pulse-glow"} rounded-full bg-purple-900/10`} />
+          {!activeIsMobile && (
+            <>
+              <div className="absolute bottom-[20%] right-[15%] w-[400px] h-[400px] rounded-full bg-indigo-900/10 filter blur-[120px]" />
+              <div className="absolute top-[40%] right-[25%] w-80 h-80 rounded-full bg-teal-950/10 filter blur-[90px]" />
+            </>
+          )}
 
           {/* Parallax Starfield Layers (1000 Stars Total) */}
           <motion.div
@@ -306,7 +322,7 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
       {/* 9. Cartoonic Floating Clouds for Day Light Mode */}
       {!showSpaceView && (
         <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
-          {Array.from({ length: 22 }).map((_, i) => {
+          {Array.from({ length: activeIsMobile ? 6 : 22 }).map((_, i) => {
             const seedWidth = i * 23 + 17;
             const seedSpeed = i * 37 + 13;
             const seedHeight = i * 43 + 19;
@@ -355,15 +371,15 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
 
       {/* 3. Glow Blobs */}
       <div
-        className="absolute -top-48 left-1/4 w-[500px] h-[500px] rounded-full filter blur-[120px] animate-pulse-glow"
+        className={`absolute left-1/4 rounded-full ${activeIsMobile ? "-top-24 w-48 h-48 blur-[50px]" : "-top-48 w-[500px] h-[500px] blur-[120px] animate-pulse-glow"}`}
         style={{ backgroundColor: bgTheme.glowColor }}
       />
 
       {/* 4. Sunlight / Sunbeam rays */}
       {isSun && !showSpaceView && (
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] pointer-events-none">
+        <div className={`absolute top-0 right-0 ${activeIsMobile ? "w-[300px] h-[300px]" : "w-[600px] h-[600px]"} pointer-events-none`}>
           <motion.div
-            animate={{ rotate: 360 }}
+            animate={animationsEnabled ? { rotate: 360 } : {}}
             transition={{ duration: 80, repeat: Infinity, ease: "linear" }}
             className="w-full h-full opacity-[0.06] bg-[radial-gradient(circle_at_center,var(--color-accent)_0%,transparent_70%)]"
           />
@@ -403,7 +419,7 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
       {/* 6. Animated Raindrops */}
       {isRain && (
         <div className="absolute inset-0 flex justify-between px-8 opacity-40">
-          {Array.from({ length: 30 }).map((_, i) => (
+          {Array.from({ length: activeIsMobile ? 12 : 30 }).map((_, i) => (
             <motion.div
               key={i}
               initial={{ y: "-120%" }}
@@ -427,7 +443,7 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
       {/* 7. Falling Snowflakes */}
       {isSnow && (
         <div className="absolute inset-0 flex justify-around opacity-60">
-          {Array.from({ length: 40 }).map((_, i) => (
+          {Array.from({ length: activeIsMobile ? 15 : 40 }).map((_, i) => (
             <motion.div
               key={i}
               initial={{ y: -20, x: Math.random() * 40 - 20, rotate: 0 }}
@@ -454,7 +470,7 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
       {/* 8. Realistic Puffy Floating Clouds Layer (Day only, centered vertically) */}
       {!showSpaceView && (
         <div className="absolute inset-0">
-          {Array.from({ length: 18 }).map((_, i) => {
+          {Array.from({ length: activeIsMobile ? 4 : 18 }).map((_, i) => {
             const seedWidth = i * 19 + 7;
             const seedHeight = i * 31 + 13;
             const seedSpeed = i * 43 + 17;
