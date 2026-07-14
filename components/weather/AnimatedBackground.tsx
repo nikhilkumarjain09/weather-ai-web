@@ -53,9 +53,12 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
   const resolvedIsNight = Number(isDay) === 0 || code === "night";
   const showSpaceView = resolvedIsNight;
 
-  const stars1 = React.useMemo(() => generateStars(activeIsMobile ? 120 : 500, 2400, 2400, 100), [activeIsMobile]);
-  const stars2 = React.useMemo(() => generateStars(activeIsMobile ? 80 : 350, 2400, 2400, 200), [activeIsMobile]);
-  const stars3 = React.useMemo(() => generateStars(activeIsMobile ? 40 : 150, 2400, 2400, 300), [activeIsMobile]);
+  const starW = activeIsMobile ? 600 : 2400;
+  const starH = activeIsMobile ? 1000 : 2400;
+
+  const stars1 = React.useMemo(() => generateStars(activeIsMobile ? 60 : 500, starW, starH, 100), [activeIsMobile, starW, starH]);
+  const stars2 = React.useMemo(() => generateStars(activeIsMobile ? 40 : 350, starW, starH, 200), [activeIsMobile, starW, starH]);
+  const stars3 = React.useMemo(() => generateStars(activeIsMobile ? 20 : 150, starW, starH, 300), [activeIsMobile, starW, starH]);
 
   const isRain = code === "rainy" || code === "stormy";
   const isSnow = code === "snowy";
@@ -175,7 +178,7 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
             </>
           )}
 
-          {/* Parallax Starfield Layers (1000 Stars Total) */}
+          {/* Parallax Starfield Layers (scaled down and static translation on mobile to save GPU memory) */}
           <motion.div
             className="absolute rounded-full bg-transparent"
             style={{
@@ -185,12 +188,18 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
               top: 0,
               left: 0,
             }}
-            animate={{
+            animate={activeIsMobile ? {
+              opacity: [0.7, 1, 0.7],
+            } : {
               x: [0, -35, 25, 0],
               y: [0, 25, -35, 0],
               opacity: [0.7, 1, 0.7],
             }}
-            transition={{
+            transition={activeIsMobile ? {
+              duration: 8,
+              repeat: Infinity,
+              ease: "linear",
+            } : {
               duration: 90,
               repeat: Infinity,
               ease: "linear",
@@ -206,12 +215,18 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
               top: 0,
               left: 0,
             }}
-            animate={{
+            animate={activeIsMobile ? {
+              opacity: [0.8, 0.5, 0.8],
+            } : {
               x: [0, 20, -30, 0],
               y: [0, -30, 20, 0],
               opacity: [0.8, 0.5, 0.8],
             }}
-            transition={{
+            transition={activeIsMobile ? {
+              duration: 12,
+              repeat: Infinity,
+              ease: "linear",
+            } : {
               duration: 120,
               repeat: Infinity,
               ease: "linear",
@@ -227,12 +242,18 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
               top: 0,
               left: 0,
             }}
-            animate={{
+            animate={activeIsMobile ? {
+              opacity: [0.6, 0.9, 0.6],
+            } : {
               x: [0, -45, 35, 0],
               y: [0, -25, 45, 0],
               opacity: [0.6, 0.9, 0.6],
             }}
-            transition={{
+            transition={activeIsMobile ? {
+              duration: 15,
+              repeat: Infinity,
+              ease: "linear",
+            } : {
               duration: 150,
               repeat: Infinity,
               ease: "linear",
@@ -477,11 +498,17 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
             const seedY = i * 53 + 23;
             const seedBlur = i * 61 + 29;
 
-            const sizeWidth = 200 + Math.floor(pseudoRandom(seedWidth) * 250); // 200 to 450px width
-            const sizeHeight = 60 + Math.floor(pseudoRandom(seedHeight) * 80); // 60 to 140px height
-            const duration = 50 + Math.floor(pseudoRandom(seedSpeed) * 80); // 50s to 130s speed
-            const yOffset = 15 + Math.floor(pseudoRandom(seedY) * 60); // spread 15% to 75% (middle)
-            const blurVal = 40 + Math.floor(pseudoRandom(seedBlur) * 45); // blur 40px to 85px (different styles)
+            const sizeWidth = activeIsMobile 
+              ? 100 + Math.floor(pseudoRandom(seedWidth) * 100) 
+              : 200 + Math.floor(pseudoRandom(seedWidth) * 250);
+            const sizeHeight = activeIsMobile
+              ? 30 + Math.floor(pseudoRandom(seedHeight) * 40)
+              : 60 + Math.floor(pseudoRandom(seedHeight) * 80);
+            const duration = 50 + Math.floor(pseudoRandom(seedSpeed) * 80);
+            const yOffset = 15 + Math.floor(pseudoRandom(seedY) * 60);
+            const blurVal = activeIsMobile
+              ? 10 + Math.floor(pseudoRandom(seedBlur) * 15)
+              : 40 + Math.floor(pseudoRandom(seedBlur) * 45);
             
             let cloudClass = "bg-white/40 border-white/10 dark:bg-slate-900/30 dark:border-white/5";
             if (isRain || code === "stormy") {
