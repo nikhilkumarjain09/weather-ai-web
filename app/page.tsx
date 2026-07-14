@@ -596,7 +596,7 @@ export default function DashboardConsole() {
   const isNight = weather?.current?.isDay === 0 || weather?.current?.conditionsCode?.toLowerCase() === "night";
 
   return (
-    <div className="min-h-screen bg-transparent text-text-primary font-sans flex flex-col pt-24 pb-16 md:pb-0 relative">
+    <div className="min-h-screen bg-transparent text-text-primary font-sans flex flex-col pt-32 sm:pt-28 md:pt-24 pb-16 md:pb-0 relative">
       <AnimatedBackground
         conditionCode={weather?.current?.conditionsCode || "sunny"}
         isDay={weather?.current?.isDay ?? 1}

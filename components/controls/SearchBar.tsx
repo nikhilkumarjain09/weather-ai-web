@@ -194,12 +194,12 @@ export default function SearchBar() {
   return (
     <div ref={containerRef} className="relative w-full max-w-md font-sans z-30">
       {/* Search Input Bar */}
-      <div className="flex items-center gap-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-1.5 focus-within:border-accent/40 focus-within:ring-1 focus-within:ring-accent/15 transition-all">
-        <Search size={13} className="text-slate-400 dark:text-slate-500 shrink-0" />
+      <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-2 sm:px-3 py-1 sm:py-1.5 focus-within:border-accent/40 focus-within:ring-1 focus-within:ring-accent/15 transition-all">
+        <Search size={12} className="text-slate-400 dark:text-slate-500 shrink-0" />
         <input
           ref={inputRef}
           type="text"
-          placeholder="Search for a city..."
+          placeholder="Search city..."
           value={query}
           onFocus={() => {
             setFocused(true);
@@ -207,7 +207,7 @@ export default function SearchBar() {
           }}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="flex-1 bg-transparent text-xs text-slate-800 dark:text-slate-100 focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 font-sans font-medium"
+          className="flex-1 bg-transparent text-xs text-slate-800 dark:text-slate-100 focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 font-sans font-medium min-w-0"
         />
         {hasQuery ? (
           <button
@@ -221,7 +221,7 @@ export default function SearchBar() {
             <X size={13} />
           </button>
         ) : (
-          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 px-1.5 py-0.5 rounded select-none shrink-0 pointer-events-none">
+          <span className="hidden sm:inline-block text-[10px] text-slate-400 dark:text-slate-500 font-mono bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 px-1.5 py-0.5 rounded select-none shrink-0 pointer-events-none">
             /
           </span>
         )}

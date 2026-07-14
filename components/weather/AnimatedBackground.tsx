@@ -351,7 +351,7 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
 
             const size = 80 + Math.floor(pseudoRandom(seedWidth) * 140); // 80 to 220px width
             const duration = 40 + Math.floor(pseudoRandom(seedSpeed) * 80); // 40s to 120s speed
-            const yOffset = 15 + Math.floor(pseudoRandom(seedHeight) * 60); // spread 15% to 75% (middle)
+            const yOffset = (activeIsMobile ? 35 : 15) + Math.floor(pseudoRandom(seedHeight) * (activeIsMobile ? 40 : 60)); // lower down on mobile (35% to 75%)
             const delay = pseudoRandom(seedDelay) * -120; // negative delay to pre-distribute
 
             const styleIndex = i % 3;

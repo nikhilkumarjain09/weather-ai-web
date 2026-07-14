@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { Bell, ChevronDown, Menu, X, LayoutDashboard, TrendingUp, Layers, MapPin, Sparkles } from "lucide-react";
+import { Bell, ChevronDown, Menu, X, LayoutDashboard, TrendingUp, Layers, MapPin, Sparkles, Settings } from "lucide-react";
 import NotificationDropdown from "./NotificationDropdown";
 import ProfileMenu from "./ProfileMenu";
 import SearchBar from "../controls/SearchBar";
@@ -15,7 +15,7 @@ interface TopBarProps {
 }
 
 export default function TopBar({ weather = null }: TopBarProps) {
-  const { userName, notifications, activeView, setActiveView, apiPlan, activeLocation } = useAppStore();
+  const { userName, notifications, activeView, setActiveView, apiPlan, activeLocation, setActiveModal } = useAppStore();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -75,35 +75,35 @@ export default function TopBar({ weather = null }: TopBarProps) {
             </span>
           </div>
           {activeLocation ? (
-            <div className="flex items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-200 text-[9px] md:text-[10px] font-bold tracking-tight max-w-[90px] sm:max-w-[130px] md:max-w-[170px] truncate ml-1 animate-slide-in">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-200 text-[9px] md:text-[10px] font-bold tracking-tight max-w-[80px] sm:max-w-[130px] md:max-w-[170px] truncate ml-1 animate-slide-in">
               <MapPin size={9} className="text-accent shrink-0 animate-pulse" />
               <span className="truncate">{activeLocation.name}</span>
             </div>
           ) : (
-            <div className="h-5 w-24 md:w-32 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl animate-pulse ml-1 shrink-0" />
+            <div className="flex h-5 w-20 sm:w-32 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl animate-pulse ml-1 shrink-0" />
           )}
         </div>
 
         {/* Embedded Center Search Bar and AI Trigger */}
-        <div className="flex-1 max-w-sm mx-4 shrink-0 flex items-center gap-2">
-          <div className="flex-1">
+        <div className="flex-1 min-w-0 max-w-sm mx-1.5 sm:mx-4 flex items-center gap-1 sm:gap-2">
+          <div className="flex-1 min-w-0">
             <SearchBar />
           </div>
           {weather && (
             <button
               onClick={() => setIsInsightsOpen(true)}
-              className="p-2 rounded-xl bg-accent text-white hover:bg-accent/90 transition-all hover:scale-105 flex items-center justify-center shadow-lg shadow-accent/15"
+              className="p-1.5 sm:p-2 rounded-xl bg-accent text-white hover:bg-accent/90 transition-all hover:scale-105 flex items-center justify-center shadow-lg shadow-accent/15 shrink-0"
               title="Get AI Weather Insights"
             >
-              <Sparkles size={14} className="animate-pulse" />
+              <Sparkles size={13} className="animate-pulse" />
             </button>
           )}
         </div>
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 md:gap-3 shrink-0">
-          {/* Notification Bell */}
-          <div className="relative">
+          {/* Notification Bell (Hidden on mobile) */}
+          <div className="relative hidden sm:block">
             <button
               onClick={() => {
                 setIsNotifOpen(!isNotifOpen);
@@ -119,8 +119,8 @@ export default function TopBar({ weather = null }: TopBarProps) {
             <NotificationDropdown isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
           </div>
 
-          {/* User Profile */}
-          <div className="relative">
+          {/* User Profile (Hidden on mobile) */}
+          <div className="relative hidden sm:block">
             <button
               onClick={() => {
                 setIsProfileOpen(!isProfileOpen);
@@ -211,6 +211,39 @@ export default function TopBar({ weather = null }: TopBarProps) {
                       </button>
                     );
                   })}
+                </div>
+                {/* Mobile-Only Actions */}
+                <div className="flex flex-col gap-2 pt-4 border-t border-slate-100 dark:border-white/5 sm:hidden">
+                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block px-1 font-display">
+                    Quick Actions
+                  </span>
+                  
+                  {/* AI insights option */}
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setIsInsightsOpen(true);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs transition-all border bg-accent/10 border-accent/20 text-accent font-bold hover:bg-accent/20"
+                  >
+                    <Sparkles size={15} className="animate-pulse" />
+                    <span className="flex-1 text-left font-semibold">AI Insights Report</span>
+                    <span className="bg-accent text-white dark:text-bg px-1 rounded text-[7px] font-bold uppercase tracking-wider">
+                      Live
+                    </span>
+                  </button>
+
+                  {/* Settings option */}
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setActiveModal("settings");
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs transition-all border bg-transparent border-transparent text-slate-500 dark:text-text-muted hover:text-slate-900 dark:hover:text-text-primary hover:bg-slate-100 dark:hover:bg-white/5"
+                  >
+                    <Settings size={15} />
+                    <span className="flex-1 text-left font-medium">User Settings</span>
+                  </button>
                 </div>
               </div>
 
