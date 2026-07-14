@@ -169,10 +169,10 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
       {/* 2. Twinkling Stars & Space View for Night */}
       {showSpaceView && (
         <div className="absolute inset-0 z-0 select-none pointer-events-none">
-          {/* Nebula dust (scaled down and static on mobile to save GPU memory) */}
-          <div className={`absolute top-[10%] left-[15%] ${activeIsMobile ? "w-48 h-48 blur-[50px]" : "w-96 h-96 blur-[100px] animate-pulse-glow"} rounded-full bg-purple-900/10`} />
+          {/* Nebula dust (completely disabled on mobile to prevent GPU blur OOM) */}
           {!activeIsMobile && (
             <>
+              <div className="absolute top-[10%] left-[15%] w-96 h-96 rounded-full bg-purple-900/10 filter blur-[100px] animate-pulse-glow" />
               <div className="absolute bottom-[20%] right-[15%] w-[400px] h-[400px] rounded-full bg-indigo-900/10 filter blur-[120px]" />
               <div className="absolute top-[40%] right-[25%] w-80 h-80 rounded-full bg-teal-950/10 filter blur-[90px]" />
             </>
@@ -390,11 +390,13 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
         </div>
       )}
 
-      {/* 3. Glow Blobs */}
-      <div
-        className={`absolute left-1/4 rounded-full ${activeIsMobile ? "-top-24 w-48 h-48 blur-[50px]" : "-top-48 w-[500px] h-[500px] blur-[120px] animate-pulse-glow"}`}
-        style={{ backgroundColor: bgTheme.glowColor }}
-      />
+      {/* 3. Glow Blobs (completely disabled on mobile to prevent GPU blur OOM) */}
+      {!activeIsMobile && (
+        <div
+          className="absolute -top-48 left-1/4 w-[500px] h-[500px] rounded-full filter blur-[120px] animate-pulse-glow"
+          style={{ backgroundColor: bgTheme.glowColor }}
+        />
+      )}
 
       {/* 4. Sunlight / Sunbeam rays */}
       {isSun && !showSpaceView && (
@@ -488,8 +490,8 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
         </div>
       )}
 
-      {/* 8. Realistic Puffy Floating Clouds Layer (Day only, centered vertically) */}
-      {!showSpaceView && (
+      {/* 8. Realistic Puffy Floating Clouds Layer (completely disabled on mobile to prevent GPU blur OOM) */}
+      {!showSpaceView && !activeIsMobile && (
         <div className="absolute inset-0">
           {Array.from({ length: activeIsMobile ? 4 : 18 }).map((_, i) => {
             const seedWidth = i * 19 + 7;
