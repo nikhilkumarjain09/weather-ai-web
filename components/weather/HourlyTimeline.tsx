@@ -161,7 +161,7 @@ export default function HourlyTimeline({
         {/* Left Blur Mask & Navigation Button */}
         {showLeftBtn && (
           <>
-            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white/10 dark:from-slate-950/10 to-transparent backdrop-blur-[2px] pointer-events-none z-10 transition-all duration-300" />
+            <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-white/2 dark:from-slate-950/4 to-transparent backdrop-blur-[1.5px] pointer-events-none z-10 transition-all duration-300" />
             <button
               onMouseDown={() => startScrolling("left")}
               onMouseUp={stopScrolling}
@@ -180,7 +180,7 @@ export default function HourlyTimeline({
         {/* Right Blur Mask & Navigation Button */}
         {showRightBtn && (
           <>
-            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white/10 dark:from-slate-950/10 to-transparent backdrop-blur-[2px] pointer-events-none z-10 transition-all duration-300" />
+            <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-white/2 dark:from-slate-950/4 to-transparent backdrop-blur-[1.5px] pointer-events-none z-10 transition-all duration-300" />
             <button
               onMouseDown={() => startScrolling("right")}
               onMouseUp={stopScrolling}
