@@ -233,7 +233,6 @@ export default function DashboardConsole() {
 
   // Trigger weather query on location shift
   useEffect(() => {
-    setWeather(null);
     fetchWeather();
   }, [fetchWeather]);
 

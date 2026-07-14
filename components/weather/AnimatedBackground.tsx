@@ -9,6 +9,18 @@ function pseudoRandom(seed: number) {
   return x - Math.floor(x);
 }
 
+function generateStars(count: number, width: number, height: number, seedOffset: number) {
+  let shadowString = "";
+  for (let i = 0; i < count; i++) {
+    const x = Math.floor(pseudoRandom(i * 13 + seedOffset) * width);
+    const y = Math.floor(pseudoRandom(i * 29 + seedOffset + 7) * height);
+    const opacity = (0.15 + pseudoRandom(i * 41 + seedOffset + 13) * 0.85).toFixed(2);
+    shadowString += `${x}px ${y}px rgba(255, 255, 255, ${opacity})`;
+    if (i < count - 1) shadowString += ", ";
+  }
+  return shadowString;
+}
+
 interface AnimatedBackgroundProps {
   conditionCode: string;
   isDay?: number;
@@ -26,8 +38,12 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
   const [lightningStrikePos, setLightningStrikePos] = useState(50);
 
   const code = conditionCode.toLowerCase();
-  const resolvedIsNight = isDay === 0 || code === "night";
+  const resolvedIsNight = Number(isDay) === 0 || code === "night";
   const showSpaceView = resolvedIsNight;
+
+  const stars1 = React.useMemo(() => generateStars(500, 2400, 2400, 100), []);
+  const stars2 = React.useMemo(() => generateStars(350, 2400, 2400, 200), []);
+  const stars3 = React.useMemo(() => generateStars(150, 2400, 2400, 300), []);
 
   const isRain = code === "rainy" || code === "stormy";
   const isSnow = code === "snowy";
@@ -143,51 +159,69 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
           <div className="absolute bottom-[20%] right-[15%] w-[400px] h-[400px] rounded-full bg-indigo-900/10 filter blur-[120px]" />
           <div className="absolute top-[40%] right-[25%] w-80 h-80 rounded-full bg-teal-950/10 filter blur-[90px]" />
 
-          {/* Twinkling & Slowly Revolving/Floating Stars */}
-          {Array.from({ length: 100 }).map((_, i) => {
-            const seed1 = i * 17 + 5;
-            const seed2 = i * 29 + 11;
-            const seed3 = i * 41 + 19;
-            const seed4 = i * 53 + 23;
-            
-            const random1 = pseudoRandom(seed1);
-            const random2 = pseudoRandom(seed2);
-            const random3 = pseudoRandom(seed3);
-            const random4 = pseudoRandom(seed4);
-            
-            const size = random1 > 0.82 ? 2.2 : 1.2;
-            const duration = 40 + random2 * 50; // 40s to 90s very slow, subtle motion
-            const delay = random3 * -60;
-            const driftX = (random4 - 0.5) * 55;
-            const driftY = (pseudoRandom(i * 73 + 31) - 0.5) * 55;
-            
-            const top = random1 * 85;
-            const left = random2 * 100;
+          {/* Parallax Starfield Layers (1000 Stars Total) */}
+          <motion.div
+            className="absolute rounded-full bg-transparent"
+            style={{
+              width: "1px",
+              height: "1px",
+              boxShadow: stars1,
+              top: 0,
+              left: 0,
+            }}
+            animate={{
+              x: [0, -35, 25, 0],
+              y: [0, 25, -35, 0],
+              opacity: [0.7, 1, 0.7],
+            }}
+            transition={{
+              duration: 90,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
 
-            return (
-              <motion.div
-                key={i}
-                className="absolute bg-white rounded-full"
-                animate={{
-                  x: [0, driftX, -driftX, 0],
-                  y: [0, driftY, -driftY, 0],
-                  opacity: [0.15, 0.95, 0.35, 0.95, 0.15],
-                }}
-                transition={{
-                  duration,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay,
-                }}
-                style={{
-                  width: `${size}px`,
-                  height: `${size}px`,
-                  top: `${top}%`,
-                  left: `${left}%`,
-                }}
-              />
-            );
-          })}
+          <motion.div
+            className="absolute rounded-full bg-transparent"
+            style={{
+              width: "1.5px",
+              height: "1.5px",
+              boxShadow: stars2,
+              top: 0,
+              left: 0,
+            }}
+            animate={{
+              x: [0, 20, -30, 0],
+              y: [0, -30, 20, 0],
+              opacity: [0.8, 0.5, 0.8],
+            }}
+            transition={{
+              duration: 120,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+
+          <motion.div
+            className="absolute rounded-full bg-transparent"
+            style={{
+              width: "2.2px",
+              height: "2.2px",
+              boxShadow: stars3,
+              top: 0,
+              left: 0,
+            }}
+            animate={{
+              x: [0, -45, 35, 0],
+              y: [0, -25, 45, 0],
+              opacity: [0.6, 0.9, 0.6],
+            }}
+            transition={{
+              duration: 150,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
 
           {/* Constellation dashed lines */}
           <svg className="absolute inset-0 w-full h-full opacity-10" stroke="white" strokeWidth="0.5" strokeDasharray="2 4">
@@ -240,16 +274,29 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
       {/* 9. Cartoonic Floating Clouds for Day Light Mode */}
       {!showSpaceView && (
         <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
-          {Array.from({ length: 5 }).map((_, i) => {
-            const size = 80 + (i % 3) * 40; // 80 to 160px width
-            const duration = 45 + i * 15; // 45s to 105s speed
-            const yOffset = 5 + i * 14; // vertical offsets: 5%, 19%, 33%, 47%, 61%
-            const delay = i * -12; // negative delay to distribute clouds pre-render
+          {Array.from({ length: 15 }).map((_, i) => {
+            const seedWidth = i * 23 + 17;
+            const seedSpeed = i * 37 + 13;
+            const seedHeight = i * 43 + 19;
+            const seedDelay = i * 59 + 29;
+
+            const size = 80 + Math.floor(pseudoRandom(seedWidth) * 140); // 80 to 220px width
+            const duration = 40 + Math.floor(pseudoRandom(seedSpeed) * 70); // 40s to 110s speed
+            const yOffset = 3 + Math.floor(pseudoRandom(seedHeight) * 82); // spread 3% to 85% (top to bottom)
+            const delay = pseudoRandom(seedDelay) * -90; // negative delay to pre-distribute
+
+            const styleIndex = i % 3;
+            let pathD = "M 20 40 A 15 15 0 0 1 45 25 A 22 22 0 0 1 85 30 A 15 15 0 0 1 95 45 A 12 12 0 0 1 85 55 L 20 55 A 12 12 0 0 1 20 40 Z"; // Style A (Standard)
+            if (styleIndex === 1) {
+              pathD = "M 10 35 A 8 8 0 0 1 25 28 A 12 12 0 0 1 65 24 A 18 18 0 0 1 90 32 A 8 8 0 0 1 95 40 L 10 40 Z"; // Style B (Wispy / Flat)
+            } else if (styleIndex === 2) {
+              pathD = "M 15 45 A 12 12 0 0 1 30 30 A 16 16 0 0 1 50 18 A 20 20 0 0 1 80 25 A 12 12 0 0 1 88 45 Z"; // Style C (Tall / Puffy)
+            }
 
             return (
               <motion.div
                 key={i}
-                initial={{ x: "-200px", y: `${yOffset}%` }}
+                initial={{ x: "-250px", y: `${yOffset}%` }}
                 animate={{ x: "100vw" }}
                 transition={{
                   duration,
@@ -262,7 +309,7 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
               >
                 <svg viewBox="0 0 100 60" fill="none" className="w-full h-full">
                   <path
-                    d="M 20 40 A 15 15 0 0 1 45 25 A 22 22 0 0 1 85 30 A 15 15 0 0 1 95 45 A 12 12 0 0 1 85 55 L 20 55 A 12 12 0 0 1 20 40 Z"
+                    d={pathD}
                     fill={isDark ? "rgba(30, 41, 59, 0.55)" : "rgba(255, 255, 255, 0.85)"}
                     stroke={isDark ? "rgba(71, 85, 105, 0.45)" : "rgba(226, 232, 240, 0.95)"}
                     strokeWidth="1.5"
@@ -374,10 +421,18 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
 
       {/* 8. Realistic Puffy Floating Clouds Layer */}
       <div className="absolute inset-0">
-        {Array.from({ length: 6 }).map((_, i) => {
-          const sizeWidth = 250 + (i % 3) * 100;
-          const sizeHeight = 70 + (i % 2) * 40;
-          const duration = 60 + i * 25;
+        {Array.from({ length: 12 }).map((_, i) => {
+          const seedWidth = i * 19 + 7;
+          const seedHeight = i * 31 + 13;
+          const seedSpeed = i * 43 + 17;
+          const seedY = i * 53 + 23;
+          const seedBlur = i * 61 + 29;
+
+          const sizeWidth = 200 + Math.floor(pseudoRandom(seedWidth) * 250); // 200 to 450px width
+          const sizeHeight = 60 + Math.floor(pseudoRandom(seedHeight) * 80); // 60 to 140px height
+          const duration = 50 + Math.floor(pseudoRandom(seedSpeed) * 80); // 50s to 130s speed
+          const yOffset = 3 + Math.floor(pseudoRandom(seedY) * 87); // spread 3% to 90% (top to bottom)
+          const blurVal = 40 + Math.floor(pseudoRandom(seedBlur) * 45); // blur 40px to 85px (different styles)
           
           let cloudClass = "bg-white/40 border-white/10 dark:bg-slate-900/30 dark:border-white/5";
           if (isRain || code === "stormy") {
@@ -387,18 +442,19 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
           return (
             <motion.div
               key={i}
-              initial={{ x: "-100%", y: `${10 + i * 14}%` }}
+              initial={{ x: "-100%", y: `${yOffset}%` }}
               animate={{ x: "100vw" }}
               transition={{
                 duration,
                 repeat: Infinity,
                 ease: "linear",
-                delay: i * -15,
+                delay: i * -18,
               }}
-              className={`absolute rounded-full filter blur-[50px] dark:blur-[60px] border ${cloudClass}`}
+              className={`absolute rounded-full border ${cloudClass}`}
               style={{
                 width: `${sizeWidth}px`,
                 height: `${sizeHeight}px`,
+                filter: `blur(${blurVal}px)`,
                 opacity: !isDark ? 0.65 : 0.3,
               }}
             />
