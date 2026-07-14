@@ -578,6 +578,7 @@ export default function DashboardConsole() {
         return null;
     }
   };
+  const isNight = weather?.current?.isDay === 0 || weather?.current?.conditionsCode?.toLowerCase() === "night";
 
   return (
     <div className="min-h-screen bg-transparent text-text-primary font-sans flex flex-col pt-24 pb-16 md:pb-0 relative">
@@ -598,10 +599,10 @@ export default function DashboardConsole() {
               {greeting.icon}
             </div>
             <div>
-              <h1 className="font-display text-2xl md:text-3xl font-extrabold text-text-primary tracking-tight">
+              <h1 className={`font-display text-2xl md:text-3xl font-extrabold tracking-tight ${isNight ? "text-white" : "text-text-primary"}`}>
                 {greeting.text}, <span className="text-accent">{userName || "Explorer"}</span> 👋
               </h1>
-              <p className="text-xs text-text-muted font-medium mt-0.5 tracking-wide uppercase">{dateString}</p>
+              <p className={`text-xs font-medium mt-0.5 tracking-wide uppercase ${isNight ? "text-slate-400" : "text-text-muted"}`}>{dateString}</p>
             </div>
           </div>
 

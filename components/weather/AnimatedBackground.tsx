@@ -4,6 +4,11 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePreferencesStore } from "@/store/preferencesStore";
 
+function pseudoRandom(seed: number) {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
 interface AnimatedBackgroundProps {
   conditionCode: string;
   isDay?: number;
@@ -138,19 +143,51 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
           <div className="absolute bottom-[20%] right-[15%] w-[400px] h-[400px] rounded-full bg-indigo-900/10 filter blur-[120px]" />
           <div className="absolute top-[40%] right-[25%] w-80 h-80 rounded-full bg-teal-950/10 filter blur-[90px]" />
 
-          {/* Twinkling Stars */}
-          {Array.from({ length: 45 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
-              style={{
-                top: `${(i * 1.3 + Math.random() * 5) % 65}%`,
-                left: `${(i * 2.2 + Math.random() * 8) % 100}%`,
-                animationDelay: `${Math.random() * 4}s`,
-                animationDuration: `${1.5 + Math.random() * 2}s`
-              }}
-            />
-          ))}
+          {/* Twinkling & Slowly Revolving/Floating Stars */}
+          {Array.from({ length: 100 }).map((_, i) => {
+            const seed1 = i * 17 + 5;
+            const seed2 = i * 29 + 11;
+            const seed3 = i * 41 + 19;
+            const seed4 = i * 53 + 23;
+            
+            const random1 = pseudoRandom(seed1);
+            const random2 = pseudoRandom(seed2);
+            const random3 = pseudoRandom(seed3);
+            const random4 = pseudoRandom(seed4);
+            
+            const size = random1 > 0.82 ? 2.2 : 1.2;
+            const duration = 40 + random2 * 50; // 40s to 90s very slow, subtle motion
+            const delay = random3 * -60;
+            const driftX = (random4 - 0.5) * 55;
+            const driftY = (pseudoRandom(i * 73 + 31) - 0.5) * 55;
+            
+            const top = random1 * 85;
+            const left = random2 * 100;
+
+            return (
+              <motion.div
+                key={i}
+                className="absolute bg-white rounded-full"
+                animate={{
+                  x: [0, driftX, -driftX, 0],
+                  y: [0, driftY, -driftY, 0],
+                  opacity: [0.15, 0.95, 0.35, 0.95, 0.15],
+                }}
+                transition={{
+                  duration,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay,
+                }}
+                style={{
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  top: `${top}%`,
+                  left: `${left}%`,
+                }}
+              />
+            );
+          })}
 
           {/* Constellation dashed lines */}
           <svg className="absolute inset-0 w-full h-full opacity-10" stroke="white" strokeWidth="0.5" strokeDasharray="2 4">
