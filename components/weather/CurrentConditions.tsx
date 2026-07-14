@@ -34,7 +34,7 @@ export default function CurrentConditions({
   onRefresh,
   isRefreshing,
 }: CurrentConditionsProps) {
-  const { userName } = useAppStore();
+  const { userName, activeLocation } = useAppStore();
 
   const convertTemp = (c: number) => {
     if (unit === "F") {
@@ -147,7 +147,7 @@ export default function CurrentConditions({
             {greetingText}, <span className="text-accent">{userName || "Explorer"}</span> 👋
           </h2>
           <span className="text-xs text-text-muted font-medium block mt-0.5">
-            Focus: {data.locationName}
+            Focus: {activeLocation?.name || data.locationName}
           </span>
         </div>
         <button

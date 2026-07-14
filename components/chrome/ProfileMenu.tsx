@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { Moon, Sun, Monitor, Thermometer, Keyboard, BookOpen, Settings } from "lucide-react";
+import { Moon, Sun, Monitor, Thermometer, Keyboard, Settings } from "lucide-react";
 
 interface ProfileMenuProps {
   isOpen: boolean;
@@ -131,16 +131,7 @@ export default function ProfileMenu({ isOpen, onClose }: ProfileMenuProps) {
           <span className="font-medium">Keyboard Shortcuts</span>
           <span className="ml-auto font-mono text-[9px] bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-1.5 py-0.5 rounded">?</span>
         </button>
-        <a
-          href="https://weather-ai.co/docs"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={onClose}
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-left"
-        >
-          <BookOpen size={14} className="text-slate-400 dark:text-slate-500" />
-          <span className="font-medium">API Documentation</span>
-        </a>
+
         <button
           onClick={() => {
             setActiveModal("settings");

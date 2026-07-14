@@ -2,30 +2,36 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { Bell, ChevronDown, Menu, X, LayoutDashboard, TrendingUp, Layers, MapPin, BellRing } from "lucide-react";
+import { Bell, ChevronDown, Menu, X, LayoutDashboard, TrendingUp, Layers, MapPin, Sparkles } from "lucide-react";
 import NotificationDropdown from "./NotificationDropdown";
 import ProfileMenu from "./ProfileMenu";
 import SearchBar from "../controls/SearchBar";
 import { motion, AnimatePresence } from "framer-motion";
+import { WeatherResponse } from "@/services/weather/types";
+import AiInsightsModal from "../modals/AiInsightsModal";
 
-export default function TopBar() {
+interface TopBarProps {
+  weather?: WeatherResponse | null;
+}
+
+export default function TopBar({ weather = null }: TopBarProps) {
   const { userName, notifications, activeView, setActiveView, apiPlan, activeLocation } = useAppStore();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isInsightsOpen, setIsInsightsOpen] = useState(false);
 
   const drawerRef = useRef<HTMLDivElement>(null);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
   const initial = userName ? userName.trim().charAt(0).toUpperCase() : "D";
 
-  // Navigation link configurations
+  // Navigation link configurations (Webhooks/Alerts removed)
   const navigation = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "trends", label: "Trends", icon: TrendingUp },
     { id: "comparison", label: "Comparison", icon: Layers },
     { id: "locations", label: "Saved Locations", icon: MapPin },
-    { id: "alerts", label: "Alerts & Webhooks", icon: BellRing, proGated: true },
   ];
 
   // Close drawer on Escape key or outside click
@@ -76,9 +82,20 @@ export default function TopBar() {
           )}
         </div>
 
-        {/* Embedded Center Search Bar */}
-        <div className="flex-1 max-w-sm mx-4 shrink-0">
-          <SearchBar />
+        {/* Embedded Center Search Bar and AI Trigger */}
+        <div className="flex-1 max-w-sm mx-4 shrink-0 flex items-center gap-2">
+          <div className="flex-1">
+            <SearchBar />
+          </div>
+          {weather && (
+            <button
+              onClick={() => setIsInsightsOpen(true)}
+              className="p-2 rounded-xl bg-accent text-white hover:bg-accent/90 transition-all hover:scale-105 flex items-center justify-center shadow-lg shadow-accent/15"
+              title="Get Groq AI Insights"
+            >
+              <Sparkles size={14} className="animate-pulse" />
+            </button>
+          )}
         </div>
 
         {/* Action Controls */}
@@ -170,7 +187,7 @@ export default function TopBar() {
                   {navigation.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeView === item.id;
-                    const isLocked = item.proGated && apiPlan === "free";
+                    const isLocked = item.id === "alerts" && apiPlan === "free";
 
                     return (
                       <button
@@ -208,6 +225,13 @@ export default function TopBar() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Groq AI Insights Modal */}
+      <AiInsightsModal
+        isOpen={isInsightsOpen}
+        onClose={() => setIsInsightsOpen(false)}
+        weather={weather}
+      />
     </>
   );
 }

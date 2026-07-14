@@ -89,8 +89,8 @@ export default function CompareConsole() {
 
   const renderMetricRow = (
     label: string,
-    valA: string | number,
-    valB: string | number,
+    valA: React.ReactNode,
+    valB: React.ReactNode,
     Icon: React.ComponentType<any>
   ) => {
     return (
@@ -99,11 +99,15 @@ export default function CompareConsole() {
           <Icon size={13} className="text-text-muted/70" />
           {label}
         </span>
-        <span className="font-mono font-bold text-text-primary text-center">{valA}</span>
-        <span className="font-mono font-bold text-text-primary text-center">{valB}</span>
+        <span className="font-mono font-bold text-text-primary text-center flex justify-center">{valA}</span>
+        <span className="font-mono font-bold text-text-primary text-center flex justify-center">{valB}</span>
       </div>
     );
   };
+
+  const skeleton = (
+    <div className="h-4 w-12 bg-slate-100 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 rounded animate-pulse" />
+  );
 
   return (
     <div className="bg-surface border border-border rounded-xl p-5 md:p-6 font-sans space-y-6">
@@ -174,38 +178,38 @@ export default function CompareConsole() {
         <div className="px-4 divide-y divide-border/20">
           {renderMetricRow(
             "Temperature",
-            dataA ? `${convertTemp(dataA.current.temp)}°${unit}` : "--",
-            dataB ? `${convertTemp(dataB.current.temp)}°${unit}` : "--",
+            dataA ? `${convertTemp(dataA.current.temp)}°${unit}` : skeleton,
+            dataB ? `${convertTemp(dataB.current.temp)}°${unit}` : skeleton,
             Thermometer
           )}
           {renderMetricRow(
             "Feels Like",
-            dataA ? `${convertTemp(dataA.current.feelsLike)}°${unit}` : "--",
-            dataB ? `${convertTemp(dataB.current.feelsLike)}°${unit}` : "--",
+            dataA ? `${convertTemp(dataA.current.feelsLike)}°${unit}` : skeleton,
+            dataB ? `${convertTemp(dataB.current.feelsLike)}°${unit}` : skeleton,
             Thermometer
           )}
           {renderMetricRow(
             "Humidity",
-            dataA ? `${dataA.current.humidity}%` : "--",
-            dataB ? `${dataB.current.humidity}%` : "--",
+            dataA ? `${dataA.current.humidity}%` : skeleton,
+            dataB ? `${dataB.current.humidity}%` : skeleton,
             Droplets
           )}
           {renderMetricRow(
             "Wind Speed",
-            dataA ? `${dataA.current.windSpeed} km/h` : "--",
-            dataB ? `${dataB.current.windSpeed} km/h` : "--",
+            dataA ? `${dataA.current.windSpeed} km/h` : skeleton,
+            dataB ? `${dataB.current.windSpeed} km/h` : skeleton,
             Wind
           )}
           {renderMetricRow(
             "Wind Direction",
-            dataA ? dataA.current.windDirection : "--",
-            dataB ? dataB.current.windDirection : "--",
+            dataA ? dataA.current.windDirection : skeleton,
+            dataB ? dataB.current.windDirection : skeleton,
             Compass
           )}
           {renderMetricRow(
             "Atmospheric Pressure",
-            dataA ? `${dataA.current.pressure} hPa` : "--",
-            dataB ? `${dataB.current.pressure} hPa` : "--",
+            dataA ? `${dataA.current.pressure} hPa` : skeleton,
+            dataB ? `${dataB.current.pressure} hPa` : skeleton,
             ArrowDown
           )}
         </div>

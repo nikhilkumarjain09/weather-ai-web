@@ -14,7 +14,7 @@ import {
 
 // Chrome & Shared
 import TopBar from "@/components/chrome/TopBar";
-import Toast from "@/components/shared/Toast";
+
 import ErrorBanner from "@/components/shared/ErrorBanner";
 import CommandPalette from "@/components/chrome/CommandPalette";
 
@@ -39,7 +39,7 @@ import AiSummaryPanel from "@/components/weather/AiSummaryPanel";
 import AnimatedBackground from "@/components/weather/AnimatedBackground";
 
 // Controls / Power Panels
-import SearchBar from "@/components/controls/SearchBar";
+
 import UnitToggle from "@/components/controls/UnitToggle";
 import UsagePanel from "@/components/controls/UsagePanel";
 
@@ -208,6 +208,13 @@ export default function DashboardConsole() {
       if (data.current) {
         addHistoricalEntry(data.current.locationName, data.current.temp, data.current.humidity);
         window.dispatchEvent(new Event("aeris-data-fetched"));
+
+        if (activeLocation && (activeLocation.name === "Current Location" || !activeLocation.name) && data.current.locationName) {
+          setActiveLocation({
+            ...activeLocation,
+            name: data.current.locationName,
+          });
+        }
       }
     } catch (err: any) {
       // Offline support: Fallback to last successful response
@@ -224,7 +231,7 @@ export default function DashboardConsole() {
     } finally {
       setLoading(false);
     }
-  }, [activeLocation, unit, showToast]);
+  }, [activeLocation, setActiveLocation, unit, showToast]);
 
 
 
@@ -273,7 +280,14 @@ export default function DashboardConsole() {
           });
           showToast(`Location resolved via IP: ${clientLoc.city}`, "info");
         } catch {
-          // Default coords
+          // Default coords fallback
+          setActiveLocation({
+            id: "default-sf",
+            name: "San Francisco, CA",
+            lat: 37.7749,
+            lon: -122.4194,
+            isDefault: false,
+          });
           showToast("Using default station: San Francisco", "warning");
         }
       }
@@ -289,18 +303,13 @@ export default function DashboardConsole() {
     return () => window.removeEventListener("aeris-detect-location", handleDetectLocation);
   }, [requestLocationAndFetch]);
 
-  // Startup: Load default saved location if set
+  // Startup: Geolocate and load live weather
   useEffect(() => {
     if (mounted && userName && !startupResolvedRef.current) {
       startupResolvedRef.current = true;
-      const defaultLoc = savedLocations.find((loc) => loc.isDefault);
-      if (defaultLoc) {
-        setActiveLocation(defaultLoc);
-      } else {
-        fetchWeather();
-      }
+      requestLocationAndFetch();
     }
-  }, [mounted, savedLocations, setActiveLocation, fetchWeather, userName]);
+  }, [mounted, requestLocationAndFetch, userName]);
 
   // Global Hotkey Manager
   useEffect(() => {
@@ -533,7 +542,7 @@ export default function DashboardConsole() {
       />
 
       {/* Chrome Shell */}
-      <TopBar />
+      <TopBar weather={weather} />
 
       {/* Main Console Content */}
       <main className="flex-1 p-4 md:p-6 max-w-6xl w-full mx-auto space-y-6">
@@ -552,7 +561,6 @@ export default function DashboardConsole() {
           </div>
 
           <div className="flex items-center gap-3">
-            <SearchBar />
             <UnitToggle />
           </div>
         </div>
@@ -611,7 +619,6 @@ export default function DashboardConsole() {
         onRequestLocation={requestLocationAndFetch}
       />
       <ProUpgradeModal />
-      <Toast />
     </div>
   );
 }
