@@ -314,7 +314,7 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
 
             const size = 80 + Math.floor(pseudoRandom(seedWidth) * 140); // 80 to 220px width
             const duration = 40 + Math.floor(pseudoRandom(seedSpeed) * 80); // 40s to 120s speed
-            const yOffset = 3 + Math.floor(pseudoRandom(seedHeight) * 91); // spread 3% to 94% (top to bottom)
+            const yOffset = 15 + Math.floor(pseudoRandom(seedHeight) * 60); // spread 15% to 75% (middle)
             const delay = pseudoRandom(seedDelay) * -120; // negative delay to pre-distribute
 
             const styleIndex = i % 3;
@@ -451,48 +451,50 @@ export default function AnimatedBackground({ conditionCode, isDay = 1 }: Animate
         </div>
       )}
 
-      {/* 8. Realistic Puffy Floating Clouds Layer */}
-      <div className="absolute inset-0">
-        {Array.from({ length: 18 }).map((_, i) => {
-          const seedWidth = i * 19 + 7;
-          const seedHeight = i * 31 + 13;
-          const seedSpeed = i * 43 + 17;
-          const seedY = i * 53 + 23;
-          const seedBlur = i * 61 + 29;
+      {/* 8. Realistic Puffy Floating Clouds Layer (Day only, centered vertically) */}
+      {!showSpaceView && (
+        <div className="absolute inset-0">
+          {Array.from({ length: 18 }).map((_, i) => {
+            const seedWidth = i * 19 + 7;
+            const seedHeight = i * 31 + 13;
+            const seedSpeed = i * 43 + 17;
+            const seedY = i * 53 + 23;
+            const seedBlur = i * 61 + 29;
 
-          const sizeWidth = 200 + Math.floor(pseudoRandom(seedWidth) * 250); // 200 to 450px width
-          const sizeHeight = 60 + Math.floor(pseudoRandom(seedHeight) * 80); // 60 to 140px height
-          const duration = 50 + Math.floor(pseudoRandom(seedSpeed) * 80); // 50s to 130s speed
-          const yOffset = 3 + Math.floor(pseudoRandom(seedY) * 91); // spread 3% to 94% (top to bottom)
-          const blurVal = 40 + Math.floor(pseudoRandom(seedBlur) * 45); // blur 40px to 85px (different styles)
-          
-          let cloudClass = "bg-white/40 border-white/10 dark:bg-slate-900/30 dark:border-white/5";
-          if (isRain || code === "stormy") {
-            cloudClass = "bg-slate-300/30 dark:bg-slate-950/40 border-slate-400/10 dark:border-white/5";
-          }
-          
-          return (
-            <motion.div
-              key={i}
-              initial={{ x: "-100%", y: `${yOffset}%` }}
-              animate={{ x: "100vw" }}
-              transition={{
-                duration,
-                repeat: Infinity,
-                ease: "linear",
-                delay: i * -18,
-              }}
-              className={`absolute rounded-full border ${cloudClass}`}
-              style={{
-                width: `${sizeWidth}px`,
-                height: `${sizeHeight}px`,
-                filter: `blur(${blurVal}px)`,
-                opacity: !isDark ? 0.65 : 0.3,
-              }}
-            />
-          );
-        })}
-      </div>
+            const sizeWidth = 200 + Math.floor(pseudoRandom(seedWidth) * 250); // 200 to 450px width
+            const sizeHeight = 60 + Math.floor(pseudoRandom(seedHeight) * 80); // 60 to 140px height
+            const duration = 50 + Math.floor(pseudoRandom(seedSpeed) * 80); // 50s to 130s speed
+            const yOffset = 15 + Math.floor(pseudoRandom(seedY) * 60); // spread 15% to 75% (middle)
+            const blurVal = 40 + Math.floor(pseudoRandom(seedBlur) * 45); // blur 40px to 85px (different styles)
+            
+            let cloudClass = "bg-white/40 border-white/10 dark:bg-slate-900/30 dark:border-white/5";
+            if (isRain || code === "stormy") {
+              cloudClass = "bg-slate-300/30 dark:bg-slate-950/40 border-slate-400/10 dark:border-white/5";
+            }
+            
+            return (
+              <motion.div
+                key={i}
+                initial={{ x: "-100%", y: `${yOffset}%` }}
+                animate={{ x: "100vw" }}
+                transition={{
+                  duration,
+                  repeat: Infinity,
+                  ease: "linear",
+                  delay: i * -18,
+                }}
+                className={`absolute rounded-full border ${cloudClass}`}
+                style={{
+                  width: `${sizeWidth}px`,
+                  height: `${sizeHeight}px`,
+                  filter: `blur(${blurVal}px)`,
+                  opacity: !isDark ? 0.65 : 0.3,
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
